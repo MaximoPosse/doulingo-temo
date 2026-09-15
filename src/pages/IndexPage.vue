@@ -1,36 +1,7 @@
 <template>
   <q-page class="dl-landing">
-    <header class="dl-header">
-      <div class="dl-header__inner">
-        <router-link to="/" class="dl-brand">
-          <img
-            :src="usagiImg"
-            alt="Usagi, la mascota de Doulingo"
-            class="dl-brand__mascot"
-          />
-          <span class="dl-brand__name">Doulingo</span>
-        </router-link>
-
-        <div class="dl-header__actions">
-          <q-btn
-            flat
-            no-caps
-            class="dl-btn-ghost"
-            label="Idioma"
-            icon="language"
-          />
-          <q-btn
-            no-caps
-            unelevated
-            class="dl-btn-main dl-btn-main--small"
-            label="Empezar"
-          />
-        </div>
-      </div>
-    </header>
-
     <!-- Hero -->
-    <section class="dl-hero">
+    <section class="dl-hero dl-hero--home">
       <div class="dl-hero__inner">
         <div class="dl-hero__text">
           <h1 class="dl-hero__title">
@@ -49,13 +20,15 @@
               size="lg"
               class="dl-btn-main dl-btn-main--big"
               label="EMPIEZA GRATIS"
+              :to="{ name: 'cursos' }"
             />
             <q-btn
               no-caps
               outline
               size="lg"
               class="dl-btn-ghost dl-btn-ghost--card"
-              label="YA TENGO UNA CUENTA"
+              label="VER CURSOS"
+              :to="{ name: 'cursos' }"
             />
           </div>
         </div>

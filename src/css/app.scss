@@ -1,1 +1,151 @@
-// app global css
+// Estilos globales de Doulingo (identidad visual).
+// Botones, tarjetas, badges y utilidades para la página, compartidos por todas
+// las vistas. La paleta vive en src/css/quasar.variables.scss.
+
+body {
+  font-family: 'Nunito', 'Quicksand', 'Segoe UI', sans-serif;
+}
+
+// ------- Página base -------
+
+.dl-page {
+  background: #ffffff;
+  min-height: 100vh;
+
+  &__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px 72px;
+  }
+
+  &__title {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 800;
+    color: $dl-ink-dark;
+    margin: 0 0 8px;
+  }
+
+  &__lead {
+    font-size: 17px;
+    line-height: 1.5;
+    color: $dl-ink;
+    margin: 0 0 32px;
+    max-width: 640px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}
+
+.dl-section-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: $dl-ink-dark;
+  margin: 0 0 18px;
+}
+
+// ------- Botones -------
+// Referencia: estilo "chunky" de Duolingo, con sombra inferior que simula grosor.
+
+.dl-btn-main {
+  background: $dl-green;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 0 $dl-green-dark;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    background: #63d60e;
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 $dl-green-dark;
+  }
+
+  &--small {
+    padding: 4px 14px;
+  }
+
+  &--big {
+    box-shadow: 0 6px 0 $dl-green-dark;
+    font-size: 17px;
+  }
+
+  &--blue {
+    background: $dl-blue;
+    box-shadow: 0 4px 0 #1899d6;
+
+    &:hover {
+      background: #30b9f7;
+    }
+  }
+}
+
+.dl-btn-ghost {
+  background: #ffffff;
+  border: 2px solid $dl-gray;
+  color: $dl-ink-dark;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 0 #d8d8d8;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #d8d8d8;
+  }
+}
+
+// ------- Badges de estado -------
+
+.dl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+
+  .q-icon {
+    font-size: 16px;
+  }
+
+  &--available {
+    background: #e9f7e2;
+    color: $dl-green-dark;
+  }
+
+  &--completed {
+    background: #e3f3fd;
+    color: #1899d6;
+  }
+
+  &--locked {
+    background: #efefef;
+    color: #8a8a8a;
+  }
+
+  &--orange {
+    background: #fff3e0;
+    color: $dl-orange;
+  }
+}
+
+// ------- Layout de grillas -------
+
+.dl-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
