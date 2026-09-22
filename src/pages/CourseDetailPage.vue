@@ -6,8 +6,16 @@
         Volver a cursos
       </router-link>
 
+      <!-- Curso no encontrado -->
+      <q-banner v-if="!course" rounded class="dl-notfound-banner">
+        <q-icon name="error_outline" size="22px" color="negative" />
+        No encontramos un curso con identificador
+        <strong>{{ slug }}</strong
+        >.
+      </q-banner>
+
       <!-- Curso en preparación -->
-      <template v-if="!course.available">
+      <template v-else-if="!available">
         <div
           class="dl-course-hero dl-course-hero--soon"
           :style="{ '--course-color': course.color }"
@@ -83,34 +91,33 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCourseBySlug } from '@/data/courses'
-import { javascriptCourse } from '@/data/javascriptCourse'
+import { getCourses, getUnits } from '@/data/courseRepository'
 import { useProgress } from '@/composables/useProgress'
 import UnitCard from '@/components/UnitCard.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { isLessonCompleted } = useProgress()
+const { countApprovedLessons } = useProgress()
 
 const slug = computed(() => route.params.slug)
 
-const meta = computed(() => getCourseBySlug(slug.value) ?? javascriptCourse)
-
-// El curso "javascript" es el único con unidades cargadas por ahora; el resto
-// se muestra como "próximamente".
-const course = computed(() => ({
-  ...meta.value,
-  available: slug.value === 'javascript'
-}))
-
-const units = computed(() =>
-  slug.value === 'javascript' ? javascriptCourse.units : []
+// La disponibilidad la define el catálogo (courses.js), no el contenido.
+// getCourseBySlug() del repositorio devuelve el contenido educativo, que no
+// incluye `status`.
+const course = computed(
+  () => getCourses().find(course => course.slug === slug.value) ?? null
 )
 
-const allLessons = computed(() => units.value.flatMap(unit => unit.lessons))
+const available = computed(() => course.value?.status === 'disponible')
 
-const completedTotal = computed(
-  () => allLessons.value.filter(lesson => isLessonCompleted(lesson.id)).length
+const units = computed(() => getUnits(slug.value))
+
+const allLessons = computed(() =>
+  units.value.filter(unit => unit.published).flatMap(unit => unit.lessons)
+)
+
+const completedTotal = computed(() =>
+  units.value.reduce((total, unit) => total + countApprovedLessons(unit), 0)
 )
 
 const overallPct = computed(() =>
@@ -121,17 +128,15 @@ const overallPct = computed(() =>
 
 const overallText = computed(
   () =>
-    `${completedTotal.value}/${allLessons.value.length} lecciones completadas (${overallPct.value}%)`
+    `${completedTotal.value}/${allLessons.value.length} lecciones aprobadas (${overallPct.value}%)`
 )
 
 function openUnit(unit) {
-  const firstLesson = unit.lessons[0]
   router.push({
-    name: 'leccion',
+    name: 'unidad',
     params: {
       slug: slug.value,
-      unitId: unit.id,
-      lessonId: firstLesson.id
+      unitId: unit.id
     }
   })
 }
@@ -242,6 +247,12 @@ function openUnit(unit) {
   margin-top: 22px;
   background: #fff8e6;
   color: #6b5b00;
+}
+
+.dl-notfound-banner {
+  margin-top: 10px;
+  background: #ffe9e9;
+  color: #c00015;
 }
 
 @media (max-width: 600px) {

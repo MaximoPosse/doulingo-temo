@@ -19,6 +19,11 @@ const routes = [
         component: () => import('@/pages/CourseDetailPage.vue')
       },
       {
+        path: 'cursos/:slug/unidad/:unitId',
+        name: 'unidad',
+        component: () => import('@/pages/CourseUnitPage.vue')
+      },
+      {
         path: 'cursos/:slug/unidad/:unitId/leccion/:lessonId',
         name: 'leccion',
         component: () => import('@/pages/LessonPage.vue')

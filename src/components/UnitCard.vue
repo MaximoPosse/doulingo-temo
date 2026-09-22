@@ -11,19 +11,23 @@
           }
         ]"
       >
-        <q-icon v-if="status === 'completada'" name="check" size="26px" />
-        <q-icon v-else-if="status === 'bloqueada'" name="lock" size="22px" />
-        <q-icon v-else :name="unit.icon" size="24px" />
+        <q-icon v-if="status === 'completada'" name="check" size="24px" />
+        <q-icon
+          v-else-if="status === 'bloqueada' || status === 'pendiente'"
+          name="lock"
+          size="20px"
+        />
+        <q-icon v-else :name="unit.icon" size="22px" />
       </span>
       <span v-if="!isLast" class="dl-unit__line" />
     </div>
 
     <div
       class="dl-unit__card"
-      :class="{ 'dl-unit__card--disabled': status === 'bloqueada' }"
+      :class="{ 'dl-unit__card--disabled': !clickable }"
       role="button"
-      :tabindex="status === 'bloqueada' ? -1 : 0"
-      :aria-disabled="status === 'bloqueada'"
+      :tabindex="clickable ? 0 : -1"
+      :aria-disabled="!clickable"
       @click="handleClick"
       @keydown.enter="handleClick"
     >
@@ -33,8 +37,8 @@
           <h3 class="dl-unit__title">{{ unit.title }}</h3>
         </div>
         <span class="dl-badge" :class="badgeClass">
-          <q-icon :name="badgeIcon" />
-          {{ badgeLabel }}
+          <q-icon :name="badgeInfo.icon" />
+          {{ badgeInfo.label }}
         </span>
       </div>
 
@@ -51,18 +55,13 @@
               :style="{ width: `${progressPct}%` }"
             />
           </div>
-          <span class="dl-unit__progress-text"
-            >{{ completedLessons }}/{{ unit.lessons.length }} lecciones</span
-          >
+          <span class="dl-unit__progress-text">{{ progressText }}</span>
         </div>
         <span
           class="dl-unit__go"
-          :class="{ 'dl-unit__go--disabled': status === 'bloqueada' }"
+          :class="{ 'dl-unit__go--disabled': !clickable }"
         >
-          <q-icon
-            :name="status === 'bloqueada' ? 'lock' : 'chevron_right'"
-            size="22px"
-          />
+          <q-icon :name="clickable ? 'chevron_right' : 'lock'" size="22px" />
         </span>
       </div>
     </div>
@@ -73,8 +72,6 @@
 import { computed } from 'vue'
 import { useProgress } from '@/composables/useProgress'
 
-// El componente recibe la unidad desde el padre y notifica con "select" cuando
-// el estudiante elige una unidad desbloqueada.
 const props = defineProps({
   unit: { type: Object, required: true },
   unitIndex: { type: Number, required: true },
@@ -83,7 +80,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select'])
 
-const { unitStatus, isLessonCompleted } = useProgress()
+const { unitStatus, countApprovedLessons } = useProgress()
 
 const status = computed(() =>
   unitStatus(props.unit, props.unitIndex, props.units)
@@ -91,44 +88,54 @@ const status = computed(() =>
 
 const isLast = computed(() => props.unitIndex === props.units.length - 1)
 
-const completedLessons = computed(
-  () => props.unit.lessons.filter(lesson => isLessonCompleted(lesson.id)).length
+const clickable = computed(
+  () => status.value === 'disponible' || status.value === 'completada'
 )
+
+const approvedCount = computed(() => countApprovedLessons(props.unit))
+const totalLessons = computed(() => props.unit.lessons.length)
 
 const progressPct = computed(() =>
-  props.unit.lessons.length === 0
+  totalLessons.value === 0
     ? 0
-    : Math.round((completedLessons.value / props.unit.lessons.length) * 100)
+    : Math.round((approvedCount.value / totalLessons.value) * 100)
 )
 
-// El primer nodo no completado del curso es el "actual" (se resalta).
+const progressText = computed(() => {
+  if (status.value === 'pendiente') return 'En preparación'
+  if (totalLessons.value === 0) return 'Sin lecciones aún'
+  return `${approvedCount.value}/${totalLessons.value} lecciones aprobadas`
+})
+
+// El primer nodo no completado de las unidades publicadas es el "actual".
 const isFirstUnfinished = computed(() => {
-  const firstUncompletedIndex = props.units.findIndex(
-    (unit, index) => unitStatus(unit, index, props.units) !== 'completada'
+  const publishedUnits = props.units.filter(unit => unit.published)
+  const firstUncompleted = publishedUnits.findIndex(
+    unit => unitStatus(unit, props.unitIndex, props.units) !== 'completada'
   )
-  return props.unitIndex === firstUncompletedIndex
+  return publishedUnits[firstUncompleted]?.id === props.unit.id
 })
 
 const badgeMap = {
   completada: {
     label: 'Completada',
     icon: 'check_circle',
-    class: 'dl-badge--completed'
+    class: 'dl-badge--available'
   },
   disponible: {
     label: 'Disponible',
     icon: 'play_circle',
-    class: 'dl-badge--available'
+    class: 'dl-badge--completed'
   },
-  bloqueada: { label: 'Bloqueada', icon: 'lock', class: 'dl-badge--locked' }
+  bloqueada: { label: 'Bloqueada', icon: 'lock', class: 'dl-badge--locked' },
+  pendiente: { label: 'Pendiente', icon: 'schedule', class: 'dl-badge--orange' }
 }
 
-const badgeClass = computed(() => badgeMap[status.value].class)
-const badgeLabel = computed(() => badgeMap[status.value].label)
-const badgeIcon = computed(() => badgeMap[status.value].icon)
+const badgeInfo = computed(() => badgeMap[status.value])
+const badgeClass = computed(() => badgeInfo.value.class)
 
 function handleClick() {
-  if (status.value !== 'bloqueada') {
+  if (clickable.value) {
     emit('select', props.unit)
   }
 }
@@ -167,7 +174,8 @@ function handleClick() {
       box-shadow: 0 4px 0 $dl-green-dark;
     }
 
-    &--bloqueada {
+    &--bloqueada,
+    &--pendiente {
       background: $dl-gray;
       color: #9a9a9a;
       box-shadow: 0 4px 0 #cfcfcf;

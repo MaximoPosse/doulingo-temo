@@ -1,183 +1,328 @@
 <template>
   <q-page class="dl-lesson">
     <div class="dl-lesson__inner">
-      <!-- Ejercicios -->
-      <template v-if="!finished">
-        <div class="dl-lesson__bar">
-          <router-link
-            :to="{ name: 'curso', params: { slug } }"
-            class="dl-lesson__close"
-          >
-            <q-icon name="close" size="22px" />
-          </router-link>
-          <div class="dl-lesson__track">
-            <div
-              class="dl-lesson__track-fill"
-              :style="{ width: `${barPct}%` }"
-            />
-          </div>
-        </div>
-
-        <div class="dl-lesson__meta">
-          <span class="dl-lesson__unit">{{ unit.title }}</span>
-          <span class="dl-lesson__sep">/</span>
-          <span class="dl-lesson__lesson">{{ lesson.title }}</span>
-          <span class="dl-lesson__counter"
-            >Ejercicio {{ currentIndex + 1 }} de {{ totalExercises }}</span
-          >
-        </div>
-
-        <div class="dl-lesson__prompt">
-          <div class="dl-lesson__mascot">
-            <q-icon name="sms" size="22px" />
-          </div>
-          <div class="dl-lesson__bubble">
-            <h2 class="dl-lesson__question">{{ currentExercise.prompt }}</h2>
-          </div>
-        </div>
-
-        <pre
-          v-if="currentExercise.code"
-          class="dl-lesson__code"
-        ><code>{{ currentExercise.code }}</code></pre>
-
-        <div class="dl-lesson__options">
-          <button
-            v-for="(option, index) in currentExercise.options"
-            :key="index"
-            type="button"
-            class="dl-lesson__option"
-            :class="optionClass(index)"
-            :disabled="checked"
-            @click="selectOption(index)"
-          >
-            <span class="dl-lesson__option-letter">{{ letters[index] }}</span>
-            <span class="dl-lesson__option-text">{{ option }}</span>
-            <span
-              v-if="checked"
-              class="dl-lesson__option-check"
-              :class="{
-                'dl-lesson__option-check--ok': index === currentExercise.answer,
-                'dl-lesson__option-check--bad':
-                  index === selected && index !== currentExercise.answer
-              }"
-            >
-              <q-icon
-                :name="
-                  index === currentExercise.answer
-                    ? 'check'
-                    : index === selected
-                      ? 'close'
-                      : 'remove'
-                "
-                size="14px"
-              />
-            </span>
-          </button>
-        </div>
-
-        <transition name="dl-fade">
-          <div
-            v-if="checked"
-            class="dl-lesson__feedback"
-            :class="`dl-lesson__feedback--${isCorrect ? 'ok' : 'bad'}`"
-          >
-            <q-icon :name="isCorrect ? 'check_circle' : 'error'" size="24px" />
-            <div>
-              <strong>{{
-                isCorrect ? '¡Correcto!' : 'Respuesta incorrecta'
-              }}</strong>
-              <p>
-                {{
-                  isCorrect
-                    ? currentExercise.explanation
-                    : `La respuesta correcta es "${currentExercise.options[currentExercise.answer]}". ${currentExercise.explanation}`
-                }}
-              </p>
-            </div>
-          </div>
-        </transition>
-
-        <div class="dl-lesson__actions">
-          <template v-if="!checked">
-            <q-btn
-              no-caps
-              unelevated
-              size="lg"
-              label="COMPROBAR"
-              class="dl-btn-main dl-btn-main--big"
-              :disable="selected === null"
-              @click="check"
-            />
-          </template>
-          <template v-else>
-            <q-btn
-              v-if="currentIndex < totalExercises - 1"
-              no-caps
-              unelevated
-              size="lg"
-              label="CONTINUAR"
-              class="dl-btn-main dl-btn-main--big"
-              @click="next"
-            />
-            <q-btn
-              v-else
-              no-caps
-              unelevated
-              size="lg"
-              label="VER RESULTADO"
-              class="dl-btn-main dl-btn-main--big"
-              @click="finish"
-            />
-          </template>
+      <!-- No encontrada -->
+      <template v-if="!lesson">
+        <div class="dl-lesson__notfound">
+          <img :src="usagiImg" alt="Usagi" class="dl-lesson__notfound-mascot" />
+          <h2 class="dl-lesson__notfound-title">Lección no encontrada</h2>
+          <p class="dl-lesson__notfound-text">
+            El identificador <strong>{{ lessonParam }}</strong> no corresponde a
+            ninguna lección de esta unidad.
+          </p>
+          <q-btn
+            no-caps
+            unelevated
+            size="lg"
+            class="dl-btn-main"
+            :label="`Volver a la unidad`"
+            @click="goToUnit"
+          />
         </div>
       </template>
 
-      <!-- Resultado -->
+      <!-- Bloqueada -->
+      <template v-else-if="!canStart">
+        <div class="dl-lesson__notfound">
+          <q-icon name="lock" size="56px" color="grey-5" />
+          <h2 class="dl-lesson__notfound-title">Lección bloqueada</h2>
+          <p class="dl-lesson__notfound-text">
+            Aprobá la lección anterior para habilitar
+            <strong>{{ lesson.title }}</strong
+            >.
+          </p>
+          <q-btn
+            no-caps
+            unelevated
+            size="lg"
+            class="dl-btn-main"
+            label="Volver a la unidad"
+            @click="goToUnit"
+          />
+        </div>
+      </template>
+
+      <!-- Contenido -->
       <template v-else>
-        <div class="dl-lesson__result">
-          <div class="dl-lesson__result-card">
-            <img :src="usagiImg" alt="Usagi" class="dl-lesson__result-mascot" />
+        <!-- FASE 1: Introducción (teoría) -->
+        <template v-if="phase === 'intro'">
+          <router-link
+            :to="{ name: 'unidad', params: { slug, unitId } }"
+            class="dl-lesson__back"
+          >
+            <q-icon name="arrow_back" size="18px" />
+            Volver a la unidad
+          </router-link>
 
-            <span
-              class="dl-badge"
-              :class="passed ? 'dl-badge--completed' : 'dl-badge--locked'"
+          <div class="dl-lesson__meta">
+            <span class="dl-lesson__unit"
+              >Unidad {{ unit.order }} · {{ unit.title }}</span
             >
-              <q-icon :name="passed ? 'check_circle' : 'replay'" />
-              {{ passed ? 'Lección completada' : 'Vuelve a intentarlo' }}
-            </span>
+            <span class="dl-lesson__sep">/</span>
+            <span class="dl-lesson__lesson">{{ lesson.title }}</span>
+          </div>
 
-            <h2 class="dl-lesson__result-title">
-              {{ resultHeadline }}
-            </h2>
-            <p class="dl-lesson__result-score">
-              Acertaste <strong>{{ score }}</strong> de
-              {{ totalExercises }} ejercicios.
-            </p>
-            <p class="dl-lesson__result-sub">
-              {{ resultSub }}
-            </p>
+          <div class="dl-lesson__intro">
+            <h1 class="dl-lesson__intro-title">{{ lesson.title }}</h1>
 
-            <div class="dl-lesson__result-actions">
+            <div class="dl-lesson__explanation">
+              <h2 class="dl-lesson__subtitle">Explicación</h2>
+              <p class="dl-lesson__explanation-text">{{
+                lesson.explanation
+              }}</p>
+            </div>
+
+            <div v-if="lesson.codeExample" class="dl-lesson__example">
+              <h2 class="dl-lesson__subtitle">Ejemplo de código</h2>
+              <pre
+                class="dl-lesson__code"
+              ><code>{{ lesson.codeExample }}</code></pre>
+            </div>
+
+            <div class="dl-lesson__intro-actions">
               <q-btn
                 no-caps
                 unelevated
                 size="lg"
                 class="dl-btn-main dl-btn-main--big"
-                label="Repetir lección"
-                @click="restart"
-              />
-              <q-btn
-                no-caps
-                outline
-                size="lg"
-                class="dl-btn-ghost"
-                label="Volver al curso"
-                @click="goToCourse"
+                :label="startLabel"
+                @click="startActivities"
               />
             </div>
           </div>
-        </div>
+        </template>
+
+        <!-- FASE 2: Actividades -->
+        <template v-else-if="phase === 'activity'">
+          <div class="dl-lesson__bar">
+            <router-link
+              :to="{ name: 'unidad', params: { slug, unitId } }"
+              class="dl-lesson__close"
+            >
+              <q-icon name="close" size="22px" />
+            </router-link>
+            <div class="dl-lesson__track">
+              <div
+                class="dl-lesson__track-fill"
+                :style="{ width: `${barPct}%` }"
+              />
+            </div>
+          </div>
+
+          <div class="dl-lesson__meta">
+            <span class="dl-lesson__unit">{{ unit.title }}</span>
+            <span class="dl-lesson__sep">/</span>
+            <span class="dl-lesson__lesson">{{ lesson.title }}</span>
+            <span class="dl-lesson__counter"
+              >Actividad {{ currentIndex + 1 }} de {{ totalActivities }}</span
+            >
+          </div>
+
+          <div class="dl-lesson__prompt">
+            <div class="dl-lesson__mascot">
+              <q-icon name="sms" size="22px" />
+            </div>
+            <div class="dl-lesson__bubble">
+              <h2 class="dl-lesson__question">{{ currentActivity.prompt }}</h2>
+            </div>
+          </div>
+
+          <pre
+            v-if="currentActivity.code"
+            class="dl-lesson__code"
+          ><code>{{ currentActivity.code }}</code></pre>
+
+          <div class="dl-lesson__options">
+            <button
+              v-for="option in currentActivity.options"
+              :key="option.id"
+              type="button"
+              class="dl-lesson__option"
+              :class="optionClass(option.id)"
+              :disabled="checked"
+              @click="selectOption(option.id)"
+            >
+              <span class="dl-lesson__option-letter">{{
+                optionLetter(option.id)
+              }}</span>
+              <span class="dl-lesson__option-text">{{ option.text }}</span>
+              <span
+                v-if="checked"
+                class="dl-lesson__option-check"
+                :class="{
+                  'dl-lesson__option-check--ok':
+                    option.id === currentActivity.answerOptionId,
+                  'dl-lesson__option-check--bad':
+                    option.id === selectedOptionId &&
+                    option.id !== currentActivity.answerOptionId
+                }"
+              >
+                <q-icon
+                  :name="
+                    option.id === currentActivity.answerOptionId
+                      ? 'check'
+                      : option.id === selectedOptionId
+                        ? 'close'
+                        : 'remove'
+                  "
+                  size="14px"
+                />
+              </span>
+            </button>
+          </div>
+
+          <transition name="dl-fade">
+            <div
+              v-if="checked"
+              class="dl-lesson__feedback"
+              :class="`dl-lesson__feedback--${isCorrect ? 'ok' : 'bad'}`"
+            >
+              <q-icon
+                :name="isCorrect ? 'check_circle' : 'error'"
+                size="26px"
+              />
+              <div>
+                <strong>{{
+                  isCorrect ? '¡Correcto!' : 'Respuesta incorrecta'
+                }}</strong>
+                <p>
+                  {{
+                    isCorrect
+                      ? currentActivity.explanation
+                      : `La opción correcta es "${currentActivity.options.find(o => o.id === currentActivity.answerOptionId)?.text}". ${currentActivity.explanation}`
+                  }}
+                </p>
+              </div>
+            </div>
+          </transition>
+
+          <div class="dl-lesson__actions">
+            <template v-if="!checked">
+              <q-btn
+                no-caps
+                unelevated
+                size="lg"
+                label="CONFIRMAR"
+                class="dl-btn-main dl-btn-main--big"
+                :disable="!selectedOptionId"
+                @click="check"
+              />
+            </template>
+            <template v-else>
+              <q-btn
+                v-if="currentIndex < totalActivities - 1"
+                no-caps
+                unelevated
+                size="lg"
+                label="CONTINUAR"
+                class="dl-btn-main dl-btn-main--big"
+                @click="next"
+              />
+              <q-btn
+                v-else
+                no-caps
+                unelevated
+                size="lg"
+                label="VER RESULTADOS"
+                class="dl-btn-main dl-btn-main--big"
+                @click="finish"
+              />
+            </template>
+          </div>
+        </template>
+
+        <!-- FASE 3: Resultados -->
+        <template v-else>
+          <div class="dl-lesson__result">
+            <div
+              class="dl-lesson__result-banner"
+              :class="
+                passed
+                  ? 'dl-lesson__result-banner--ok'
+                  : 'dl-lesson__result-banner--bad'
+              "
+            >
+              <img
+                :src="usagiImg"
+                alt="Usagi"
+                class="dl-lesson__result-mascot"
+              />
+              <span
+                class="dl-badge"
+                :class="passed ? 'dl-badge--available' : 'dl-badge--locked'"
+              >
+                <q-icon :name="passed ? 'check_circle' : 'replay'" />
+                {{ passed ? 'Lección aprobada' : 'No alcanzaste el mínimo' }}
+              </span>
+
+              <h2 class="dl-lesson__result-title">{{ resultHeadline }}</h2>
+              <p class="dl-lesson__result-summary">
+                {{ lesson.title }}
+              </p>
+
+              <div class="dl-lesson__result-stats">
+                <div class="dl-lesson__result-stat">
+                  <span class="dl-lesson__result-stat-value">{{
+                    totalActivities
+                  }}</span>
+                  <span class="dl-lesson__result-stat-label">Actividades</span>
+                </div>
+                <div class="dl-lesson__result-stat dl-lesson__result-stat--ok">
+                  <span class="dl-lesson__result-stat-value">{{
+                    correctCount
+                  }}</span>
+                  <span class="dl-lesson__result-stat-label">Correctas</span>
+                </div>
+                <div class="dl-lesson__result-stat dl-lesson__result-stat--bad">
+                  <span class="dl-lesson__result-stat-value">{{
+                    incorrectCount
+                  }}</span>
+                  <span class="dl-lesson__result-stat-label">Incorrectas</span>
+                </div>
+                <div class="dl-lesson__result-stat">
+                  <span class="dl-lesson__result-stat-value"
+                    >{{ percentage }}%</span
+                  >
+                  <span class="dl-lesson__result-stat-label">Aciertos</span>
+                </div>
+              </div>
+
+              <p class="dl-lesson__result-note">
+                Para aprobar una lección de 3 actividades necesitás al menos 2
+                correctas (60%). Estos resultados corresponden a este intento y
+                todavía no forman parte de un ranking compartido.
+              </p>
+
+              <div class="dl-lesson__result-actions">
+                <q-btn
+                  v-if="passed && nextLesson"
+                  no-caps
+                  unelevated
+                  size="lg"
+                  class="dl-btn-main dl-btn-main--big"
+                  label="Siguiente lección"
+                  @click="goToNextLesson"
+                />
+                <q-btn
+                  no-caps
+                  unelevated
+                  size="lg"
+                  class="dl-btn-main"
+                  label="Intentar nuevamente"
+                  @click="restart"
+                />
+                <q-btn
+                  no-caps
+                  outline
+                  size="lg"
+                  class="dl-btn-ghost"
+                  label="Volver a la unidad"
+                  @click="goToUnit"
+                />
+              </div>
+            </div>
+          </div>
+        </template>
       </template>
     </div>
   </q-page>
@@ -186,7 +331,12 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { javascriptCourse } from '@/data/javascriptCourse'
+import {
+  getUnit,
+  getLesson,
+  getLessons,
+  getActivities
+} from '@/data/courseRepository'
 import { useProgress } from '@/composables/useProgress'
 import usagiImg from '@/assets/usagi.webp'
 
@@ -195,106 +345,149 @@ const router = useRouter()
 
 const slug = route.params.slug
 const unitId = route.params.unitId
-const lessonId = route.params.lessonId
+const lessonParam = route.params.lessonId
 
-const { completeLesson } = useProgress()
+const { lessonStatus, completeAttempt } = useProgress()
 
-const unit = computed(() => javascriptCourse.units.find(u => u.id === unitId))
-const lesson = computed(() => unit.value?.lessons.find(l => l.id === lessonId))
+const unit = computed(() => getUnit(slug, unitId))
+const lessons = computed(() => (unit.value ? getLessons(slug, unitId) : []))
+const lesson = computed(() => getLesson(slug, unitId, lessonParam))
 const lessonIndex = computed(() =>
-  unit.value ? unit.value.lessons.findIndex(l => l.id === lessonId) : -1
+  lessons.value.findIndex(l => l.id === lessonParam)
+)
+const activities = computed(() => getActivities(slug, unitId, lessonParam))
+
+const lessonState = computed(() =>
+  lesson.value && unit.value
+    ? lessonStatus(unit.value, lesson.value, lessonIndex.value, lessons.value)
+    : 'pendiente'
 )
 
-const exercises = computed(() => lesson.value?.exercises ?? [])
-const totalExercises = computed(() => exercises.value.length)
+const canStart = computed(() =>
+  ['disponible', 'aprobada', 'reprobada'].includes(lessonState.value)
+)
+
+const startLabel = computed(() => {
+  if (lessonState.value === 'aprobada') return 'Repasar lección'
+  if (lessonState.value === 'reprobada') return 'Reintentar lección'
+  return 'Comenzar actividades'
+})
+
+// ---------- Estado del intento ----------
+const phase = ref('intro') // 'intro' | 'activity' | 'results'
 const currentIndex = ref(0)
-const selected = ref(null)
+const selectedOptionId = ref(null)
 const checked = ref(false)
-const score = ref(0)
-const finished = ref(false)
-const passed = ref(false)
+const correctCount = ref(0)
 
-const currentExercise = computed(() => exercises.value[currentIndex.value])
+const totalActivities = computed(() => activities.value.length)
+const currentActivity = computed(() => activities.value[currentIndex.value])
 const isCorrect = computed(
-  () => currentExercise.value && selected.value === currentExercise.value.answer
+  () =>
+    currentActivity.value &&
+    selectedOptionId.value === currentActivity.value.answerOptionId
 )
+const incorrectCount = computed(
+  () => totalActivities.value - correctCount.value
+)
+const percentage = computed(() =>
+  totalActivities.value === 0
+    ? 0
+    : Math.round((correctCount.value / totalActivities.value) * 100)
+)
+const passed = computed(
+  () => correctCount.value >= Math.ceil(totalActivities.value * 0.6)
+)
+
+const nextLesson = computed(() =>
+  lessonIndex.value >= 0 && lessonIndex.value < lessons.value.length - 1
+    ? lessons.value[lessonIndex.value + 1]
+    : null
+)
+
+const resultHeadline = computed(() => {
+  if (passed.value && correctCount.value === totalActivities.value) {
+    return '¡Perfecto!'
+  }
+  if (passed.value) return '¡Aprobaste!'
+  return 'Casi lo lográs'
+})
 
 const barPct = computed(() => {
   const done = currentIndex.value + (checked.value ? 1 : 0)
-  return totalExercises.value === 0
+  return totalActivities.value === 0
     ? 0
-    : Math.round((done / totalExercises.value) * 100)
+    : Math.round((done / totalActivities.value) * 100)
 })
 
-const letters = ['A', 'B', 'C', 'D']
+function optionLetter(optionId) {
+  const index = currentActivity.value.options.findIndex(o => o.id === optionId)
+  return ['A', 'B', 'C', 'D'][index] ?? '?'
+}
 
-const resultHeadline = computed(() => {
-  if (score.value === totalExercises.value)
-    return '¡Perfecto! Usagi está orgullosa de ti.'
-  if (passed.value) return '¡Buen trabajo!'
-  return 'Casi lo logras'
-})
-
-const resultSub = computed(() => {
-  if (passed.value) {
-    return 'Sigues así y dominarás JavaScript muy pronto.'
-  }
-  return 'Repasa la lección y vuelve a intentarlo: cada error es un paso hacia adelante.'
-})
-
-function optionClass(index) {
+function optionClass(optionId) {
   if (!checked.value) {
-    return selected.value === index ? 'dl-lesson__option--selected' : ''
+    return optionId === selectedOptionId.value
+      ? 'dl-lesson__option--selected'
+      : ''
   }
-  if (index === currentExercise.value.answer)
+  if (optionId === currentActivity.value.answerOptionId)
     return 'dl-lesson__option--correct'
-  if (index === selected.value) return 'dl-lesson__option--wrong'
+  if (optionId === selectedOptionId.value) return 'dl-lesson__option--wrong'
   return 'dl-lesson__option--dimmed'
 }
 
-function selectOption(index) {
+function startActivities() {
+  phase.value = 'activity'
+}
+
+function selectOption(optionId) {
   if (checked.value) return
-  selected.value = index
+  selectedOptionId.value = optionId
 }
 
 function check() {
-  if (selected.value === null) return
+  if (selectedOptionId.value === null) return
+  if (checked.value) return // evita contabilizar dos veces un mismo envío
   checked.value = true
-  if (selected.value === currentExercise.value.answer) {
-    score.value += 1
+  if (selectedOptionId.value === currentActivity.value.answerOptionId) {
+    correctCount.value += 1
   }
 }
 
 function next() {
   currentIndex.value += 1
-  selected.value = null
+  selectedOptionId.value = null
   checked.value = false
 }
 
 function finish() {
-  passed.value = score.value >= Math.ceil(totalExercises.value / 2)
-  finished.value = true
-  if (passed.value && unit.value && lesson.value) {
-    completeLesson(
-      lesson.value.id,
-      unit.value.id,
-      lessonIndex.value,
-      unit.value.lessons
-    )
-  }
+  const total = totalActivities.value
+  const correct = correctCount.value
+  // La lección queda completada (intentada) y aprobada si alcanza el umbral.
+  completeAttempt(lessonParam, { correct, total })
+  phase.value = 'results'
 }
 
 function restart() {
+  phase.value = 'intro'
   currentIndex.value = 0
-  selected.value = null
+  selectedOptionId.value = null
   checked.value = false
-  score.value = 0
-  finished.value = false
-  passed.value = false
+  correctCount.value = 0
 }
 
-function goToCourse() {
-  router.push({ name: 'curso', params: { slug } })
+function goToUnit() {
+  router.push({ name: 'unidad', params: { slug, unitId } })
+}
+
+function goToNextLesson() {
+  if (nextLesson.value) {
+    router.push({
+      name: 'leccion',
+      params: { slug, unitId, lessonId: nextLesson.value.id }
+    })
+  }
 }
 </script>
 
@@ -307,6 +500,23 @@ function goToCourse() {
     max-width: 720px;
     margin: 0 auto;
     padding: 28px 20px 72px;
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b6b6b;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    text-decoration: none;
+    margin-bottom: 16px;
+
+    &:hover {
+      color: $dl-green-dark;
+    }
   }
 
   &__bar {
@@ -350,7 +560,7 @@ function goToCourse() {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    margin: 20px 0 28px;
+    margin: 20px 0 24px;
     flex-wrap: wrap;
   }
 
@@ -379,6 +589,64 @@ function goToCourse() {
     color: #8a8a8a;
   }
 
+  // ---------- Intro ----------
+  &__intro {
+    background: #f6fbf4;
+    border: 2px solid $dl-gray;
+    border-radius: 18px;
+    padding: 28px 24px;
+  }
+
+  &__intro-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: $dl-ink-dark;
+    margin: 0 0 18px;
+  }
+
+  &__subtitle {
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $dl-green-dark;
+    margin: 0 0 8px;
+  }
+
+  &__explanation {
+    margin-bottom: 20px;
+  }
+
+  &__explanation-text {
+    font-size: 16px;
+    line-height: 1.65;
+    color: $dl-ink;
+    margin: 0;
+  }
+
+  &__example {
+    margin-bottom: 24px;
+  }
+
+  &__code {
+    background: #1e1e1e;
+    color: #e5e5e5;
+    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    border-radius: 12px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 0;
+    white-space: pre;
+  }
+
+  &__intro-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  // ---------- Actividades ----------
   &__prompt {
     display: flex;
     gap: 14px;
@@ -405,24 +673,11 @@ function goToCourse() {
   }
 
   &__question {
-    font-size: 20px;
-    line-height: 1.4;
+    font-size: 19px;
+    line-height: 1.45;
     font-weight: 800;
     color: $dl-ink-dark;
     margin: 0;
-  }
-
-  &__code {
-    background: #1e1e1e;
-    color: #e5e5e5;
-    font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.55;
-    border-radius: 12px;
-    padding: 16px 18px;
-    overflow-x: auto;
-    margin: 0 0 20px;
-    white-space: pre;
   }
 
   &__options {
@@ -460,6 +715,7 @@ function goToCourse() {
     &--selected {
       background: #f6fbf4;
       border-color: $dl-blue;
+      box-shadow: 0 3px 0 rgba(28, 176, 246, 0.3);
     }
 
     &--correct {
@@ -491,11 +747,7 @@ function goToCourse() {
     align-items: center;
     justify-content: center;
 
-    .dl-lesson__option--correct & {
-      background: rgba(255, 255, 255, 0.25);
-      color: inherit;
-    }
-
+    .dl-lesson__option--correct &,
     .dl-lesson__option--wrong & {
       background: rgba(255, 255, 255, 0.25);
       color: inherit;
@@ -551,7 +803,7 @@ function goToCourse() {
     p {
       margin: 4px 0 0;
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
     &--ok {
@@ -570,56 +822,136 @@ function goToCourse() {
     justify-content: flex-end;
   }
 
+  // ---------- Resultados ----------
   &__result {
     display: flex;
     justify-content: center;
   }
 
-  &__result-card {
-    max-width: 520px;
+  &__result-banner {
+    max-width: 560px;
     width: 100%;
-    background: #ffffff;
     border: 2px solid $dl-gray;
     border-radius: 22px;
-    padding: 36px 28px;
+    padding: 32px 24px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    &--ok {
+      background: #f4fbf0;
+      border-color: #b5e3a3;
+    }
+
+    &--bad {
+      background: #fff8f0;
+      border-color: #ffd9a3;
+    }
   }
 
   &__result-mascot {
-    width: 150px;
-    height: 150px;
+    width: 140px;
+    height: 140px;
     object-fit: contain;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   &__result-title {
     font-size: 26px;
     font-weight: 800;
     color: $dl-ink-dark;
-    margin: 12px 0 6px;
+    margin: 12px 0 4px;
   }
 
-  &__result-score {
-    font-size: 16px;
-    color: $dl-ink;
-    margin: 0 0 6px;
-  }
-
-  &__result-sub {
+  &__result-summary {
     font-size: 14px;
+    color: #6b6b6b;
+    margin: 0 0 20px;
+  }
+
+  &__result-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 18px;
+  }
+
+  &__result-stat {
+    background: #ffffff;
+    border: 2px solid $dl-gray;
+    border-radius: 14px;
+    padding: 12px 6px;
+
+    &--ok {
+      border-color: #b5e3a3;
+    }
+
+    &--bad {
+      border-color: #ffc9c9;
+    }
+  }
+
+  &__result-stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 800;
+    color: $dl-ink-dark;
+  }
+
+  &__result-stat-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #8a8a8a;
+    margin-top: 2px;
+  }
+
+  &__result-note {
+    font-size: 13px;
     line-height: 1.5;
     color: #6b6b6b;
-    margin: 0 0 24px;
+    margin: 0 0 22px;
+    max-width: 440px;
   }
 
   &__result-actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 14px;
+    gap: 12px;
+  }
+
+  // ---------- Auxiliares ----------
+  &__notfound {
+    text-align: center;
+    padding: 48px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__notfound-mascot {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+  }
+
+  &__notfound-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: $dl-ink-dark;
+    margin: 0;
+  }
+
+  &__notfound-text {
+    font-size: 15px;
+    color: $dl-ink;
+    margin: 0 0 8px;
   }
 }
 
@@ -634,5 +966,11 @@ function goToCourse() {
 .dl-fade-leave-to {
   opacity: 0;
   transform: translateY(6px);
+}
+
+@media (max-width: 480px) {
+  .dl-lesson__result-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

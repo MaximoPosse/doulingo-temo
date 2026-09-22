@@ -26,11 +26,13 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { courses } from '@/data/courses'
+import { getCourses } from '@/data/courseRepository'
 import CourseCard from '@/components/CourseCard.vue'
 import usagiImg from '@/assets/usagi.webp'
 
 const router = useRouter()
+
+const courses = getCourses()
 
 function openCourse(course) {
   router.push({ name: 'curso', params: { slug: course.slug } })

@@ -15,6 +15,10 @@ La mascota oficial es **Usagi**, del anime _Chiikawa_, en lugar del búho clási
 | [`docs/02-estructura.md`](docs/02-estructura.md)             | Mapas de pantallas, rutas y arquitectura de carpetas.           |
 | [`docs/03-wireframes.md`](docs/03-wireframes.md)             | Bocetos (wireframes) de las pantallas principales.              |
 | [`docs/04-identidad-visual.md`](docs/04-identidad-visual.md) | Paleta, tipografías, botones, tarjetas, íconos y justificación. |
+| [`docs/05-modelo-datos.md`](docs/05-modelo-datos.md)         | Diagrama entidad-relación y tablas (PK, FK, restricciones).     |
+| [`docs/06-reglas-avance.md`](docs/06-reglas-avance.md)       | Completada vs aprobada, umbral, desbloqueo y repetición.        |
+| [`docs/07-pruebas.md`](docs/07-pruebas.md)                   | Registro de pruebas (9 casos obligatorios + complementarios).   |
+| [`docs/08-aportes.md`](docs/08-aportes.md)                   | Aportes del equipo.                                             |
 
 ## Estado actual
 
@@ -22,14 +26,22 @@ Aplicación funcional con:
 
 - Página de inicio (landing) que presenta el proyecto.
 - Catálogo de cursos con tarjetas reutilizables (`CourseCard`).
-- Curso **JavaScript desde cero** con 5 unidades, 15 lecciones y más de 40
-  ejercicios.
-- Mapa de unidades con estados (disponible / bloqueada / completada) y
-  barra de progreso (`UnitCard`).
-- Pantalla de actividad con opción múltiple y verdadero/falso, verificación
-  inmediata, explicación y pantalla de resultado.
-- Progreso persistente en `localStorage` (`useProgress`).
-- Router con rutas nombradas y página 404.
+- Curso **JavaScript desde cero** con **una unidad funcional**
+  (`Fundamentos de JavaScript`) formada por **2 lecciones** con explicación,
+  ejemplo de código y **6 actividades** de opción múltiple con devolución.
+  El resto de las unidades (variables, condicionales, bucles, funciones) está
+  identificado pero **en preparación** (`published: false`).
+- Pantallas de detalle por curso y por **unidad** con estados
+  (pendiente / bloqueada / disponible / completada) y progreso.
+- Lección completa en tres fases: **introducción** (teoría + código),
+  **actividades** (selección, verificación textual, contador, respuesta única)
+  y **resultados** (aciertos, porcentaje, aprobar/reprobar, repetir).
+- Reglas de avance: aprobar una lección la cierra y habilita la siguiente; la
+  unidad se completa al aprobar todas sus lecciones (ver `docs/06`).
+- Progreso persistente en `localStorage` (`useProgress`), con acceso a datos
+  centralizado en `courseRepository`.
+- Router con rutas nombradas, avisos para lecciones/cursos inexistentes y
+  página 404.
 
 Cursos restantes (Python, HTML y CSS) aparecen como **próximamente**.
 
@@ -53,23 +65,25 @@ Cursos restantes (Python, HTML y CSS) aparecen como **próximamente**.
     ├── App.vue
     ├── assets/usagi.webp     # Mascota oficial (fondo transparente)
     ├── components/
-    │   ├── AppHeader.vue     # Header global con navegación
     │   ├── CourseCard.vue    # Tarjeta reutilizable de curso
-    │   └── UnitCard.vue      # Tarjeta reutilizable de unidad
+    │   ├── UnitCard.vue      # Tarjeta reutilizable de unidad
+    │   └── LessonCard.vue    # Tarjeta reutilizable de lección
     ├── composables/
-    │   └── useProgress.js    # Progreso persistente (localStorage)
+    │   └── useProgress.js    # Progreso del participante (localStorage)
     ├── css/
     │   ├── app.scss          # Identidad visual global
     │   └── quasar.variables.scss
-    ├── data/                 # Estructura de datos (cursos y ejercicios)
+    ├── data/                 # Estructura de datos y acceso centralizado
     │   ├── courses.js
-    │   └── javascriptCourse.js
+    │   ├── javascriptCourse.js
+    │   └── courseRepository.js
     ├── layouts/MainLayout.vue
     ├── pages/
     │   ├── IndexPage.vue         # /  (inicio)
     │   ├── CoursesPage.vue       # /cursos
     │   ├── CourseDetailPage.vue  # /cursos/:slug
-    │   ├── LessonPage.vue        # lección / actividad
+    │   ├── CourseUnitPage.vue    # /cursos/:slug/unidad/:unitId
+    │   ├── LessonPage.vue        # /cursos/:slug/unidad/:unitId/leccion/:lessonId
     │   └── ErrorNotFound.vue     # 404
     └── router/routes.js      # Rutas con nombres
 ```
@@ -98,7 +112,8 @@ npx serve dist/spa
 | `/`                                              | `inicio`        | Landing                      |
 | `/cursos`                                        | `cursos`        | Catálogo                     |
 | `/cursos/:slug`                                  | `curso`         | Detalle del curso + unidades |
-| `/cursos/:slug/unidad/:unitId/leccion/:lessonId` | `leccion`       | Actividad                    |
+| `/cursos/:slug/unidad/:unitId`                   | `unidad`        | Lecciones de la unidad       |
+| `/cursos/:slug/unidad/:unitId/leccion/:lessonId` | `leccion`       | Lección completa             |
 | cualquier otra                                   | `no-encontrada` | 404                          |
 
 ## Notas de estilo
