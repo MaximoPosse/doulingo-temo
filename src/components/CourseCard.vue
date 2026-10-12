@@ -34,7 +34,7 @@
       </div>
 
       <h3 class="dl-course-card__title">{{ course.title }}</h3>
-      <p class="dl-course-card__desc">{{ course.shortDescription }}</p>
+      <p class="dl-course-card__desc">{{ course.description }}</p>
 
       <div class="dl-course-card__meta">
         <span class="dl-course-card__meta-item">

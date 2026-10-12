@@ -2,23 +2,27 @@
 //
 // Las credenciales provienen de variables de entorno Vite (archivo .env):
 //   VITE_SUPABASE_URL
-//   VITE_SUPABASE_ANON_KEY
+//   VITE_SUPABASE_PUBLISHABLE_KEY   (clave nueva: sb_publishable_...)
+//     └─ o, en proyectos antiguos, VITE_SUPABASE_ANON_KEY
 //
-// La anon key es pública por diseño (solo lectura de contenido publicado +
-// llamada a la RPC check_answer). La service_role key y las contraseñas NUNCA
-// deben usarse en el frontend.
+// Ambas claves son PÚBLICAS por diseño (solo lectura de contenido publicado +
+// llamada a la RPC check_answer). La claves secretas (service_role /
+// sb_secret_...) y las contraseñas NUNCA deben usarse en el frontend.
 
 import { createClient } from '@supabase/supabase-js'
 
 const url = import.meta.env.VITE_SUPABASE_URL ?? ''
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
+const publicKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  import.meta.env.VITE_SUPABASE_ANON_KEY ??
+  ''
 
 // Se considera configurado cuando hay URL y key reales (no placeholders).
 const IS_CONFIGURED =
   url.trim() !== '' &&
-  anonKey.trim() !== '' &&
+  publicKey.trim() !== '' &&
   !/REEMPLAZA/i.test(url) &&
-  !/REEMPLAZA/i.test(anonKey)
+  !/REEMPLAZA/i.test(publicKey)
 
 let client = null
 
@@ -29,8 +33,8 @@ export function isSupabaseConfigured() {
 export function supabaseNotConfiguredError() {
   return new Error(
     'La aplicación no está conectada a la base de datos todavía. ' +
-      'Configurá VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en el archivo .env ' +
-      'con los datos de tu proyecto Supabase.'
+      'Configurá VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY en el ' +
+      'archivo .env con los datos de tu proyecto Supabase.'
   )
 }
 
@@ -39,7 +43,7 @@ export function getSupabaseClient() {
     throw supabaseNotConfiguredError()
   }
   if (!client) {
-    client = createClient(url, anonKey)
+    client = createClient(url, publicKey)
   }
   return client
 }

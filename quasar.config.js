@@ -37,6 +37,13 @@ export default defineConfig((/* ctx */) => {
         // node: 'node22'
       },
 
+      // Quasar expone al código cliente solo variables con prefijo QCLI_ por
+      // defecto. Permitimos el prefijo VITE_ para que .env (VITE_SUPABASE_*)
+      // llegue al bundle del navegador.
+      env: {
+        clientPrefix: 'VITE_'
+      },
+
       // https://v2.quasar.dev/quasar-cli-vite/page-routing-with-vue-router#filename-based-routing
       // filenameBasedRouting: true,
 

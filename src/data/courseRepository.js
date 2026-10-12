@@ -17,9 +17,11 @@ function client() {
 
 function unwrap(result) {
   if (result.error) {
-    throw new Error(
-      `No se pudieron cargar los datos. ${result.error.message ?? 'Error de conexión.'}`
-    )
+    const raw = result.error.message ?? ''
+    const friendly = /fetch|network|failed to fetch|load failed/i.test(raw)
+      ? 'No se pudo contactar al servidor.'
+      : raw || 'Error de conexión.'
+    throw new Error(`No se pudieron cargar los datos. ${friendly}`)
   }
   return result.data
 }
@@ -107,14 +109,14 @@ export async function getUnits(courseSlug) {
 
   const [unitRows, lessonRows] = await Promise.all([
     unwrap(
-      client()
+      await client()
         .from('unidades')
         .select('id, curso_id, orden, titulo, descripcion, icono, disponible')
         .eq('curso_id', courseId)
         .order('orden', { ascending: true })
     ),
     unwrap(
-      client()
+      await client()
         .from('lecciones')
         .select(
           'id, unidad_id, orden, titulo, explicacion, ejemplo_codigo, preguntas(id)'
@@ -206,11 +208,24 @@ export async function getActivities(courseSlug, unitId, lessonId) {
 // recién entonces compara contra la solución. Resuelve con
 // { correcto, explicacion, opcion_correcta_id } o lanza un error.
 export async function checkAnswer(questionId, optionId) {
-  const rows = unwrap(
-    await client().rpc('check_answer', {
+  let result
+  try {
+    result = await client().rpc('check_answer', {
       p_pregunta: questionId,
       p_opcion: optionId
     })
-  )
-  return rows?.[0] ?? null
+  } catch {
+    // Fallo de red/servidor inalcanzable: no se puede comprobar.
+    throw new Error(
+      'No se pudo contactar al servidor para comprobar la respuesta.'
+    )
+  }
+  if (result.error) {
+    const raw = result.error.message ?? ''
+    const friendly = /fetch|network|failed to fetch|load failed/i.test(raw)
+      ? 'No se pudo contactar al servidor para comprobar la respuesta.'
+      : raw || 'No se pudo comprobar la respuesta.'
+    throw new Error(friendly)
+  }
+  return result.data?.[0] ?? null
 }
