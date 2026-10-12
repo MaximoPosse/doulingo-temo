@@ -1,125 +1,164 @@
-# 05 · Modelo de datos (diagrama entidad-relación)
+# 05 · Modelo de datos (diagrama entidad-relación y diccionario)
 
 ## Consideración previa
 
-Doulingo separa **dos mundos de datos** que conviene no confundir:
+Doulingo separa **dos mundos de datos**:
 
 1. **Contenido educativo (publicación)**: lo que se enseña (cursos, unidades,
-   lecciones, actividades, opciones). Es "el producto" y hoy vive en
-   `src/data/` accedido a través de `courseRepository.js`.
+   lecciones, preguntas, opciones y soluciones). Es "el producto". En esta etapa
+   vive en **Supabase** y la aplicación lo consume a través de
+   `src/data/courseRepository.js`.
 2. **Avance del participante (progreso)**: si una persona completó o aprobó una
    lección y cuántos aciertos obtuvo en su intento. Es individual y hoy se
-   guarda en `localStorage` a través de `useProgress.js`.
+   guarda en `localStorage` a través de `useProgress.js` (ver el final).
 
-En una etapa siguiente, ambas partes pasarán a la base de datos compartida;
-el repositorio `courseRepository` ya centraliza todas las lecturas para que
-las pantallas no cambien.
+Las pantallas nunca hablan con la base directamente: piden datos al
+repositorio, que centraliza todas las consultas.
 
-## Diagrama entidad-relación (conceptual)
+## Diagrama entidad-relación (implementado)
 
 ```
-CURSO 1 ───── 1 N UNIDAD 1 ───── 1 N LECCION 1 ───── 1 N ACTIVIDAD 1 ───── 1 N OPCION
-        contiene          contiene          contiene          contiene
-
-USUARIO 1 ───── 1 N INTENTO_DE_LECCION N ───── 1 LECCION
-              realiza                  de
+CURSOS 1 ───── N UNIDADES 1 ───── N LECCIONES 1 ───── N PREGUNTAS 1 ───── N OPCIONES
+                                                                          │
+                                                    PREGUNTAS 1 ───── 1 SOLUCIONES
+                                                                          │ (opcion_correcta_id)
+                                                                          └──────► OPCIONES
 ```
 
-## Especificación de tablas
+- `unidades.curso_id` → `cursos.id`
+- `lecciones.unidad_id` → `unidades.id`
+- `preguntas.leccion_id` → `lecciones.id`
+- `opciones.pregunta_id` → `preguntas.id`
+- `soluciones.pregunta_id` → `preguntas.id` (1 a 1) y
+  `soluciones.opcion_correcta_id` → `opciones.id`
 
-### Contenido educativo (publicación)
+Todas las claves foráneas usan `on delete cascade`. Los identificadores son
+`uuid` con `default gen_random_uuid()` (extensión `pgcrypto`).
 
-**CURSOS**
+## Diccionario de datos
 
-| Campo        | Tipo     | PK  | FK  | Obligatorio | Restricciones                       |
-| ------------ | -------- | --- | --- | ----------- | ----------------------------------- |
-| id           | VARCHAR  | ✓   | –   | ✓           | identificador único                 |
-| slug         | VARCHAR  | –   | –   | ✓           | UNIQUE, formato url-safe            |
-| titulo       | VARCHAR  | –   | –   | ✓           | –                                   |
-| descripcion  | TEXT     | –   | –   | ✓           | –                                   |
-| nivel        | VARCHAR  | –   | –   | ✓           | ej. "Principiante"                  |
-| estado       | VARCHAR  | –   | –   | ✓           | CHECK: 'disponible'\|'proximamente' |
-| color        | VARCHAR  | –   | –   | ✓           | código hex (#f7df1e)                |
-| icono        | VARCHAR  | –   | –   | ✓           | nombre de ícono Material            |
-| unidades_tot | SMALLINT | –   | –   | ✓           | CHECK: > 0                          |
+### CURSOS
 
-**UNIDADES**
+| Campo       | Tipo    | PK  | FK  | Nulo | Restricciones                         |
+| ----------- | ------- | --- | --- | ---- | ------------------------------------- |
+| id          | uuid    | ✓   | –   | no   | default `gen_random_uuid()`           |
+| slug        | text    | –   | –   | no   | UNIQUE (identificador url-safe)       |
+| titulo      | text    | –   | –   | no   | –                                     |
+| descripcion | text    | –   | –   | no   | –                                     |
+| nivel       | text    | –   | –   | no   | ej. "Principiante"                    |
+| estado      | text    | –   | –   | no   | CHECK: `disponible` \| `proximamente` |
+| color       | text    | –   | –   | no   | CHECK: `^#[0-9a-fA-F]{6}$`            |
+| icono       | text    | –   | –   | no   | nombre de ícono Material              |
+| orden       | integer | –   | –   | no   | CHECK: `orden > 0`                    |
 
-| Campo       | Tipo     | PK  | FK          | Obligatorio | Restricciones                      |
-| ----------- | -------- | --- | ----------- | ----------- | ---------------------------------- |
-| id          | VARCHAR  | ✓   | –           | ✓           | identificador único                |
-| curso_id    | VARCHAR  | –   | → CURSOS.id | ✓           | –                                  |
-| orden       | SMALLINT | –   | –           | ✓           | CHECK: > 0; UNIQUE por curso       |
-| titulo      | VARCHAR  | –   | –           | ✓           | –                                  |
-| descripcion | TEXT     | –   | –           | ✓           | –                                  |
-| icono       | VARCHAR  | –   | –           | ✓           | nombre de ícono Material           |
-| publicada   | BOOLEAN  | –   | –           | ✓           | CHECK: 0/1 (estado de publicación) |
+### UNIDADES
 
-**LECCIONES**
+| Campo       | Tipo    | PK  | FK          | Nulo | Restricciones                           |
+| ----------- | ------- | --- | ----------- | ---- | --------------------------------------- |
+| id          | uuid    | ✓   | –           | no   | default `gen_random_uuid()`             |
+| curso_id    | uuid    | –   | → CURSOS.id | no   | on delete cascade                       |
+| orden       | integer | –   | –           | no   | CHECK: `orden > 0`; UNIQUE con curso_id |
+| titulo      | text    | –   | –           | no   | –                                       |
+| descripcion | text    | –   | –           | no   | –                                       |
+| icono       | text    | –   | –           | no   | nombre de ícono Material                |
+| disponible  | boolean | –   | –           | no   | default `false`                         |
 
-| Campo          | Tipo     | PK  | FK          | Obligatorio | Restricciones                 |
-| -------------- | -------- | --- | ----------- | ----------- | ----------------------------- |
-| id             | VARCHAR  | ✓   | –           | ✓           | identificador único           |
-| unidad_id      | VARCHAR  | –   | → UNIDAD.id | ✓           | –                             |
-| orden          | SMALLINT | –   | –           | ✓           | CHECK: > 0; UNIQUE por unidad |
-| titulo         | VARCHAR  | –   | –           | ✓           | –                             |
-| explicacion    | TEXT     | –   | –           | ✓           | –                             |
-| ejemplo_codigo | TEXT     | –   | –           | –           | opcional (puede ser NULL)     |
+`disponible = false` identifica unidades con contenido aún incompleto
+("en preparación"). El contenido (lecciones/preguntas/opciones) de una unidad
+no disponible queda oculto por RLS.
 
-**ACTIVIDADES**
+### LECCIONES
 
-| Campo      | Tipo     | PK  | FK           | Obligatorio | Restricciones                  |
-| ---------- | -------- | --- | ------------ | ----------- | ------------------------------ |
-| id         | VARCHAR  | ✓   | –            | ✓           | identificador único            |
-| leccion_id | VARCHAR  | –   | → LECCION.id | ✓           | –                              |
-| puesto     | SMALLINT | –   | –            | ✓           | CHECK: > 0; UNIQUE por lección |
-| tipo       | VARCHAR  | –   | –            | ✓           | CHECK: 'choice' (por ahora)    |
-| enunciado  | TEXT     | –   | –            | ✓           | –                              |
-| codigo_opc | TEXT     | –   | –            | –           | opcional (fragmento a evaluar) |
+| Campo          | Tipo    | PK  | FK            | Nulo | Restricciones                            |
+| -------------- | ------- | --- | ------------- | ---- | ---------------------------------------- |
+| id             | uuid    | ✓   | –             | no   | default `gen_random_uuid()`              |
+| unidad_id      | uuid    | –   | → UNIDADES.id | no   | on delete cascade                        |
+| orden          | integer | –   | –             | no   | CHECK: `orden > 0`; UNIQUE con unidad_id |
+| titulo         | text    | –   | –             | no   | –                                        |
+| explicacion    | text    | –   | –             | no   | teoría de la lección                     |
+| ejemplo_codigo | text    | –   | –             | sí   | opcional (fragmento de código)           |
 
-**OPCIONES**
+### PREGUNTAS
 
-| Campo        | Tipo    | PK  | FK             | Obligatorio | Restricciones                             |
-| ------------ | ------- | --- | -------------- | ----------- | ----------------------------------------- |
-| id           | VARCHAR | ✓   | –              | ✓           | identificador único                       |
-| actividad_id | VARCHAR | –   | → ACTIVIDAD.id | ✓           | –                                         |
-| texto        | TEXT    | –   | –              | ✓           | –                                         |
-| es_correcta  | BOOLEAN | –   | –              | ✓           | CHECK: 0/1; exactamente UNA por actividad |
+| Campo      | Tipo    | PK  | FK             | Nulo | Restricciones                             |
+| ---------- | ------- | --- | -------------- | ---- | ----------------------------------------- |
+| id         | uuid    | ✓   | –              | no   | default `gen_random_uuid()`               |
+| leccion_id | uuid    | –   | → LECCIONES.id | no   | on delete cascade                         |
+| orden      | integer | –   | –              | no   | CHECK: `orden > 0`; UNIQUE con leccion_id |
+| enunciado  | text    | –   | –              | no   | –                                         |
+| codigo     | text    | –   | –              | sí   | fragmento opcional junto al enunciado     |
 
-> Nota de implementación actual: el JSON de actividades define las opciones con
-> `id` y marca la correcta con `answerOptionId`, equivalente lógico a un único
-> `es_correcta = 1` por actividad.
+### OPCIONES
 
-### Avance del participante
+| Campo       | Tipo    | PK  | FK             | Nulo | Restricciones                              |
+| ----------- | ------- | --- | -------------- | ---- | ------------------------------------------ |
+| id          | uuid    | ✓   | –              | no   | default `gen_random_uuid()`                |
+| pregunta_id | uuid    | –   | → PREGUNTAS.id | no   | on delete cascade                          |
+| orden       | integer | –   | –              | no   | CHECK: `orden > 0`; UNIQUE con pregunta_id |
+| texto       | text    | –   | –              | no   | –                                          |
 
-**USUARIOS**
+Las opciones **no** almacenan cuál es la correcta: eso vive en `soluciones`,
+fuera del alcance público.
 
-| Campo  | Tipo    | PK  | FK  | Obligatorio | Restricciones   |
-| ------ | ------- | --- | --- | ----------- | --------------- |
-| id     | INTEGER | ✓   | –   | ✓           | autoincremental |
-| email  | VARCHAR | –   | –   | ✓           | UNIQUE          |
-| nombre | VARCHAR | –   | –   | ✓           | –               |
+### SOLUCIONES (privada)
 
-**INTENTO_DE_LECCION**
+| Campo              | Tipo | PK  | FK             | Nulo | Restricciones                    |
+| ------------------ | ---- | --- | -------------- | ---- | -------------------------------- |
+| pregunta_id        | uuid | ✓   | → PREGUNTAS.id | no   | 1 a 1 con la pregunta; cascade   |
+| opcion_correcta_id | uuid | –   | → OPCIONES.id  | no   | on delete cascade                |
+| explicacion        | text | –   | –              | no   | por qué la respuesta es correcta |
 
-| Campo        | Tipo      | PK  | FK            | Obligatorio | Restricciones                     |
-| ------------ | --------- | --- | ------------- | ----------- | --------------------------------- |
-| usuario_id   | INTEGER   | ✓   | → USUARIOS.id | ✓           | compone la PK                     |
-| leccion_id   | VARCHAR   | ✓   | → LECCION.id  | ✓           | compone la PK                     |
-| aciertos     | SMALLINT  | –   | –             | ✓           | CHECK: 0 ≤ aciertos ≤ total       |
-| total        | SMALLINT  | –   | –             | ✓           | CHECK: > 0                        |
-| aprobada     | BOOLEAN   | –   | –             | ✓           | derivado: aciertos ≥ umbral (60%) |
-| fecha_ultimo | TIMESTAMP | –   | –             | ✓           | último intento                    |
+Protegida por RLS (sin política de lectura) y con los permisos `SELECT`
+revocados: sus filas **no** se pueden consultar vía API. Solo se entrega la
+solución a través de la función `check_answer()`.
 
-> La tabla guarda el **resultado del último intento** (los intentos anteriores
-> se descartan; "repetir" reinicia el conteo hasta que se llega a resultados).
-> UNIQUE(usuario_id, leccion_id).
+## Políticas de acceso (RLS) y función de comprobación
 
-## Implementación actual en JavaScript
+Implementadas en `supabase/migrations/0003_rls.sql`:
 
-| Tabla lógica                                  | Archivo / estructura                                                          |
-| --------------------------------------------- | ----------------------------------------------------------------------------- |
-| CURSOS                                        | `src/data/courses.js` (catálogo) + `src/data/javascriptCourse.js` (contenido) |
-| UNIDADES / LECCIONES / ACTIVIDADES / OPCIONES | `src/data/javascriptCourse.js` (objetos anidados)                             |
-| Lecturas centralizadas                        | `src/data/courseRepository.js` (único punto de acceso)                        |
-| INTENTO_DE_LECCION                            | `src/composables/useProgress.js` → `localStorage` clave `doulingo-progress`   |
+- **Lectura (anon/authenticated)**: `cursos` solo `estado = 'disponible'`;
+  `unidades` todas (su `disponible` es visible); `lecciones`, `preguntas` y
+  `opciones` solo si pertenecen a una unidad `disponible`.
+- **Escritura**: no hay políticas de INSERT/UPDATE/DELETE y además se revocan
+  esos permisos para `anon`/`authenticated`. La carga se hace desde las
+  herramientas de administración de Supabase.
+- **Soluciones**: `enable row level security` + `revoke all` → sin lectura vía
+  API.
+
+```sql
+create function public.check_answer(p_pregunta uuid, p_opcion uuid)
+returns table (correcto boolean, explicacion text, opcion_correcta_id uuid)
+language plpgsql security definer set search_path = public
+```
+
+`SECURITY DEFINER`; el servidor: (1) verifica que la pregunta exista y su unidad
+esté disponible, (2) verifica que la opción pertenezca a esa pregunta y
+(3) compara contra `soluciones`. Devuelve `correcto`, `explicacion` y el id de la
+opción correcta. Errores de negocio: `PR_QUESTION_NOT_PUBLISHED` y
+`PR_OPTION_NOT_IN_QUESTION`.
+
+## Fuente de verdad (scripts)
+
+| Artefacto                          | Archivo                               |
+| ---------------------------------- | ------------------------------------- |
+| Creación de tablas y restricciones | `supabase/migrations/0001_schema.sql` |
+| Carga inicial (datos)              | `supabase/migrations/0002_seed.sql`   |
+| Políticas RLS y `check_answer`     | `supabase/migrations/0003_rls.sql`    |
+| Script combinado                   | `supabase/setup.sql`                  |
+| Registro del proyecto y uso        | `supabase/README.md`                  |
+
+No se incluyen contraseñas ni claves secretas: los scripts solo contienen
+estructura y contenido de ejemplo.
+
+## Progreso del participante (etapa posterior)
+
+El avance individual todavía no está en la base compartida:
+
+| Tabla lógica       | Implementación actual                                                       |
+| ------------------ | --------------------------------------------------------------------------- |
+| INTENTO_DE_LECCION | `src/composables/useProgress.js` → `localStorage` clave `doulingo-progress` |
+
+Conceptos: **completada** (se terminó el intento), **aprobada** (≥ 60 % de
+aciertos) y **reprobada** (completada por debajo del umbral). Solo las lecciones
+aprobadas habilitan la siguiente. Se migrará a la base junto con la
+identificación de usuarios y los puntajes oficiales de la competencia.
