@@ -26,20 +26,20 @@ seguridad (RLS), comprobación de respuestas y estados de UI.
 
 ## Casos
 
-| #   | Caso                                     | Pasos                                                                         | Resultado esperado                                                                                                           | Estado                  |
-| --- | ---------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| 1   | Curso disponible y sus unidades          | Abrir `/cursos`; entrar a "JavaScript desde cero".                            | Aparece el curso disponible; al abrirlo se listan sus 5 unidades (1 disponible y 4 en preparación).                          | **OK**                  |
-| 2   | Filtrado por relación (curso → unidades) | Abrir el curso y contar unidades.                                             | Solo se muestran unidades cuyo `curso_id` corresponde al curso abierto.                                                      | **OK**                  |
+| #   | Caso                                     | Pasos                                                                         | Resultado esperado                                                                                                           | Estado                                 |
+| --- | ---------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| 1   | Curso disponible y sus unidades          | Abrir `/cursos`; entrar a "JavaScript desde cero".                            | Aparece el curso disponible; al abrirlo se listan sus 5 unidades (1 disponible y 4 en preparación).                          | **OK**                                 |
+| 2   | Filtrado por relación (curso → unidades) | Abrir el curso y contar unidades.                                             | Solo se muestran unidades cuyo `curso_id` corresponde al curso abierto.                                                      | **OK**                                 |
 | 3   | Cambiar un título en la base             | Editar el `titulo` de una unidad en Supabase; recargar la app.                | El nuevo título aparece sin tocar código: la base es la fuente de verdad.                                                    | Pendiente (edición manual en Supabase) |
-| 4   | Respeto del campo `orden`                | Insertar/editar filas con `orden` fuera de secuencia; recargar.               | Unidades, lecciones y preguntas se muestran ordenadas por `orden`, no por orden de inserción.                                | **OK**                  |
-| 5   | Identificador inexistente                | Abrir `/cursos/no-existe`, una unidad y una lección inexistentes.             | Mensajes claros de "no encontrado"; la app no se rompe.                                                                      | **OK**                  |
-| 6   | Sin conexión al consultar contenido      | Con backend inalcanzable/sin `.env`, abrir `/cursos` y `/cursos/:slug`.       | Estado de error con mensaje y botón **Reintentar**; al restablecer, Reintentar vuelve a cargar.                              | **OK** (headless)       |
-| 7   | Sin conexión al comprobar una respuesta  | En una actividad, cortar la conexión y presionar CONFIRMAR.                   | No se marca como incorrecta: aparece "No se pudo comprobar tu respuesta" y se puede reintentar sin contabilizar.             | **OK** (headless)       |
-| 8   | Visitante no modifica (RLS)              | Con la anon key, intentar INSERT/UPDATE/DELETE sobre `cursos`/`unidades`/etc. | La operación es denegada; no se modifica ningún contenido.                                                                   | **OK** (REST 401)       |
-| 9   | Soluciones no consultables               | Con la anon key, hacer `SELECT` sobre `soluciones`.                           | No se obtienen filas. La respuesta solo se conoce vía `check_answer()` (RPC).                                                | **OK** (REST 401)       |
-| 10  | Completar una lección                    | Recorrer una lección, responder las 3 actividades y ver resultados.           | Se obtiene el resultado; con ≥ 2 correctas la lección queda aprobada y se habilita la siguiente; progreso en `localStorage`. | **OK** (headless)       |
-| 11  | Unidad sin lecciones publicadas          | Abrir directamente la URL de una unidad en preparación.                       | Mensaje "Esta unidad no tiene lecciones publicadas todavía".                                                                 | **OK** (headless)       |
-| 12  | Dos navegadores                          | Abrir la app en dos navegadores/perfiles distintos con la misma base.         | Ambos ven el mismo contenido publicado (compartido) y avances independientes.                                                | **OK** (headless)       |
+| 4   | Respeto del campo `orden`                | Insertar/editar filas con `orden` fuera de secuencia; recargar.               | Unidades, lecciones y preguntas se muestran ordenadas por `orden`, no por orden de inserción.                                | **OK**                                 |
+| 5   | Identificador inexistente                | Abrir `/cursos/no-existe`, una unidad y una lección inexistentes.             | Mensajes claros de "no encontrado"; la app no se rompe.                                                                      | **OK**                                 |
+| 6   | Sin conexión al consultar contenido      | Con backend inalcanzable/sin `.env`, abrir `/cursos` y `/cursos/:slug`.       | Estado de error con mensaje y botón **Reintentar**; al restablecer, Reintentar vuelve a cargar.                              | **OK** (headless)                      |
+| 7   | Sin conexión al comprobar una respuesta  | En una actividad, cortar la conexión y presionar CONFIRMAR.                   | No se marca como incorrecta: aparece "No se pudo comprobar tu respuesta" y se puede reintentar sin contabilizar.             | **OK** (headless)                      |
+| 8   | Visitante no modifica (RLS)              | Con la anon key, intentar INSERT/UPDATE/DELETE sobre `cursos`/`unidades`/etc. | La operación es denegada; no se modifica ningún contenido.                                                                   | **OK** (REST 401)                      |
+| 9   | Soluciones no consultables               | Con la anon key, hacer `SELECT` sobre `soluciones`.                           | No se obtienen filas. La respuesta solo se conoce vía `check_answer()` (RPC).                                                | **OK** (REST 401)                      |
+| 10  | Completar una lección                    | Recorrer una lección, responder las 3 actividades y ver resultados.           | Se obtiene el resultado; con ≥ 2 correctas la lección queda aprobada y se habilita la siguiente; progreso en `localStorage`. | **OK** (headless)                      |
+| 11  | Unidad sin lecciones publicadas          | Abrir directamente la URL de una unidad en preparación.                       | Mensaje "Esta unidad no tiene lecciones publicadas todavía".                                                                 | **OK** (headless)                      |
+| 12  | Dos navegadores                          | Abrir la app en dos navegadores/perfiles distintos con la misma base.         | Ambos ven el mismo contenido publicado (compartido) y avances independientes.                                                | **OK** (headless)                      |
 
 ## Automatizado
 
@@ -51,6 +51,9 @@ seguridad (RLS), comprobación de respuestas y estados de UI.
     completar lección, `localStorage` y dos contextos (casos 1, 2, 5, 10, 11, 12).
   - `case7.mjs`: fallo de conexión al comprobar y reintento (caso 7), abortando
     la petición a `check_answer`.
+  - `buttons.mjs`: recorrido completo pulsando **todos los botones** navegando
+    por clics reales (landing, nav, tarjetas, links de volver, empezar/confirmar/
+    continuar/ver resultados, repasar, siguiente lección, intentar nuevamente, X).
   - Verificaciones REST con la anon key para RLS y `check_answer` (casos 4, 8, 9).
 - Herramientas locales en `edgetest/` (fuera del repositorio).
 
@@ -76,7 +79,7 @@ Ejecutado contra un proyecto Supabase real (tablas creadas con `setup.sql`).
   "¡Correcto!".
 - Caso 8: **OK** — `INSERT` anónimo → `401 permission denied`.
 - Caso 9: **OK** — `SELECT` a `soluciones` → `401 permission denied for table
-  soluciones`; la respuesta solo se obtiene vía RPC `check_answer`.
+soluciones`; la respuesta solo se obtiene vía RPC `check_answer`.
 - Caso 10: **OK** — 3/3 correctas, resultado "¡Perfecto! LECCIÓN APROBADA 100%
   ACIERTOS", y `localStorage` (`doulingo-progress`) registra la lección como
   intentada y aprobada.
@@ -85,5 +88,12 @@ Ejecutado contra un proyecto Supabase real (tablas creadas con `setup.sql`).
 - Caso 12: **OK** — dos contextos de navegador ven las mismas 5 unidades.
 - RPC `check_answer`: **OK** — opción correcta → `correcto:true`; incorrecta →
   `correcto:false`; opción de otra pregunta → `PR_OPTION_NOT_IN_QUESTION`.
+- Recorrido de botones: **OK** — 26/26 comprobaciones en `buttons.mjs`
+  (landing, navegación, tarjetas, links de volver, intro, CONFIRMAR/CONTINUAR,
+  VER RESULTADOS, "Intentar nuevamente", "Repasar lección", "Siguiente lección",
+  "Volver a la unidad", botón X), sin errores de página.
+- Corrección: se detectó que al pasar de una lección a la siguiente el
+  componente reutilizado no recargaba los datos (los params de ruta no son
+  reactivos). Se corrigió con `:key="$route.fullPath"` en el `router-view`.
 - Pendiente: caso 3 (edición manual de un título en Supabase), por ser un cambio
   de datos en el panel.

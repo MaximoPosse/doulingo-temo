@@ -19,7 +19,10 @@
     </q-header>
 
     <q-page-container>
-      <router-view />
+      <!-- :key fuerza a remontar la página cuando cambian los params de ruta
+           (p. ej. pasar de una lección a la siguiente). Sin esto, Vue reutiliza
+           la instancia y no vuelve a consultar los datos. -->
+      <router-view :key="$route.fullPath" />
     </q-page-container>
   </q-layout>
 </template>
