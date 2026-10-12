@@ -33,9 +33,9 @@
       </div>
 
       <p class="dl-lesson-card__desc">
-        {{ lesson.activities.length }} actividades ·
+        {{ lesson.activityCount }} actividades ·
         {{
-          lesson.activities.length >= 3
+          lesson.activityCount >= 3
             ? 'aprueba con 2 de 3'
             : 'aprueba respondiendo bien la mayoría'
         }}

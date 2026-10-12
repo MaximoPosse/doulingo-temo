@@ -1,8 +1,29 @@
 <template>
   <q-page class="dl-lesson">
     <div class="dl-lesson__inner">
+      <!-- Cargando -->
+      <div v-if="loading" class="dl-lesson__state">
+        <q-spinner color="primary" size="34px" class="q-mb-sm" />
+        <p class="dl-lesson__state-text">Cargando la lección…</p>
+      </div>
+
+      <!-- Error de consulta -->
+      <div v-else-if="error" class="dl-lesson__state">
+        <q-icon name="wifi_off" size="44px" color="negative" />
+        <h2 class="dl-lesson__state-title">No se pudo cargar la lección</h2>
+        <p class="dl-lesson__state-text">{{ error }}</p>
+        <q-btn
+          no-caps
+          unelevated
+          color="primary"
+          class="q-mt-sm"
+          label="Reintentar"
+          @click="load"
+        />
+      </div>
+
       <!-- No encontrada -->
-      <template v-if="!lesson">
+      <template v-else-if="!lesson">
         <div class="dl-lesson__notfound">
           <img :src="usagiImg" alt="Usagi" class="dl-lesson__notfound-mascot" />
           <h2 class="dl-lesson__notfound-title">Lección no encontrada</h2>
@@ -139,7 +160,7 @@
               type="button"
               class="dl-lesson__option"
               :class="optionClass(option.id)"
-              :disabled="checked"
+              :disabled="checked || submitting"
               @click="selectOption(option.id)"
             >
               <span class="dl-lesson__option-letter">{{
@@ -150,16 +171,15 @@
                 v-if="checked"
                 class="dl-lesson__option-check"
                 :class="{
-                  'dl-lesson__option-check--ok':
-                    option.id === currentActivity.answerOptionId,
+                  'dl-lesson__option-check--ok': option.id === checkedAnswerId,
                   'dl-lesson__option-check--bad':
                     option.id === selectedOptionId &&
-                    option.id !== currentActivity.answerOptionId
+                    option.id !== checkedAnswerId
                 }"
               >
                 <q-icon
                   :name="
-                    option.id === currentActivity.answerOptionId
+                    option.id === checkedAnswerId
                       ? 'check'
                       : option.id === selectedOptionId
                         ? 'close'
@@ -170,6 +190,20 @@
               </span>
             </button>
           </div>
+
+          <!-- No se pudo comprobar -->
+          <transition name="dl-fade">
+            <div v-if="checkError" class="dl-lesson__check-error">
+              <q-icon name="error_outline" size="26px" />
+              <div>
+                <strong>No se pudo comprobar tu respuesta</strong>
+                <p>
+                  {{ checkError }} Revisá tu conexión y volvé a intentar. Tu
+                  intento no se contabilizó.
+                </p>
+              </div>
+            </div>
+          </transition>
 
           <transition name="dl-fade">
             <div
@@ -185,13 +219,7 @@
                 <strong>{{
                   isCorrect ? '¡Correcto!' : 'Respuesta incorrecta'
                 }}</strong>
-                <p>
-                  {{
-                    isCorrect
-                      ? currentActivity.explanation
-                      : `La opción correcta es "${currentActivity.options.find(o => o.id === currentActivity.answerOptionId)?.text}". ${currentActivity.explanation}`
-                  }}
-                </p>
+                <p>{{ feedbackText }}</p>
               </div>
             </div>
           </transition>
@@ -202,9 +230,9 @@
                 no-caps
                 unelevated
                 size="lg"
-                label="CONFIRMAR"
+                :label="submitting ? 'COMPROBANDO…' : 'CONFIRMAR'"
                 class="dl-btn-main dl-btn-main--big"
-                :disable="!selectedOptionId"
+                :disable="!selectedOptionId || submitting"
                 @click="check"
               />
             </template>
@@ -331,13 +359,9 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  getUnit,
-  getLesson,
-  getLessons,
-  getActivities
-} from '@/data/courseRepository'
+import { getUnits, getActivities, checkAnswer } from '@/data/courseRepository'
 import { useProgress } from '@/composables/useProgress'
+import { useRemoteData } from '@/composables/useRemoteData'
 import usagiImg from '@/assets/usagi.webp'
 
 const route = useRoute()
@@ -349,13 +373,25 @@ const lessonParam = route.params.lessonId
 
 const { lessonStatus, completeAttempt } = useProgress()
 
-const unit = computed(() => getUnit(slug, unitId))
-const lessons = computed(() => (unit.value ? getLessons(slug, unitId) : []))
-const lesson = computed(() => getLesson(slug, unitId, lessonParam))
+const { data, loading, error, load } = useRemoteData(async () => {
+  const units = await getUnits(slug)
+  const unit = units.find(u => u.id === unitId) ?? null
+  const lessons = unit ? unit.lessons : []
+  const lesson = lessons.find(l => l.id === lessonParam) ?? null
+  const activities = lesson
+    ? await getActivities(slug, unitId, lessonParam)
+    : []
+  return { unit, lessons, lesson, activities }
+})
+
+const unit = computed(() => data.value?.unit ?? null)
+const lessons = computed(() => data.value?.lessons ?? [])
+const lesson = computed(() => data.value?.lesson ?? null)
+const activities = computed(() => data.value?.activities ?? [])
+
 const lessonIndex = computed(() =>
   lessons.value.findIndex(l => l.id === lessonParam)
 )
-const activities = computed(() => getActivities(slug, unitId, lessonParam))
 
 const lessonState = computed(() =>
   lesson.value && unit.value
@@ -378,15 +414,15 @@ const phase = ref('intro') // 'intro' | 'activity' | 'results'
 const currentIndex = ref(0)
 const selectedOptionId = ref(null)
 const checked = ref(false)
+const submitting = ref(false)
+const checkError = ref(null)
+const checkedResult = ref(null) // { correcto, explicacion, opcion_correcta_id }
 const correctCount = ref(0)
 
 const totalActivities = computed(() => activities.value.length)
 const currentActivity = computed(() => activities.value[currentIndex.value])
-const isCorrect = computed(
-  () =>
-    currentActivity.value &&
-    selectedOptionId.value === currentActivity.value.answerOptionId
-)
+const isCorrect = computed(() => checkedResult.value?.correcto === true)
+const checkedAnswerId = computed(() => checkedResult.value?.opcion_correcta_id)
 const incorrectCount = computed(
   () => totalActivities.value - correctCount.value
 )
@@ -398,6 +434,19 @@ const percentage = computed(() =>
 const passed = computed(
   () => correctCount.value >= Math.ceil(totalActivities.value * 0.6)
 )
+
+const correctOptionText = computed(() => {
+  const found = currentActivity.value?.options.find(
+    o => o.id === checkedAnswerId.value
+  )
+  return found?.text ?? ''
+})
+
+const feedbackText = computed(() => {
+  if (!checkedResult.value) return ''
+  if (isCorrect.value) return checkedResult.value.explicacion
+  return `La opción correcta es "${correctOptionText.value}". ${checkedResult.value.explicacion}`
+})
 
 const nextLesson = computed(() =>
   lessonIndex.value >= 0 && lessonIndex.value < lessons.value.length - 1
@@ -431,8 +480,7 @@ function optionClass(optionId) {
       ? 'dl-lesson__option--selected'
       : ''
   }
-  if (optionId === currentActivity.value.answerOptionId)
-    return 'dl-lesson__option--correct'
+  if (optionId === checkedAnswerId.value) return 'dl-lesson__option--correct'
   if (optionId === selectedOptionId.value) return 'dl-lesson__option--wrong'
   return 'dl-lesson__option--dimmed'
 }
@@ -442,16 +490,32 @@ function startActivities() {
 }
 
 function selectOption(optionId) {
-  if (checked.value) return
+  if (checked.value || submitting.value) return
   selectedOptionId.value = optionId
 }
 
-function check() {
+// Comprueba la respuesta en el servidor (RPC check_answer). Si la conexión
+// falla, NO se muestra como incorrecta: queda un mensaje y se puede reintentar.
+async function check() {
   if (selectedOptionId.value === null) return
-  if (checked.value) return // evita contabilizar dos veces un mismo envío
-  checked.value = true
-  if (selectedOptionId.value === currentActivity.value.answerOptionId) {
-    correctCount.value += 1
+  if (checked.value || submitting.value) return // no se envía dos veces
+  submitting.value = true
+  checkError.value = null
+  try {
+    const result = await checkAnswer(
+      currentActivity.value.id,
+      selectedOptionId.value
+    )
+    if (!result) throw new Error('El servidor no devolvió un resultado.')
+    checkedResult.value = result
+    checked.value = true
+    if (result.correcto) {
+      correctCount.value += 1
+    }
+  } catch (err) {
+    checkError.value = err?.message ?? 'Ocurrió un error inesperado.'
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -459,6 +523,8 @@ function next() {
   currentIndex.value += 1
   selectedOptionId.value = null
   checked.value = false
+  checkError.value = null
+  checkedResult.value = null
 }
 
 function finish() {
@@ -474,6 +540,9 @@ function restart() {
   currentIndex.value = 0
   selectedOptionId.value = null
   checked.value = false
+  submitting.value = false
+  checkError.value = null
+  checkedResult.value = null
   correctCount.value = 0
 }
 
@@ -926,6 +995,51 @@ function goToNextLesson() {
   }
 
   // ---------- Auxiliares ----------
+  &__state {
+    text-align: center;
+    padding: 48px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__state-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: $dl-ink-dark;
+    margin: 4px 0 0;
+  }
+
+  &__state-text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #6b6b6b;
+    margin: 0;
+    max-width: 480px;
+  }
+
+  &__check-error {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #fff8e6;
+    color: #8a5b00;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+
+    strong {
+      font-size: 16px;
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+  }
+
   &__notfound {
     text-align: center;
     padding: 48px 0;

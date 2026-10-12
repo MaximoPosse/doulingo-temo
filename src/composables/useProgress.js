@@ -10,6 +10,9 @@
 // Progreso persistido en localStorage de forma provisional. En una etapa
 // posterior se conservará en la base de datos compartida junto con la
 // identificación de usuarios.
+//
+// El contenido (lecciones/actividades, campos `disponible` de cada unidad)
+// proviene del repositorio remoto (Supabase); aquí solo se guarda el avance.
 
 import { ref, watch } from 'vue'
 
@@ -74,7 +77,7 @@ function isLessonUnlocked(lessonIndex, lessons) {
 
 // Estado de una lección: pendiente | bloqueada | disponible | aprobada | reprobada
 function lessonStatus(unit, lesson, lessonIndex, lessons) {
-  if (!unit?.published) return 'pendiente'
+  if (!unit?.disponible) return 'pendiente'
   if (!isLessonUnlocked(lessonIndex, lessons)) return 'bloqueada'
   if (isLessonApproved(lesson.id)) return 'aprobada'
   if (isLessonAttempted(lesson.id)) return 'reprobada'
@@ -101,7 +104,7 @@ function countApprovedLessons(unit) {
 // Una unidad publicada está completada cuando TODAS sus lecciones están aprobadas.
 function isUnitCompleted(unit) {
   return (
-    unit?.published === true &&
+    unit?.disponible === true &&
     unit.lessons.length > 0 &&
     unit.lessons.every(lesson => isLessonApproved(lesson.id))
   )
@@ -114,7 +117,7 @@ function isUnitUnlocked(unit, unitIndex, units) {
 
 // Estado de una unidad: pendiente | bloqueada | disponible | completada
 function unitStatus(unit, unitIndex, units) {
-  if (!unit.published) return 'pendiente'
+  if (!unit.disponible) return 'pendiente'
   if (!isUnitUnlocked(unit, unitIndex, units)) return 'bloqueada'
   if (isUnitCompleted(unit)) return 'completada'
   return 'disponible'

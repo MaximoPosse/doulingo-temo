@@ -109,11 +109,11 @@ const progressText = computed(() => {
 
 // El primer nodo no completado de las unidades publicadas es el "actual".
 const isFirstUnfinished = computed(() => {
-  const publishedUnits = props.units.filter(unit => unit.published)
-  const firstUncompleted = publishedUnits.findIndex(
+  const availableUnits = props.units.filter(unit => unit.disponible)
+  const firstUncompleted = availableUnits.findIndex(
     unit => unitStatus(unit, props.unitIndex, props.units) !== 'completada'
   )
-  return publishedUnits[firstUncompleted]?.id === props.unit.id
+  return availableUnits[firstUncompleted]?.id === props.unit.id
 })
 
 const badgeMap = {

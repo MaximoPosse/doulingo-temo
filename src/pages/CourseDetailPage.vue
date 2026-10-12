@@ -6,40 +6,35 @@
         Volver a cursos
       </router-link>
 
+      <!-- Cargando -->
+      <div v-if="loading" class="dl-states">
+        <q-spinner color="primary" size="34px" class="q-mb-sm" />
+        <p class="dl-states__text">Cargando el curso…</p>
+      </div>
+
+      <!-- Error de consulta -->
+      <div v-else-if="error" class="dl-states">
+        <q-icon name="wifi_off" size="44px" color="negative" />
+        <h2 class="dl-states__title">No se pudo cargar el curso</h2>
+        <p class="dl-states__text">{{ error }}</p>
+        <q-btn
+          no-caps
+          unelevated
+          color="primary"
+          class="q-mt-sm"
+          label="Reintentar"
+          @click="load"
+        />
+      </div>
+
       <!-- Curso no encontrado -->
-      <q-banner v-if="!course" rounded class="dl-notfound-banner">
+      <q-banner v-else-if="!course" rounded class="dl-notfound-banner">
         <q-icon name="error_outline" size="22px" color="negative" />
-        No encontramos un curso con identificador
-        <strong>{{ slug }}</strong
+        No encontramos un curso con identificador <strong>{{ slug }}</strong
         >.
       </q-banner>
 
-      <!-- Curso en preparación -->
-      <template v-else-if="!available">
-        <div
-          class="dl-course-hero dl-course-hero--soon"
-          :style="{ '--course-color': course.color }"
-        >
-          <span class="dl-course-hero__icon">
-            <q-icon :name="course.icon" size="44px" />
-          </span>
-          <div>
-            <span class="dl-badge dl-badge--orange">
-              <q-icon name="schedule" />
-              Próximamente
-            </span>
-            <h1 class="dl-course-hero__title">{{ course.title }}</h1>
-            <p class="dl-course-hero__desc">{{ course.description }}</p>
-          </div>
-        </div>
-        <q-banner class="dl-soon-banner" rounded>
-          <q-icon name="construction" size="22px" color="orange" />
-          Este curso todavía está en preparación. Elige otro curso disponible o
-          vuelve más tarde.
-        </q-banner>
-      </template>
-
-      <!-- Curso disponible -->
+      <!-- Contenido del curso -->
       <template v-else>
         <div class="dl-course-hero" :style="{ '--course-color': course.color }">
           <span class="dl-course-hero__icon">
@@ -74,6 +69,12 @@
           Completa las lecciones de cada unidad para desbloquear la siguiente.
         </p>
 
+        <!-- Sin unidades -->
+        <q-banner v-if="units.length === 0" rounded class="dl-empty-banner">
+          <q-icon name="construction" size="22px" color="orange" />
+          Este curso todavía no tiene unidades publicadas. Volvé más tarde.
+        </q-banner>
+
         <UnitCard
           v-for="(unit, index) in units"
           :key="unit.id"
@@ -91,8 +92,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCourses, getUnits } from '@/data/courseRepository'
+import { getCourseBySlug, getUnits } from '@/data/courseRepository'
 import { useProgress } from '@/composables/useProgress'
+import { useRemoteData } from '@/composables/useRemoteData'
 import UnitCard from '@/components/UnitCard.vue'
 
 const route = useRoute()
@@ -101,19 +103,17 @@ const { countApprovedLessons } = useProgress()
 
 const slug = computed(() => route.params.slug)
 
-// La disponibilidad la define el catálogo (courses.js), no el contenido.
-// getCourseBySlug() del repositorio devuelve el contenido educativo, que no
-// incluye `status`.
-const course = computed(
-  () => getCourses().find(course => course.slug === slug.value) ?? null
-)
+const { data, loading, error, load } = useRemoteData(async () => {
+  const course = await getCourseBySlug(slug.value)
+  const units = course ? await getUnits(slug.value) : []
+  return { course, units }
+})
 
-const available = computed(() => course.value?.status === 'disponible')
-
-const units = computed(() => getUnits(slug.value))
+const course = computed(() => data.value?.course ?? null)
+const units = computed(() => data.value?.units ?? [])
 
 const allLessons = computed(() =>
-  units.value.filter(unit => unit.published).flatMap(unit => unit.lessons)
+  units.value.filter(unit => unit.disponible).flatMap(unit => unit.lessons)
 )
 
 const completedTotal = computed(() =>
@@ -169,10 +169,6 @@ function openUnit(unit) {
   border-left: 10px solid var(--course-color);
   border-radius: 18px;
   padding: 26px;
-
-  &--soon {
-    opacity: 0.9;
-  }
 
   &__icon {
     flex: 0 0 auto;
@@ -243,8 +239,32 @@ function openUnit(unit) {
   }
 }
 
-.dl-soon-banner {
-  margin-top: 22px;
+.dl-states {
+  text-align: center;
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  &__title {
+    font-size: 20px;
+    font-weight: 800;
+    color: $dl-ink-dark;
+    margin: 4px 0 0;
+  }
+
+  &__text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #6b6b6b;
+    margin: 0;
+    max-width: 480px;
+  }
+}
+
+.dl-empty-banner {
+  margin-top: 18px;
   background: #fff8e6;
   color: #6b5b00;
 }

@@ -19,10 +19,13 @@ La mascota oficial es **Usagi**, del anime _Chiikawa_, en lugar del búho clási
 | [`docs/06-reglas-avance.md`](docs/06-reglas-avance.md)       | Completada vs aprobada, umbral, desbloqueo y repetición.        |
 | [`docs/07-pruebas.md`](docs/07-pruebas.md)                   | Registro de pruebas (9 casos obligatorios + complementarios).   |
 | [`docs/08-aportes.md`](docs/08-aportes.md)                   | Aportes del equipo.                                             |
+| [`docs/09-pruebas-supabase.md`](docs/09-pruebas-supabase.md) | Pruebas de la etapa de base de datos (Supabase).                |
+| [`supabase/README.md`](supabase/README.md)                   | Proyecto Supabase: esquema, seed, RLS y seguridad.              |
 
 ## Estado actual
 
-Aplicación funcional con:
+Aplicación funcional con el **contenido alojado en una base de datos
+relacional Supabase**:
 
 - Página de inicio (landing) que presenta el proyecto.
 - Catálogo de cursos con tarjetas reutilizables (`CourseCard`).
@@ -30,7 +33,7 @@ Aplicación funcional con:
   (`Fundamentos de JavaScript`) formada por **2 lecciones** con explicación,
   ejemplo de código y **6 actividades** de opción múltiple con devolución.
   El resto de las unidades (variables, condicionales, bucles, funciones) está
-  identificado pero **en preparación** (`published: false`).
+  **identificado pero en preparación** (`disponible = false`).
 - Pantallas de detalle por curso y por **unidad** con estados
   (pendiente / bloqueada / disponible / completada) y progreso.
 - Lección completa en tres fases: **introducción** (teoría + código),
@@ -38,18 +41,20 @@ Aplicación funcional con:
   y **resultados** (aciertos, porcentaje, aprobar/reprobar, repetir).
 - Reglas de avance: aprobar una lección la cierra y habilita la siguiente; la
   unidad se completa al aprobar todas sus lecciones (ver `docs/06`).
-- Progreso persistente en `localStorage` (`useProgress`), con acceso a datos
-  centralizado en `courseRepository`.
-- Router con rutas nombradas, avisos para lecciones/cursos inexistentes y
-  página 404.
-
-Cursos restantes (Python, HTML y CSS) aparecen como **próximamente**.
+- **Contenido consultado desde Supabase** (solo lectura de lo publicado) con
+  estados de **carga**, **error + reintento**, **vacío** y **contenido
+  inexistente**. Las **soluciones no se descargan al cliente**: se validan en
+  el servidor con la función `check_answer()` (RPC).
+- Progreso persistente en `localStorage` (`useProgress`).
+- Router con rutas nombradas y página 404.
 
 ## Tecnologías
 
 - **Vue.js 3** (Composition API, `<script setup>`)
 - **Quasar v2** (framework de componentes y CLI) junto a **Vite**
 - **Vue Router** (rutas nombradas con modo hash)
+- **Supabase** (Postgres + PostgREST) con **Row Level Security** y una función
+  `SECURITY DEFINER` para comprobar respuestas.
 - **SCSS** para estilos (variables en `src/css/quasar.variables.scss`)
 
 ## Estructura del proyecto
@@ -59,6 +64,13 @@ Cursos restantes (Python, HTML y CSS) aparecen como **próximamente**.
 ├── index.html
 ├── package.json
 ├── quasar.config.js
+├── .env.example              # Plantilla de credenciales públicas (Supabase)
+├── supabase/                 # Base de datos: esquema, seed y RLS (SQL)
+│   ├── README.md
+│   └── migrations/
+│       ├── 0001_schema.sql
+│       ├── 0002_seed.sql
+│       └── 0003_rls.sql
 ├── public/
 ├── docs/                     # Documentación de diseño y decisiones
 └── src/
@@ -69,14 +81,15 @@ Cursos restantes (Python, HTML y CSS) aparecen como **próximamente**.
     │   ├── UnitCard.vue      # Tarjeta reutilizable de unidad
     │   └── LessonCard.vue    # Tarjeta reutilizable de lección
     ├── composables/
-    │   └── useProgress.js    # Progreso del participante (localStorage)
+    │   ├── useProgress.js    # Progreso del participante (localStorage)
+    │   └── useRemoteData.js  # Carga remota: loading / error (reintento) / datos
     ├── css/
     │   ├── app.scss          # Identidad visual global
     │   └── quasar.variables.scss
-    ├── data/                 # Estructura de datos y acceso centralizado
-    │   ├── courses.js
-    │   ├── javascriptCourse.js
-    │   └── courseRepository.js
+    ├── data/
+    │   └── courseRepository.js # Consultas a Supabase (única puerta de datos)
+    ├── lib/
+    │   └── supabase.js       # Cliente centralizado (VITE_SUPABASE_*)
     ├── layouts/MainLayout.vue
     ├── pages/
     │   ├── IndexPage.vue         # /  (inicio)
@@ -92,12 +105,20 @@ Cursos restantes (Python, HTML y CSS) aparecen como **próximamente**.
 
 Requisitos: **Node.js 22.12+** (probado con Node 24).
 
+1. Crear el proyecto Supabase y aplicar los scripts SQL (ver
+   [`supabase/README.md`](supabase/README.md)).
+2. Copiar `.env.example` a `.env` y completar `VITE_SUPABASE_URL` y
+   `VITE_SUPABASE_ANON_KEY` (Supabase → Project Settings → API).
+
 ```bash
 npm install
-npm run dev      # o: quasar dev  (entorno con recarga en caliente)
+npm run dev          # o: quasar dev  (entorno con recarga en caliente)
 npm run lint:check   # formato + lint
 npm run build        # genera ./dist/spa
 ```
+
+Sin un `.env` configurado, la aplicación arranca y muestra los estados de error
+con botón **Reintentar** en lugar de datos.
 
 Servir la build de producción:
 

@@ -6,7 +6,28 @@
         Volver al curso
       </router-link>
 
-      <template v-if="unit">
+      <!-- Cargando -->
+      <div v-if="loading" class="dl-states">
+        <q-spinner color="primary" size="34px" class="q-mb-sm" />
+        <p class="dl-states__text">Cargando la unidad…</p>
+      </div>
+
+      <!-- Error de consulta -->
+      <div v-else-if="error" class="dl-states">
+        <q-icon name="wifi_off" size="44px" color="negative" />
+        <h2 class="dl-states__title">No se pudo cargar la unidad</h2>
+        <p class="dl-states__text">{{ error }}</p>
+        <q-btn
+          no-caps
+          unelevated
+          color="primary"
+          class="q-mt-sm"
+          label="Reintentar"
+          @click="load"
+        />
+      </div>
+
+      <template v-else-if="unit">
         <div class="dl-unit-head" :style="{ '--course-color': course.color }">
           <span class="dl-unit-head__icon">
             <q-icon :name="unit.icon" size="40px" />
@@ -58,8 +79,8 @@
           </template>
           <q-banner v-else rounded class="dl-pending-banner">
             <q-icon name="construction" size="22px" color="orange" />
-            Esta unidad todavía está en preparación. Completa la unidad anterior
-            y vuelve pronto.
+            Esta unidad no tiene lecciones publicadas todavía. Completa la
+            unidad disponible y vuelve pronto.
           </q-banner>
         </div>
       </template>
@@ -76,13 +97,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  getCourseBySlug,
-  getUnits,
-  getUnit,
-  getLessons
-} from '@/data/courseRepository'
+import { getCourseBySlug, getUnits } from '@/data/courseRepository'
 import { useProgress } from '@/composables/useProgress'
+import { useRemoteData } from '@/composables/useRemoteData'
 import LessonCard from '@/components/LessonCard.vue'
 
 const route = useRoute()
@@ -93,12 +110,18 @@ const unitParam = computed(() => route.params.unitId)
 
 const { unitStatus, countApprovedLessons } = useProgress()
 
-const course = computed(
-  () => getCourseBySlug(slug.value) ?? { color: '#58cc02' }
+const { data, loading, error, load } = useRemoteData(async () => {
+  const course = (await getCourseBySlug(slug.value)) ?? { color: '#58cc02' }
+  const units = await getUnits(slug.value)
+  return { course, units }
+})
+
+const course = computed(() => data.value?.course ?? { color: '#58cc02' })
+const units = computed(() => data.value?.units ?? [])
+const unit = computed(
+  () => units.value.find(u => u.id === unitParam.value) ?? null
 )
-const units = computed(() => getUnits(slug.value))
-const unit = computed(() => getUnit(slug.value, unitParam.value))
-const lessons = computed(() => getLessons(slug.value, unitParam.value))
+const lessons = computed(() => unit.value?.lessons ?? [])
 
 const unitIndex = computed(() =>
   units.value.findIndex(u => u.id === unitParam.value)
@@ -249,6 +272,30 @@ function openLesson(lesson) {
 .dl-notfound-banner {
   background: #ffe9e9;
   color: #c00015;
+}
+
+.dl-states {
+  text-align: center;
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  &__title {
+    font-size: 20px;
+    font-weight: 800;
+    color: $dl-ink-dark;
+    margin: 4px 0 0;
+  }
+
+  &__text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #6b6b6b;
+    margin: 0;
+    max-width: 480px;
+  }
 }
 
 @media (max-width: 600px) {
