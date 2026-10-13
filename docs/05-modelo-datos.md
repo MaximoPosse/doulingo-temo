@@ -1,4 +1,4 @@
-# 05 · Modelo de datos (diagrama entidad-relación y diccionario)
+# 05 · Modelo de datos (diccionario de datos)
 
 ## Consideración previa
 
@@ -15,25 +15,9 @@ Doulingo separa **dos mundos de datos**:
 Las pantallas nunca hablan con la base directamente: piden datos al
 repositorio, que centraliza todas las consultas.
 
-## Diagrama entidad-relación (implementado)
+## Diagrama entidad-relación
 
-```
-CURSOS 1 ───── N UNIDADES 1 ───── N LECCIONES 1 ───── N PREGUNTAS 1 ───── N OPCIONES
-                                                                          │
-                                                    PREGUNTAS 1 ───── 1 SOLUCIONES
-                                                                          │ (opcion_correcta_id)
-                                                                          └──────► OPCIONES
-```
-
-- `unidades.curso_id` → `cursos.id`
-- `lecciones.unidad_id` → `unidades.id`
-- `preguntas.leccion_id` → `lecciones.id`
-- `opciones.pregunta_id` → `preguntas.id`
-- `soluciones.pregunta_id` → `preguntas.id` (1 a 1) y
-  `soluciones.opcion_correcta_id` → `opciones.id`
-
-Todas las claves foráneas usan `on delete cascade`. Los identificadores son
-`uuid` con `default gen_random_uuid()` (extensión `pgcrypto`).
+_(Pendiente: el diagrama se elabora manualmente por el equipo.)_
 
 ## Diccionario de datos
 
