@@ -1,8 +1,8 @@
 # Doulingo · Base de datos Supabase
 
 Registro y documentación operativa del proyecto de base de datos de la
-aplicación **Doulingo** (proyecto escolar). Los diagramas y el diccionario
-de datos se documentarán en una entrega posterior.
+aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
+`docs/05-modelo-datos.md`; el diagrama entidad-relación lo elabora el equipo.
 
 ## Registro del proyecto
 
@@ -44,12 +44,13 @@ supabase/
    **`doulingo`** (lanzar la base).
 2. Ir a **SQL Editor** y ejecutar, **en orden**, los tres archivos:
    `0001_schema.sql`, `0002_seed.sql` y `0003_rls.sql`.
-3. En **Settings → API** copiar la **Project URL** y la **anon public key**
-   y guardarlas localmente en `.env` (nunca en el repositorio):
+3. En **Settings → API** copiar la **Project URL** y la **publishable key**
+   (o **anon public key** en proyectos antiguos) y guardarlas localmente en
+   `.env` (nunca en el repositorio):
 
    ```env
    VITE_SUPABASE_URL=https://TU-PROYECTO.supabase.co
-   VITE_SUPABASE_ANON_KEY=tu-anon-key-publica
+   VITE_SUPABASE_PUBLISHABLE_KEY=tu-publishable-key-publica
    ```
 
    Ver `.env.example` en la raíz del proyecto para la referencia.
