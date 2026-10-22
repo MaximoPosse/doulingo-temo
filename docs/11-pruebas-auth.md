@@ -45,34 +45,36 @@ esperando a que se reponga el cupo.
 
 ## 3. Fase A · API de Supabase Auth (`auth.mjs`)
 
-| Caso | Descripción                                             | Resultado  | Observación                                                            |
-| ---- | ------------------------------------------------------- | ---------- | ---------------------------------------------------------------------- |
-| A1   | El invitado anónimo puede crear su sesión               | PASA       | `is_anonymous: true` y sesión emitida                                  |
-| A2   | Dos invitados tienen identificadores distintos          | PASA       | `1549dc4b` vs `b4945a10`                                               |
-| A3   | Cada alta anónima crea una identidad nueva              | PASA       | No hay cuenta compartida entre dispositivos                            |
-| A4   | Registro: la cuenta se crea                             | PASA/OMITE | `429 over_email_send_rate_limit` cuando el cupo está agotado           |
-| A4   | Registro: con confirmación activa no hay sesión todavía | PASA       | Se verifica que con confirmación activa no hay sesión                  |
-| A4   | Registro: correo ya utilizado → aviso claro             | PASA/OMITE | Con el ofuscado de correo de Supabase responde `email_address_invalid` |
-| A5   | Login: contraseña inválida → aviso claro                | PASA       | `400 invalid_credentials` mapeado a mensaje en español                 |
-| A6   | Recuperación: la solicitud se acepta                    | PASA       | `HTTP 200` sin enumerar si el correo existe                            |
-| A7   | El invitado guarda y lee su propio progreso             | PASA       | Su fila en `participant_progress`                                      |
-| A7   | RLS: no lee el progreso de otro                         | PASA       | Devuelve 0 filas                                                       |
-| A7   | RLS: no escribe en el progreso de otro                  | PASA       | `new row violates row-level security policy`                           |
-| A7   | RLS: no modifica el progreso de otro                    | PASA       | 0 filas afectadas; la fila ajena queda intacta                         |
-| A7   | El perfil propio existe con alias y sufijo              | PASA       | `alias: invitado`, `alias_sufijo: 2fe6`                                |
-| A7   | RLS: no puede cambiar el alias de otro                  | PASA       | 0 filas afectadas                                                      |
-| A7   | El alias de otro es visible (es público)                | PASA       | Lectura pública de `perfiles`                                          |
-| A8   | Conversión: la cuenta invitada se convierte             | PASA/OMITE | `email rate limit exceeded` (necesita enviar un correo)                |
-| A8   | Conversión: conserva el mismo identificador             | PASA/OMITE | No se puede ejecutar sin completar la conversión                       |
-| A8   | Conversión: deja de ser anonymous                       | PASA/OMITE | Ídem anterior                                                          |
-| A8   | Conversión: conserva el historial                       | PASA       | La fila de progreso sigue ahí                                          |
+| Caso | Descripción                                             | Resultado  | Observación                                                               |
+| ---- | ------------------------------------------------------- | ---------- | ------------------------------------------------------------------------- |
+| A1   | El invitado anónimo puede crear su sesión               | PASA       | `is_anonymous: true` y sesión emitida                                     |
+| A2   | Dos invitados tienen identificadores distintos          | PASA       | `1549dc4b` vs `b4945a10`                                                  |
+| A3   | Cada alta anónima crea una identidad nueva              | PASA       | No hay cuenta compartida entre dispositivos                               |
+| A4   | Registro: la cuenta se crea                             | PASA/OMITE | `429 over_email_send_rate_limit` cuando el cupo está agotado              |
+| A4   | Registro: con confirmación activa no hay sesión todavía | PASA       | Se verifica que con confirmación activa no hay sesión                     |
+| A4   | Registro: correo ya utilizado → aviso claro             | PASA/OMITE | Con el ofuscado de correo de Supabase responde `email_address_invalid`    |
+| A5   | Login: contraseña inválida → aviso claro                | PASA       | `400 invalid_credentials` mapeado a mensaje en español                    |
+| A6   | Recuperación: la solicitud se acepta                    | PASA/OMITE | `HTTP 200` sin enumerar si el correo existe (o `429` al agotarse el cupo) |
+| A7   | El invitado guarda y lee su propio progreso             | PASA       | Su fila en `participant_progress`                                         |
+| A7   | RLS: no lee el progreso de otro                         | PASA       | Devuelve 0 filas                                                          |
+| A7   | RLS: no escribe en el progreso de otro                  | PASA       | `new row violates row-level security policy`                              |
+| A7   | RLS: no modifica el progreso de otro                    | PASA       | 0 filas afectadas; la fila ajena queda intacta                            |
+| A7   | El perfil propio existe con alias y sufijo              | PASA       | `alias: invitado`, `alias_sufijo: 2fe6`                                   |
+| A7   | RLS: no puede cambiar el alias de otro                  | PASA       | 0 filas afectadas                                                         |
+| A7   | El alias de otro es visible (es público)                | PASA       | Lectura pública de `perfiles`                                             |
+| A8   | Conversión: la cuenta invitada se convierte             | PASA/OMITE | `email rate limit exceeded` (necesita enviar un correo)                   |
+| A8   | Conversión: conserva el mismo identificador             | PASA/OMITE | No se puede ejecutar sin completar la conversión                          |
+| A8   | Conversión: deja de ser anonymous                       | PASA/OMITE | Ídem anterior                                                             |
+| A8   | Conversión: conserva el historial                       | PASA       | La fila de progreso sigue ahí                                             |
 
 **Resumen: 22/22 OK (7 omitidos).** Los casos omitidos dependen **solo** del
 envío de correo (cupo de 2 por hora agotado): la suite los marca como
 `SKIP` con el motivo y no los cuenta como error, de modo que un resultado
 verde significa “todo lo verificable pasó”. La conversión exige
 `updateUser({ email, password })`: con un SMTP propio o al reponerse el cupo,
-el mismo código los resuelve sin cambios.
+el mismo código los resuelve sin cambios. El cupo puede agotarse **a mitad de
+la corrida** (el propio alta consume el último envío), así que cada respuesta
+`429` se convierte en `SKIP` en el momento, no solo al inicio.
 
 ### Fase A' · Alias y sufijo (`alias.mjs`)
 
@@ -141,19 +143,21 @@ cambios de autenticación:
 
 ## 5. Defectos detectados y corregidos en esta etapa
 
-| #   | Defecto                                                                                            | Causa                                                                     | Corrección                                                                                                            |
-| --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 1   | La página de acceso mostraba “Sesión activa” **sin** tener sesión                                  | `hasSession` se calculaba con `publicName`, que nunca es vacío            | `hasSession` ahora se calcula con `session` (`src/pages/AuthPage.vue`)                                                |
-| 2   | La barra superior mostraba “Participante” a los visitantes                                         | `publicName` como etiqueta por defecto                                    | La etiqueta es el alias con sesión y “Acceder” sin ella (`src/layouts/MainLayout.vue`)                                |
-| 3   | Un contexto limpio guardaba la clave `doulingo-progress` aunque no hubiera avance                  | Al reiniciar el progreso sin sesión se escribía la clave heredada         | Sin sesión y sin avance no se escribe nada (`src/composables/useProgress.js`)                                         |
-| 4   | El avance hecho sin sesión se perdía al iniciar sesión si el participante ya tenía copia propia    | Solo se adoptaba la clave heredada cuando no había copia del participante | Ahora se **une** con la copia del participante (`src/composables/useProgress.js`)                                     |
-| 5   | “Borrar historial” solo borraba la copia local                                                     | El botón llamaba a `resetProgress()`                                      | Ahora borra también las filas propias en la base (`clearHistory()`)                                                   |
-| 6   | La prueba de RLS daba un falso negativo al actualizar una fila ajena                               | Sin `.select()` PostgREST devuelve `data: null` (no un array vacío)       | La comprobación usa `.select()` y acepta lista vacía (`tests/e2e/auth.mjs`)                                           |
-| 7   | La prueba de UI fallaba aunque el invitado funcionara                                              | Se leía el texto antes de que terminara la llamada a Supabase             | La prueba espera a que aparezca el texto (`waitForText`)                                                              |
-| 8   | La prueba de UI usaba una sesión de invitado para comprobar el formulario de ingreso               | El contexto del navegador se reutilizaba entre comprobaciones             | Cada comprobación usa un contexto nuevo (`tests/e2e/auth_ui.mjs`)                                                     |
-| 9   | Un choque de `alias + alias_sufijo` abortaba el alta del usuario (el trigger fallaba)              | El sufijo era siempre los 4 primeros hexadecimales del identificador      | El trigger y el cliente prueban ventanas successive del identificador (`0004_auth.sql`, `src/data/authRepository.js`) |
-| 10  | Registrar un correo ya usado mostraba un error crudo en inglés                                     | Supabase activa el ofuscado de correo: responde `email_address_invalid`   | `authErrorMessage()` traduce ese error a un aviso en español (`src/data/authRepository.js`)                           |
-| 11  | Un perfil creado por el cliente quedaba marcado como invitado aunque la cuenta ya fuera permanente | `ensureProfile` fijaba `es_invitado: true` a ciegas                       | `ensureProfile` recibe el estado real de la sesión (`src/composables/useAuth.js`)                                     |
+| #   | Defecto                                                                                            | Causa                                                                     | Corrección                                                                                                                                           |
+| --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | La página de acceso mostraba “Sesión activa” **sin** tener sesión                                  | `hasSession` se calculaba con `publicName`, que nunca es vacío            | `hasSession` ahora se calcula con `session` (`src/pages/AuthPage.vue`)                                                                               |
+| 2   | La barra superior mostraba “Participante” a los visitantes                                         | `publicName` como etiqueta por defecto                                    | La etiqueta es el alias con sesión y “Acceder” sin ella (`src/layouts/MainLayout.vue`)                                                               |
+| 3   | Un contexto limpio guardaba la clave `doulingo-progress` aunque no hubiera avance                  | Al reiniciar el progreso sin sesión se escribía la clave heredada         | Sin sesión y sin avance no se escribe nada (`src/composables/useProgress.js`)                                                                        |
+| 4   | El avance hecho sin sesión se perdía al iniciar sesión si el participante ya tenía copia propia    | Solo se adoptaba la clave heredada cuando no había copia del participante | Ahora se **une** con la copia del participante (`src/composables/useProgress.js`)                                                                    |
+| 5   | “Borrar historial” solo borraba la copia local                                                     | El botón llamaba a `resetProgress()`                                      | Ahora borra también las filas propias en la base (`clearHistory()`)                                                                                  |
+| 6   | La prueba de RLS daba un falso negativo al actualizar una fila ajena                               | Sin `.select()` PostgREST devuelve `data: null` (no un array vacío)       | La comprobación usa `.select()` y acepta lista vacía (`tests/e2e/auth.mjs`)                                                                          |
+| 7   | La prueba de UI fallaba aunque el invitado funcionara                                              | Se leía el texto antes de que terminara la llamada a Supabase             | La prueba espera a que aparezca el texto (`waitForText`)                                                                                             |
+| 8   | La prueba de UI usaba una sesión de invitado para comprobar el formulario de ingreso               | El contexto del navegador se reutilizaba entre comprobaciones             | Cada comprobación usa un contexto nuevo (`tests/e2e/auth_ui.mjs`)                                                                                    |
+| 9   | Un choque de `alias + alias_sufijo` abortaba el alta del usuario (el trigger fallaba)              | El sufijo era siempre los 4 primeros hexadecimales del identificador      | El trigger y el cliente prueban ventanas successive del identificador (`0004_auth.sql`, `src/data/authRepository.js`)                                |
+| 10  | Registrar un correo ya usado mostraba un error crudo en inglés                                     | Supabase activa el ofuscado de correo: responde `email_address_invalid`   | `authErrorMessage()` traduce ese error a un aviso en español (`src/data/authRepository.js`)                                                          |
+| 11  | Un perfil creado por el cliente quedaba marcado como invitado aunque la cuenta ya fuera permanente | `ensureProfile` fijaba `es_invitado: true` a ciegas                       | `ensureProfile` recibe el estado real de la sesión (`src/composables/useAuth.js`)                                                                    |
+| 12  | Un enlace vencido o ya usado mostraba el error crudo de `supabase-js` en inglés                    | No había traducción para los errores de PKCE                              | `authErrorMessage()` traduce PKCE, `otp_expired` y `access_denied`; si el texto parece técnico, usa un aviso genérico (`src/data/authRepository.js`) |
+| 13  | Un mismo deep link podía disparar el intercambio dos veces (arranque en frío)                      | Android puede notificar el mismo enlace más de una vez                    | `completeDeepLink` ignora el mismo código repetido dentro de 10 s (`src/composables/useAuth.js`)                                                     |
 
 Correcciones de robustez aplicadas durante la implementación:
 
@@ -184,6 +188,12 @@ completar la configuración:
 -T android` (ver [`docs/12-apk.md`](12-apk.md)); lo que no se puede verificar
    sin un dispositivo es el toque real del enlace.
 
+   **Actualización (22 de octubre de 2026)**: el APK ya se probó en un emulador
+   Android (`emulator-5554`, Android 16): el esquema abre la app, el evento
+   `appUrlOpen` llega con la URL, el enlace falso muestra el aviso en español y
+   el invitado funciona con persistencia de sesión (ver la tabla siguiente).
+   Lo único que sigue pendiente es el enlace real generado por un correo.
+
 Lo que **ya quedó verificado** con la configuración actual: alta de invitado
 anónimo, alias propio con sufijo, aislamiento de RLS (lectura, escritura y
 modificación de filas ajenas), lectura pública del alias, progreso propio
@@ -201,6 +211,30 @@ y cierre de sesión.
 | Firma (`apksigner verify`)                            | firmante “Android Debug” (instalable; para producción, keystore) |
 | Código del deep link dentro de los assets del APK     | presente (`appUrlOpen`)                                          |
 | Regresión en la web (bundle con Capacitor)            | botones 26/26 · UI auth 5/5 · base de datos 25/25                |
+
+### Verificación en emulador Android (22 de octubre de 2026)
+
+Emulador `doulingo` (Pixel 6, x86_64, Android 16 / SDK 36), APK instalado con
+`adb install -r`, app abierta con `adb shell am start`.
+
+| Verificación                                | Resultado                                                                                                                  |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| El sistema resuelve el esquema a la app     | `cmd package resolve-activity` → `com.doulingo.app/.MainActivity`                                                          |
+| La app carga dentro del WebView             | `https://localhost/#/`, título “Doulingo”, landing y cursos visibles                                                       |
+| Deep link con la app abierta                | logcat: `START … cmp=com.doulingo.app/.MainActivity` + `Notifying listeners for event appUrlOpen` + la URL del enlace      |
+| Deep link en arranque en frío (app cerrada) | la app arranca y recibe el enlace (`appUrlOpen` con la URL); la sesión guardada se restaura antes de registrar el escucha  |
+| Enlace falso (código inválido)              | “El enlace de acceso no sirve o ya venció. Pedí un correo nuevo y abrilo en este mismo dispositivo.” (sin texto en inglés) |
+| Mismo enlace repetido                       | una sola lectura del `code-verifier` PKCE (≈ un solo intento de intercambio)                                               |
+| Enlaces con códigos distintos               | cada uno se procesa (no los bloquea el dedupe)                                                                             |
+| Alta como invitado                          | “Sesión activa como invitado#2abd”; perfil en la base real: `alias=invitado`, `alias_sufijo=2abd`, `es_invitado=true`      |
+| Persistencia de la sesión                   | tras `force-stop` y reabrir, el badge sigue siendo `invitado#2abd`                                                         |
+
+La única parte del flujo que no se pudo probar es el **enlace real generado por
+un correo** (requiere un correo que reciba el SMTP del proyecto y cupo
+disponible). Para probarlo: pedir el correo desde el APK, abrir el enlace en el
+mismo dispositivo y verificar que la app queda con sesión; también se puede
+inyectar el enlace desde la computadora con
+`adb shell am start -a android.intent.action.VIEW -d "<enlace>"`.
 
 ## 7. Comandos de verificación
 

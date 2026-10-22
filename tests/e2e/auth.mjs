@@ -90,11 +90,16 @@ const signup = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
 })
 const signupBody = await signup.json()
 // El proyecto tiene un cupo de correos por hora: si está agotado, los casos
-// que necesitan enviar correo se omiten (no son un error del código).
-const CORREO_LIMITADO =
-  signup.status === 429 ||
-  String(signupBody.error_code ?? '').includes('over_email_send_rate_limit')
+// que necesitan enviar correo se omiten (no son un error del código). El cupo
+// puede agotarse a mitad de la corrida, así que se revisa en cada respuesta.
+function cupoAgotado(respuesta, cuerpo) {
+  return (
+    respuesta.status === 429 ||
+    String(cuerpo?.error_code ?? '').includes('over_email_send_rate_limit')
+  )
+}
 const MOTIVO_CORREO = 'el proyecto agotó el cupo de correos por hora'
+const CORREO_LIMITADO = cupoAgotado(signup, signupBody)
 if (CORREO_LIMITADO) {
   runner.skip('A4 Registro: la cuenta se crea', MOTIVO_CORREO)
   runner.skip(
@@ -127,16 +132,23 @@ if (!CORREO_LIMITADO) {
     })
   })
   const duplicateBody = await duplicate.json()
-  // Con el ofuscado de correo de Supabase (activo por defecto) un alta
-  // repetida responde "email_address_invalid" en lugar de "email_exists":
-  // las dos respuestas son válidas y la app las traduce a un aviso claro.
-  runner.check(
-    'A4 Registro: correo ya utilizado -> aviso claro',
-    /already registered|already been registered|registered|email_address_invalid/i.test(
-      JSON.stringify(duplicateBody)
-    ),
-    JSON.stringify(duplicateBody).slice(0, 140)
-  )
+  if (cupoAgotado(duplicate, duplicateBody)) {
+    runner.skip(
+      'A4 Registro: correo ya utilizado -> aviso claro',
+      MOTIVO_CORREO
+    )
+  } else {
+    // Con el ofuscado de correo de Supabase (activo por defecto) un alta
+    // repetida responde "email_address_invalid" en lugar de "email_exists":
+    // las dos respuestas son válidas y la app las traduce a un aviso claro.
+    runner.check(
+      'A4 Registro: correo ya utilizado -> aviso claro',
+      /already registered|already been registered|registered|email_address_invalid/i.test(
+        JSON.stringify(duplicateBody)
+      ),
+      JSON.stringify(duplicateBody).slice(0, 140)
+    )
+  }
 }
 
 // --- A5: contraseña inválida ---
@@ -168,11 +180,16 @@ if (CORREO_LIMITADO) {
       body: JSON.stringify({ email: mail })
     }
   )
-  runner.check(
-    'A6 Recuperación: la solicitud se acepta',
-    recover.status === 200,
-    `http ${recover.status}`
-  )
+  const recoverBody = await recover.json().catch(() => ({}))
+  if (cupoAgotado(recover, recoverBody)) {
+    runner.skip('A6 Recuperación: la solicitud se acepta', MOTIVO_CORREO)
+  } else {
+    runner.check(
+      'A6 Recuperación: la solicitud se acepta',
+      recover.status === 200,
+      `http ${recover.status}`
+    )
+  }
 }
 
 // --- A7: RLS · aislamiento de los datos de cada participante ---

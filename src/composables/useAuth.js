@@ -37,6 +37,15 @@ import { registerDeepLinkHandler } from '@/lib/deepLink'
 
 const LAST_UID_KEY = 'doulingo-last-uid'
 
+// En Android el evento del deep link puede llegar repetido para el mismo
+// enlace (por ejemplo al arrancar en frío): se ignora el mismo código
+// durante unos segundos para no intentar el intercambio dos veces. El
+// código PKCE es de un solo uso, así que el segundo intento solo serviría
+// para mostrar un error sobre una sesión ya iniciada.
+const DEEP_LINK_REPETIDO_MS = 10000
+let ultimoCodigoDeepLink = null
+let ultimoCodigoDeepLinkEn = 0
+
 const session = ref(null)
 const profile = ref(null)
 const status = ref('cargando')
@@ -160,6 +169,16 @@ export function initAuth() {
 
 // Completa el acceso a partir del código PKCE del deep link del APK.
 export async function completeDeepLink(code) {
+  const ahora = Date.now()
+  if (
+    code === ultimoCodigoDeepLink &&
+    ahora - ultimoCodigoDeepLinkEn < DEEP_LINK_REPETIDO_MS
+  ) {
+    return { ok: false, repetido: true }
+  }
+  ultimoCodigoDeepLink = code
+  ultimoCodigoDeepLinkEn = ahora
+
   authError.value = null
   try {
     await exchangeAuthCode(code)

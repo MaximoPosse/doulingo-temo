@@ -69,13 +69,33 @@ function authErrorMessage(err, fallback) {
   ) {
     return 'No se pudo contactar al servidor. Revisá tu conexión.'
   }
+  // El enlace se abre en otro dispositivo o el código ya venció: con PKCE
+  // el verificador queda en el dispositivo donde se pidió el correo.
+  if (
+    raw.includes('pkce') ||
+    raw.includes('code verifier') ||
+    raw.includes('invalid code') ||
+    raw.includes('otp_expired') ||
+    raw.includes('access_denied')
+  ) {
+    return (
+      'El enlace de acceso no sirve o ya venció. ' +
+      'Pedí un correo nuevo y abrilo en este mismo dispositivo.'
+    )
+  }
   if (raw.includes('perfiles_pkey')) {
     return 'Ese perfil ya existe.'
   }
   if (raw.includes('duplicate key') || raw.includes('unique constraint')) {
     return 'Ese alias ya está en uso con ese sufijo. Probá con otro alias.'
   }
-  return err?.message || fallback
+  // Cualquier otro error desconocido no se muestra crudo: se devuelve el
+  // mensaje genérico en español de cada operación.
+  const mensaje = err?.message ?? ''
+  if (mensaje.length > 120 || /\bhttps?:\/\//.test(mensaje)) {
+    return fallback
+  }
+  return mensaje || fallback
 }
 
 // Normaliza el alias: minúsculas, solo letras/dígitos/guion bajo, 3-20.

@@ -97,6 +97,11 @@ npm run dev
 # Android y compila el APK (necesita ANDROID_HOME y JDK 21)
 npx quasar build -m capacitor -T android
 
+# Igual, pero con la variante de depuración (APK firmado con la clave de debug,
+# instalable sin configurar firma): deja el archivo en
+# src-capacitor/android/app/build/outputs/apk/debug/app-debug.apk
+npx quasar build -m capacitor -T android --debug
+
 # Copia la web al proyecto Android y actualiza los plugins
 npx cap sync android        # (desde la carpeta src-capacitor)
 
@@ -136,6 +141,33 @@ dispositivo o emulador.
   compilar.
 - Android Studio, para la firma y el emulador (opcional: se puede compilar solo
   con el SDK y Gradle).
+
+### Emulador sin Android Studio
+
+Con los _command-line tools_ del SDK alcanza para probar el APK:
+
+```powershell
+# 1. Instalar el emulador y una imagen del sistema
+sdkmanager.bat --sdk_root=<sdk> --install "emulator" "system-images;android-36;google_apis;x86_64"
+
+# 2. Crear el dispositivo virtual (Pixel 6)
+avdmanager.bat create avd -n doulingo -k "system-images;android-36;google_apis;x86_64" -d pixel_6
+
+# 3. Arrancarlo (sin ventana) y esperar a que termine de bootear
+emulator.exe -avd doulingo -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+adb wait-for-device
+adb shell getprop sys.boot_completed   # 1 = listo
+
+# 4. Instalar y abrir la app
+adb install -r src-capacitor/android/app/build/outputs/apk/debug/app-debug.apk
+adb shell am start -n com.doulingo.app/.MainActivity
+```
+
+El emulador necesita virtualización (WHPX en Windows). Para inspeccionar la
+página del WebView: `adb shell pidof com.doulingo.app`, luego
+`adb forward tcp:9222 localabstract:webview_devtools_remote_<pid>` y abrir
+`http://localhost:9222/json` (se puede automatizar con el protocolo DevTools
+por WebSocket, sin instalar nada más).
 
 ### Ojo con `local.properties`
 
@@ -181,6 +213,22 @@ Resultado obtenido el 12 de octubre de 2026:
   dispositivo con depuración activada).
 - Tamaño: 4,7 MB.
 
+### 5.1 Verificación en un emulador (22 de octubre de 2026)
+
+Probado en el AVD `doulingo` (Pixel 6, x86_64, Android 16 / SDK 36) con el APK
+de depuración. El sistema resuelve el esquema con
+`cmd package resolve-activity` → `com.doulingo.app/.MainActivity`. Dentro del
+WebView la app se sirve en `https://localhost/#/` (origen seguro para PKCE).
+
+| Verificación                    | Resultado                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| Deep link con la app abierta    | `appUrlOpen` llega con `doulingo://auth/callback?...` y se procesa              |
+| Deep link en arranque en frío   | la app arranca con el enlace y la sesión guardada se restaura antes de escuchar |
+| Enlace falso (código inválido)  | aviso en español: “El enlace de acceso no sirve o ya venció…”                   |
+| Mismo enlace repetido           | se ignora el duplicado (una sola lectura del `code-verifier`)                   |
+| Alta como invitado desde el APK | sesión anónima creada y perfil visible (`invitado#2abd`)                        |
+| Persistencia                    | tras `force-stop` y reabrir, la sesión sigue activa                             |
+
 ## 6. Pruebas del deep link
 
 Con la app instalada en el dispositivo o emulador:
@@ -189,5 +237,12 @@ Con la app instalada en el dispositivo o emulador:
 adb shell am start -a android.intent.action.VIEW -d "doulingo://auth/callback?code=prueba"
 ```
 
-La app debe abrirse; con un código falso se informa “No se pudo completar el
-acceso” (lo esperado: el código real lo genera Supabase).
+La app debe abrirse; con un código falso se informa “El enlace de acceso no
+sirve o ya venció” (lo esperado: el código real lo genera Supabase y, además,
+el cliente PKCE solo acepta el código si el pedido se hizo en el mismo
+dispositivo).
+
+Android puede notificar el mismo enlace más de una vez (por ejemplo al arrancar
+en frío). `completeDeepLink()` ignora el mismo código repetido dentro de 10
+segundos, para que un enlace de un solo uso no se intente canjear dos veces y
+termine mostrando un error sobre una sesión ya iniciada.
