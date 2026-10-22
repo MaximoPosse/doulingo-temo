@@ -14,20 +14,33 @@ const page = await browser.newPage()
 try {
   await page.goto(`${BASE_URL}/#/`, { waitUntil: 'networkidle0' })
   await page.waitForSelector('.dl-hero, .dl-course-card', { timeout: 20000 })
-  await sleep(400)
+  await sleep(800)
   await page.evaluate(() => {
     location.hash =
       '#/cursos/javascript/unidad/10000000-0000-0000-0000-000000000001/leccion/20000000-0000-0000-0000-200000000001'
   })
   await page.waitForSelector('.dl-lesson__intro', { timeout: 20000 })
+  // Espera a que la app cree el intento en el servidor antes de responder.
+  await page.waitForFunction(
+    () =>
+      !document.querySelector('.dl-lesson__intro-actions .dl-btn-main')
+        ?.disabled,
+    { timeout: 20000 }
+  )
   await page.click('.dl-lesson__intro-actions .dl-btn-main')
   await page.waitForSelector('.dl-lesson__option', { timeout: 20000 })
+  await page.waitForSelector('.dl-lesson__option:not([disabled])', {
+    timeout: 20000
+  })
 
-  // Corta la comunicación con la RPC de comprobación.
+  // Corta la comunicación con la RPC de comprobación/guardado de respuestas.
   let interceptOn = true
   await page.setRequestInterception(true)
   page.on('request', request => {
-    if (interceptOn && request.url().includes('/rest/v1/rpc/check_answer'))
+    if (
+      interceptOn &&
+      request.url().includes('/rest/v1/rpc/registrar_respuesta')
+    )
       request.abort('failed')
     else request.continue()
   })
@@ -88,13 +101,26 @@ try {
     (await page.$('.dl-lesson__result-banner')) !== null
   )
 
-  const stored = await page.evaluate(() =>
-    localStorage.getItem('doulingo-progress')
-  )
+  // El resultado se muestra recién cuando el servidor confirma el guardado.
+  await page.waitForSelector('.dl-lesson__save--saved', { timeout: 20000 })
+
+  // Con sesión (aquí, invitado) el progreso local vive en una clave por
+  // participante: `doulingo-progress:<uid>`.
+  const stored = await page.evaluate(() => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('doulingo-progress')) {
+        const value = localStorage.getItem(key)
+        if (value && value.includes('20000000-0000-0000-0000-200000000001'))
+          return `${key}=${value}`
+      }
+    }
+    return null
+  })
   runner.check(
-    'Progreso guardado en localStorage',
-    !!stored && stored.includes('20000000-0000-0000-0000-200000000001'),
-    String(stored).slice(0, 120)
+    'Progreso guardado (local, con la lección completada)',
+    !!stored,
+    String(stored).slice(0, 140)
   )
 } catch (error) {
   runner.check('Caso 7 sin excepciones', false, error.message)

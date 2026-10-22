@@ -50,8 +50,9 @@ La primera unidad del curso siempre está habilitada.
 1. Reinicia el estado del intento local: contador de actividades, selección,
    verificaciones y aciertos vuelven a cero.
 2. Lleva de nuevo a la introducción de la lección (teoría).
-3. Los resultados del intento anterior NO se suman al nuevo: el progreso
-   registrado es el del **último intento finalizado**.
+3. Los resultados del intento anterior NO se suman al nuevo: cada intento se
+   guarda aparte y el progreso de la lección conserva el mejor resultado (nunca
+   baja uno ya aprobado) y la cantidad de intentos finalizados.
 4. Una respuesta se contabiliza una sola vez: el botón "CONFIRMAR" se
    deshabilita tras pulsarlo (reemplazado por "CONTINUAR"/"VER RESULTADOS") y,
    pese a múltiples pulsaciones simultáneas, el guardado solo se ejecuta con el
@@ -67,13 +68,21 @@ Unidad completada  ──► Unidad siguiente disponible (si está publicada)
 
 ## Persistencia
 
-- Actual: `localStorage` (clave `doulingo-progress`), estructura:
+- Con sesión (invitado o cuenta permanente) el avance se guarda en la base
+  compartida, atado a `auth.uid()`:
+  - `intentos` e `intentos_respuestas` (detalle de cada intento);
+  - `participant_progress` (resumen por lección; lo escribe **solo**
+    `finalizar_intento()`).
+- El dispositivo mantiene una **copia local** de trabajo en `localStorage`:
+  clave `doulingo-progress` sin sesión y `doulingo-progress:<uid>` con sesión,
+  con la estructura
   `{ attemptedLessons: [leccionId], approvedLessons: [leccionId] }`.
-- Estos arreglos son **provisorios** mientras no existe autenticación. En la
-  base compartida (ver `docs/05-modelo-datos.md`, tabla `INTENTO_DE_LECCION`)
-  el avance se asociará a `usuario_id`, manteniendo las mismas reglas.
-- Al no existir usuario, cualquier persona que abra la app en el mismo
-  navegador comparte ese progreso local.
+- El resultado se muestra solo cuando el servidor confirma el guardado. Si
+  falla, la app avisa y ofrece **Reintentar guardado** sin dar el intento por
+  finalizado.
+- Un intento que se abandona (salida, cierre de la app o pérdida de conexión)
+  queda `en_curso`: no cuenta como lección completada hasta que se finaliza.
+- El detalle del modelo y las decisiones están en `docs/13-intentos.md`.
 
 ## Diferenciación publicación vs avance
 

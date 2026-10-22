@@ -104,8 +104,18 @@
               <span class="dl-stat__label">Lecciones aprobadas</span>
             </div>
             <div class="dl-stat">
-              <span class="dl-stat__value">{{ attempted.length }}</span>
-              <span class="dl-stat__label">Lecciones intentadas</span>
+              <span class="dl-stat__value">{{ pendingLessons }}</span>
+              <span class="dl-stat__label">Lecciones pendientes</span>
+            </div>
+            <div class="dl-stat">
+              <span class="dl-stat__value">{{ finalizedAttempts.length }}</span>
+              <span class="dl-stat__label">Intentos guardados</span>
+            </div>
+            <div class="dl-stat">
+              <span class="dl-stat__value">{{
+                inProgressAttempts.length
+              }}</span>
+              <span class="dl-stat__label">Sin terminar</span>
             </div>
             <div class="dl-stat">
               <span class="dl-stat__value">{{ identityType }}</span>
@@ -122,6 +132,129 @@
           <p v-else class="dl-card__empty">
             Todavía no aprobaste ninguna lección. Tu avance se guarda solo en
             este dispositivo hasta que inicies sesión.
+          </p>
+
+          <q-banner
+            v-if="attemptsError"
+            rounded
+            class="dl-error-banner q-mt-md"
+          >
+            <q-icon name="error_outline" size="22px" color="negative" />
+            {{ attemptsError }}
+          </q-banner>
+        </section>
+
+        <!-- Último intento -->
+        <section v-if="lastAttempt" class="dl-card q-mt-md">
+          <h2 class="dl-card__title">Último intento</h2>
+          <div class="dl-last">
+            <div class="dl-last__main">
+              <span class="dl-last__lesson">{{ lastAttempt.lessonTitle }}</span>
+              <span class="dl-last__date">{{
+                formatDate(lastAttempt.finalizadoEn)
+              }}</span>
+            </div>
+            <span class="dl-badge" :class="attemptBadgeClass(lastAttempt)">
+              <q-icon
+                :name="lastAttempt.aprobada ? 'check_circle' : 'replay'"
+              />
+              {{ attemptLabel(lastAttempt) }}
+            </span>
+            <div class="dl-last__numbers">
+              <span
+                ><strong>{{ lastAttempt.aciertos }}</strong> correctas de
+                {{ lastAttempt.totalActividades }}</span
+              >
+              <span
+                ><strong>{{ lastAttempt.errores }}</strong> incorrectas</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- Intentos -->
+        <section class="dl-card q-mt-md">
+          <h2 class="dl-card__title">Intentos</h2>
+          <p class="dl-card__empty q-mb-sm">
+            Cada intento conserva su fecha, sus respuestas y su resultado. Los
+            intentos sin terminar no cuentan como lección completada.
+          </p>
+
+          <ul v-if="attempts.length" class="dl-attempts">
+            <li
+              v-for="attempt in attempts"
+              :key="attempt.id"
+              class="dl-attempt"
+            >
+              <div class="dl-attempt__row">
+                <div class="dl-attempt__main">
+                  <span class="dl-attempt__lesson">{{
+                    attempt.lessonTitle
+                  }}</span>
+                  <span class="dl-attempt__meta">
+                    {{ formatDate(attempt.finalizadoEn || attempt.iniciadoEn) }}
+                    · {{ attemptDetail(attempt) }}
+                  </span>
+                </div>
+                <span class="dl-badge" :class="attemptBadgeClass(attempt)">
+                  {{ attemptLabel(attempt) }}
+                </span>
+                <q-btn
+                  no-caps
+                  flat
+                  dense
+                  color="primary"
+                  :label="
+                    expandedAttemptId === attempt.id
+                      ? 'Ocultar respuestas'
+                      : 'Ver respuestas'
+                  "
+                  @click="toggleAnswers(attempt)"
+                />
+              </div>
+
+              <div
+                v-if="expandedAttemptId === attempt.id"
+                class="dl-attempt__answers"
+              >
+                <div
+                  v-if="loadingAnswers === attempt.id"
+                  class="dl-attempt__loading"
+                >
+                  <q-spinner size="18px" />
+                  Cargando respuestas…
+                </div>
+                <template v-else>
+                  <div
+                    v-for="answer in answersFor(attempt)"
+                    :key="answer.activityId"
+                    class="dl-answer"
+                  >
+                    <q-icon
+                      :name="answer.correct ? 'check_circle' : 'cancel'"
+                      size="18px"
+                      :color="answer.correct ? 'positive' : 'negative'"
+                    />
+                    <div>
+                      <span class="dl-answer__question">
+                        {{ answer.order }}. {{ answer.question }}
+                      </span>
+                      <span class="dl-answer__choice">
+                        Elegiste: {{ answer.option }}
+                      </span>
+                    </div>
+                  </div>
+                  <p v-if="!answersFor(attempt).length" class="dl-card__empty">
+                    No hay respuestas guardadas en este intento.
+                  </p>
+                </template>
+              </div>
+            </li>
+          </ul>
+
+          <p v-else class="dl-card__empty">
+            Todavía no hay intentos guardados. Al terminar una lección vas a ver
+            acá el resultado y el detalle de tus respuestas.
           </p>
         </section>
 
@@ -179,6 +312,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useProgress } from '@/composables/useProgress'
 import { getUnits } from '@/data/courseRepository'
+import { fetchAttemptAnswers, fetchAttempts } from '@/data/attemptRepository'
 
 const router = useRouter()
 const {
@@ -188,7 +322,8 @@ const {
   authError,
   notice,
   signOut,
-  changeAlias
+  changeAlias,
+  initAuth
 } = useAuth()
 const { progress, clearHistory } = useProgress()
 
@@ -196,10 +331,25 @@ const aliasDraft = ref('')
 const busy = ref(false)
 const loading = ref(true)
 const lessonTitles = ref(new Map())
+const attempts = ref([])
+const attemptsError = ref(null)
+const answersByAttempt = ref({})
+const expandedAttemptId = ref(null)
+const loadingAnswers = ref(null)
 
 const identityType = computed(() => (isGuest.value ? 'Invitado' : 'Permanente'))
 const approved = computed(() => progress.value.approvedLessons)
-const attempted = computed(() => progress.value.attemptedLessons)
+
+const pendingLessons = computed(() =>
+  Math.max(lessonTitles.value.size - approved.value.length, 0)
+)
+const finalizedAttempts = computed(() =>
+  attempts.value.filter(attempt => attempt.estado === 'finalizado')
+)
+const inProgressAttempts = computed(() =>
+  attempts.value.filter(attempt => attempt.estado === 'en_curso')
+)
+const lastAttempt = computed(() => finalizedAttempts.value[0] ?? null)
 
 const aliasRule = value => {
   const clean = (value ?? '')
@@ -219,6 +369,72 @@ const approvedDetails = computed(() =>
   }))
 )
 
+function formatDate(value) {
+  if (!value) return ''
+  try {
+    return new Intl.DateTimeFormat('es', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
+
+function attemptLabel(attempt) {
+  if (attempt.estado === 'en_curso') return 'Sin terminar'
+  return attempt.aprobada ? 'Aprobado' : 'Reprobado'
+}
+
+function attemptBadgeClass(attempt) {
+  if (attempt.estado === 'en_curso') return 'dl-badge--locked'
+  return attempt.aprobada ? 'dl-badge--available' : 'dl-badge--locked'
+}
+
+function attemptDetail(attempt) {
+  if (attempt.estado === 'en_curso') {
+    const answered = attempt.aciertos + attempt.errores
+    return `${answered} de ${attempt.totalActividades} respondidas`
+  }
+  return `${attempt.aciertos} de ${attempt.totalActividades} correctas`
+}
+
+function answersFor(attempt) {
+  return answersByAttempt.value[attempt.id] ?? []
+}
+
+async function toggleAnswers(attempt) {
+  if (expandedAttemptId.value === attempt.id) {
+    expandedAttemptId.value = null
+    return
+  }
+  expandedAttemptId.value = attempt.id
+  if (answersByAttempt.value[attempt.id]) return
+  loadingAnswers.value = attempt.id
+  try {
+    answersByAttempt.value = {
+      ...answersByAttempt.value,
+      [attempt.id]: await fetchAttemptAnswers([attempt.id])
+    }
+  } catch (err) {
+    notice.value = ''
+    authError.value =
+      err?.message ?? 'No se pudieron leer las respuestas del intento.'
+  } finally {
+    loadingAnswers.value = null
+  }
+}
+
+async function loadAttempts() {
+  attemptsError.value = null
+  try {
+    attempts.value = await fetchAttempts()
+  } catch (err) {
+    attemptsError.value =
+      err?.message ?? 'No se pudo leer el historial de intentos.'
+  }
+}
+
 async function loadTitles() {
   try {
     const units = await getUnits('javascript')
@@ -234,7 +450,8 @@ async function loadTitles() {
 
 onMounted(async () => {
   aliasDraft.value = profile.value?.alias ?? ''
-  await loadTitles()
+  await initAuth()
+  await Promise.all([loadTitles(), loadAttempts()])
   loading.value = false
 })
 
@@ -255,6 +472,9 @@ async function submitClear() {
   busy.value = true
   try {
     await clearHistory()
+    attempts.value = []
+    answersByAttempt.value = {}
+    expandedAttemptId.value = null
     notice.value = 'Se borró tu historial (en el dispositivo y en la base).'
   } catch (err) {
     notice.value = ''
@@ -365,6 +585,118 @@ async function submitClear() {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  color: #6b6b6b;
+}
+
+.dl-last {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.dl-last__main {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dl-last__lesson {
+  font-size: 18px;
+  font-weight: 800;
+  color: #3c3c3c;
+}
+
+.dl-last__date {
+  font-size: 13px;
+  color: #8a8a8a;
+}
+
+.dl-last__numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 14px;
+  color: #6b6b6b;
+}
+
+.dl-attempts {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dl-attempt {
+  border-top: 1px solid #efefef;
+  padding: 12px 0;
+}
+
+.dl-attempt:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.dl-attempt__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.dl-attempt__main {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dl-attempt__lesson {
+  font-size: 15px;
+  font-weight: 800;
+  color: #3c3c3c;
+}
+
+.dl-attempt__meta {
+  font-size: 13px;
+  color: #8a8a8a;
+}
+
+.dl-attempt__answers {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #f8faf8;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dl-attempt__loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b6b6b;
+}
+
+.dl-answer {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 14px;
+}
+
+.dl-answer__question {
+  display: block;
+  font-weight: 700;
+  color: #3c3c3c;
+}
+
+.dl-answer__choice {
+  display: block;
   color: #6b6b6b;
 }
 </style>

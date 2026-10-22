@@ -32,21 +32,23 @@ aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
 ```
 supabase/
 ├── README.md                 ← este archivo
-├── setup.sql                 ← los cuatro archivos en un solo script
+├── setup.sql                 ← los cinco archivos en un solo script
 └── migrations/
     ├── 0001_schema.sql       ← tablas, PKs, FKs y restricciones
     ├── 0002_seed.sql         ← datos iniciales (curso JavaScript)
     ├── 0003_rls.sql          ← RLS + función check_answer()
-    └── 0004_auth.sql         ← perfiles, progreso del participante y RLS ampliada
+    ├── 0004_auth.sql         ← perfiles, progreso del participante y RLS ampliada
+    └── 0005_intentos.sql     ← intentos, respuestas y resultado calculado en el servidor
 ```
 
 ## Cómo crear el proyecto y aplicar el esquema
 
 1. Crear un proyecto en [supabase.com](https://supabase.com) llamado
    **`doulingo`** (lanzar la base).
-2. Ir a **SQL Editor** y ejecutar, **en orden**, los cuatro archivos:
-   `0001_schema.sql`, `0002_seed.sql`, `0003_rls.sql` y `0004_auth.sql`
-   (o pegar `setup.sql`, que es la concatenación de los cuatro).
+2. Ir a **SQL Editor** y ejecutar, **en orden**, los cinco archivos:
+   `0001_schema.sql`, `0002_seed.sql`, `0003_rls.sql`, `0004_auth.sql` y
+   `0005_intentos.sql` (o pegar `setup.sql`, que es la concatenación de los
+   cinco).
 3. En **Settings → API** copiar la **Project URL** y la **publishable key**
    (o **anon public key** en proyectos antiguos) y guardarlas localmente en
    `.env` (nunca en el repositorio):
@@ -79,6 +81,40 @@ Configuración necesaria en el panel:
 
 Detalle completo del diseño en [`docs/10-auth.md`](../docs/10-auth.md).
 
+## Intentos y respuestas (etapa 5)
+
+`0005_intentos.sql` agrega el historial por participante y mueve el cálculo
+del resultado al servidor:
+
+| Tabla                 | Contenido                                                                 | Acceso                                     |
+| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------ |
+| `intentos`            | Un intento por lección: inicio, fin, total, aciertos, errores y resultado | Solo el propio participante (`auth.uid()`) |
+| `intentos_respuestas` | Una respuesta por actividad e intento (opción elegida + corrección)       | Solo el propio participante                |
+
+| Función                                           | Qué hace                                                                                        |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `iniciar_intento(leccion, clave)`                 | Crea el intento del usuario. Repetir la misma `clave` devuelve el MISMO intento (idempotencia). |
+| `registrar_respuesta(intento, actividad, opcion)` | Corrige contra `soluciones` y guarda la primera respuesta de la actividad.                      |
+| `finalizar_intento(intento)`                      | Calcula aciertos/errores/aprobación, actualiza `participant_progress` y es idempotente.         |
+
+Reglas del modelo:
+
+- La **corrección, los totales, el porcentaje y la aprobación los calcula el
+  servidor**: el dispositivo nunca envía aciertos.
+- Una **respuesta por actividad e intento**: la primera queda firme; no se puede
+  "reintentar" dentro del mismo intento para subir el resultado.
+- `finalizar_intento` no baja un progreso ya aprobado: mantiene `aprobada` y
+  conserva el mejor resultado.
+- Un intento **sin terminar** (`en_curso`, por salida, cierre o corte de
+  conexión) no cuenta como lección completada.
+- El cliente **no puede insertar ni modificar** `intentos` ni el progreso por
+  REST: solo puede leerlos y borrarlos (borrado propio, con cascada a las
+  respuestas).
+- La tabla `participant_progress` sigue existiendo como resumen por lección,
+  pero ahora **la escribe únicamente `finalizar_intento()`**.
+
+Detalle del diseño en [`docs/13-intentos.md`](../docs/13-intentos.md).
+
 ## Seguridad (RLS)
 
 - **Lectura pública** (usuario anónimo): cursos `disponible` y el listado de
@@ -105,6 +141,9 @@ Detalle completo del diseño en [`docs/10-auth.md`](../docs/10-auth.md).
 
 - Los archivos `0001` a `0003` son idempotentes (re-ejecutables) gracias a
   `ON CONFLICT DO NOTHING` y `create ... if not exists` / `drop policy if
-exists`.
-- El progreso del participante (lecciones completadas/aprobadas) NO se
-  almacena en esta base: sigue en `localStorage` (`useProgress`).
+exists`. `0004` y `0005` también: usan `create ... if not exists`,
+  `create or replace function` y `drop policy if exists`.
+- Con la sesión iniciada, el avance por lección se guarda en la base
+  (`participant_progress` como resumen y `intentos`/`intentos_respuestas` como
+  historial); el dispositivo conserva además una copia local (`localStorage`,
+  `useProgress`) para funcionar sin conexión.

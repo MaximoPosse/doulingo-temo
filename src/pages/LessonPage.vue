@@ -106,9 +106,31 @@
                 unelevated
                 size="lg"
                 class="dl-btn-main dl-btn-main--big"
-                :label="startLabel"
+                :label="starting ? 'PREPARANDO…' : startLabel"
+                :loading="starting"
+                :disable="starting"
                 @click="startActivities"
               />
+            </div>
+
+            <div v-if="startError" class="dl-lesson__check-error q-mt-md">
+              <q-icon name="error_outline" size="26px" />
+              <div>
+                <strong>No se pudo comenzar el intento</strong>
+                <p>
+                  {{ startError }} Revisá tu conexión y volvé a intentar. El
+                  intento todavía no se creó.
+                </p>
+                <q-btn
+                  no-caps
+                  unelevated
+                  color="primary"
+                  class="q-mt-sm"
+                  label="REINTENTAR"
+                  :loading="starting"
+                  @click="startActivities"
+                />
+              </div>
             </div>
           </div>
         </template>
@@ -262,25 +284,15 @@
         <!-- FASE 3: Resultados -->
         <template v-else>
           <div class="dl-lesson__result">
-            <div
-              class="dl-lesson__result-banner"
-              :class="
-                passed
-                  ? 'dl-lesson__result-banner--ok'
-                  : 'dl-lesson__result-banner--bad'
-              "
-            >
+            <div class="dl-lesson__result-banner" :class="resultBannerClass">
               <img
                 :src="usagiImg"
                 alt="Usagi"
                 class="dl-lesson__result-mascot"
               />
-              <span
-                class="dl-badge"
-                :class="passed ? 'dl-badge--available' : 'dl-badge--locked'"
-              >
-                <q-icon :name="passed ? 'check_circle' : 'replay'" />
-                {{ passed ? 'Lección aprobada' : 'No alcanzaste el mínimo' }}
+              <span class="dl-badge" :class="resultBadgeClass">
+                <q-icon :name="resultBadgeIcon" />
+                {{ resultBadgeText }}
               </span>
 
               <h2 class="dl-lesson__result-title">{{ resultHeadline }}</h2>
@@ -288,65 +300,116 @@
                 {{ lesson.title }}
               </p>
 
+              <div
+                class="dl-lesson__save"
+                :class="`dl-lesson__save--${saveState}`"
+              >
+                <q-spinner v-if="saveState === 'saving'" size="18px" />
+                <q-icon
+                  v-else
+                  :name="saveState === 'saved' ? 'cloud_done' : 'cloud_off'"
+                  size="20px"
+                />
+                <span v-if="saveState === 'saving'">
+                  Guardando el resultado en el servidor…
+                </span>
+                <span v-else-if="saveState === 'saved'">
+                  Resultado guardado en el servidor.
+                </span>
+                <span v-else>
+                  No se pudo guardar el resultado.
+                  {{ saveError }}
+                </span>
+              </div>
+
               <div class="dl-lesson__result-stats">
                 <div class="dl-lesson__result-stat">
                   <span class="dl-lesson__result-stat-value">{{
-                    totalActivities
+                    displayTotal
                   }}</span>
                   <span class="dl-lesson__result-stat-label">Actividades</span>
                 </div>
                 <div class="dl-lesson__result-stat dl-lesson__result-stat--ok">
                   <span class="dl-lesson__result-stat-value">{{
-                    correctCount
+                    displayCorrect
                   }}</span>
                   <span class="dl-lesson__result-stat-label">Correctas</span>
                 </div>
                 <div class="dl-lesson__result-stat dl-lesson__result-stat--bad">
                   <span class="dl-lesson__result-stat-value">{{
-                    incorrectCount
+                    displayIncorrect
                   }}</span>
                   <span class="dl-lesson__result-stat-label">Incorrectas</span>
                 </div>
                 <div class="dl-lesson__result-stat">
                   <span class="dl-lesson__result-stat-value"
-                    >{{ percentage }}%</span
+                    >{{ displayPercentage }}%</span
                   >
                   <span class="dl-lesson__result-stat-label">Aciertos</span>
                 </div>
               </div>
 
               <p class="dl-lesson__result-note">
-                Para aprobar una lección de 3 actividades necesitás al menos 2
-                correctas (60%). Estos resultados corresponden a este intento y
-                todavía no forman parte de un ranking compartido.
+                <template v-if="saveState === 'saved'">
+                  El resultado lo calculó el servidor con tus respuestas
+                  guardadas. Para aprobar hacían falta al menos
+                  {{ minimoAprobacion }} de {{ displayTotal }} correctas.
+                </template>
+                <template v-else-if="saveState === 'saving'">
+                  Todavía no está guardado: esperá la confirmación del servidor.
+                </template>
+                <template v-else>
+                  Los números son provisionales y este intento no figura en tu
+                  historial hasta que se guarde.
+                </template>
               </p>
 
               <div class="dl-lesson__result-actions">
-                <q-btn
-                  v-if="passed && nextLesson"
-                  no-caps
-                  unelevated
-                  size="lg"
-                  class="dl-btn-main dl-btn-main--big"
-                  label="Siguiente lección"
-                  @click="goToNextLesson"
-                />
-                <q-btn
-                  no-caps
-                  unelevated
-                  size="lg"
-                  class="dl-btn-main"
-                  label="Intentar nuevamente"
-                  @click="restart"
-                />
-                <q-btn
-                  no-caps
-                  outline
-                  size="lg"
-                  class="dl-btn-ghost"
-                  label="Volver a la unidad"
-                  @click="goToUnit"
-                />
+                <template v-if="saveState === 'failed'">
+                  <q-btn
+                    no-caps
+                    unelevated
+                    size="lg"
+                    class="dl-btn-main dl-btn-main--big"
+                    label="REINTENTAR GUARDADO"
+                    @click="guardarResultado"
+                  />
+                  <q-btn
+                    no-caps
+                    outline
+                    size="lg"
+                    class="dl-btn-ghost"
+                    label="Volver a la unidad"
+                    @click="goToUnit"
+                  />
+                </template>
+                <template v-else-if="saveState === 'saved'">
+                  <q-btn
+                    v-if="passed && nextLesson"
+                    no-caps
+                    unelevated
+                    size="lg"
+                    class="dl-btn-main dl-btn-main--big"
+                    label="Siguiente lección"
+                    @click="goToNextLesson"
+                  />
+                  <q-btn
+                    no-caps
+                    unelevated
+                    size="lg"
+                    class="dl-btn-main"
+                    label="Intentar nuevamente"
+                    @click="restart"
+                  />
+                  <q-btn
+                    no-caps
+                    outline
+                    size="lg"
+                    class="dl-btn-ghost"
+                    label="Volver a la unidad"
+                    @click="goToUnit"
+                  />
+                </template>
               </div>
             </div>
           </div>
@@ -359,7 +422,13 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getUnits, getActivities, checkAnswer } from '@/data/courseRepository'
+import { getUnits, getActivities } from '@/data/courseRepository'
+import {
+  finalizarIntento,
+  iniciarIntento,
+  registrarRespuesta
+} from '@/data/attemptRepository'
+import { useAuth } from '@/composables/useAuth'
 import { useProgress } from '@/composables/useProgress'
 import { useRemoteData } from '@/composables/useRemoteData'
 import usagiImg from '@/assets/usagi.webp'
@@ -372,6 +441,7 @@ const unitId = route.params.unitId
 const lessonParam = route.params.lessonId
 
 const { lessonStatus, completeAttempt } = useProgress()
+const { session, initAuth, startGuest } = useAuth()
 
 const { data, loading, error, load } = useRemoteData(async () => {
   const units = await getUnits(slug)
@@ -411,6 +481,13 @@ const startLabel = computed(() => {
 
 // ---------- Estado del intento ----------
 const phase = ref('intro') // 'intro' | 'activity' | 'results'
+const starting = ref(false)
+const startError = ref(null)
+const attemptId = ref(null)
+const attemptKey = ref(null)
+const saveState = ref('idle') // idle | saving | saved | failed
+const saveError = ref(null)
+const serverResult = ref(null)
 const currentIndex = ref(0)
 const selectedOptionId = ref(null)
 const checked = ref(false)
@@ -423,17 +500,57 @@ const totalActivities = computed(() => activities.value.length)
 const currentActivity = computed(() => activities.value[currentIndex.value])
 const isCorrect = computed(() => checkedResult.value?.correcto === true)
 const checkedAnswerId = computed(() => checkedResult.value?.opcion_correcta_id)
-const incorrectCount = computed(
-  () => totalActivities.value - correctCount.value
+
+// Mientras se guarda o si falla, se muestran los números provisionales del
+// dispositivo; cuando el servidor confirma, mandan los del servidor.
+const displayTotal = computed(
+  () => serverResult.value?.totalActividades ?? totalActivities.value
 )
-const percentage = computed(() =>
-  totalActivities.value === 0
+const displayCorrect = computed(
+  () => serverResult.value?.aciertos ?? correctCount.value
+)
+const displayIncorrect = computed(
+  () =>
+    serverResult.value?.errores ??
+    Math.max(totalActivities.value - correctCount.value, 0)
+)
+const displayPercentage = computed(() =>
+  displayTotal.value === 0
     ? 0
-    : Math.round((correctCount.value / totalActivities.value) * 100)
+    : Math.round((displayCorrect.value / displayTotal.value) * 100)
 )
-const passed = computed(
+const minimoAprobacion = computed(() => Math.ceil(displayTotal.value * 0.6))
+const provisionalPassed = computed(
   () => correctCount.value >= Math.ceil(totalActivities.value * 0.6)
 )
+const passed = computed(() =>
+  serverResult.value ? serverResult.value.aprobada : provisionalPassed.value
+)
+
+const resultBadgeText = computed(() => {
+  if (saveState.value === 'saving') return 'Guardando resultado'
+  if (saveState.value === 'failed') return 'Resultado sin guardar'
+  return passed.value ? 'Lección aprobada' : 'No alcanzaste el mínimo'
+})
+
+const resultBadgeIcon = computed(() => {
+  if (saveState.value === 'saving') return 'cloud_upload'
+  if (saveState.value === 'failed') return 'cloud_off'
+  return passed.value ? 'check_circle' : 'replay'
+})
+
+const resultBadgeClass = computed(() =>
+  saveState.value === 'saved' && passed.value
+    ? 'dl-badge--available'
+    : 'dl-badge--locked'
+)
+
+const resultBannerClass = computed(() => {
+  if (saveState.value !== 'saved') return 'dl-lesson__result-banner--pending'
+  return passed.value
+    ? 'dl-lesson__result-banner--ok'
+    : 'dl-lesson__result-banner--bad'
+})
 
 const correctOptionText = computed(() => {
   const found = currentActivity.value?.options.find(
@@ -455,7 +572,9 @@ const nextLesson = computed(() =>
 )
 
 const resultHeadline = computed(() => {
-  if (passed.value && correctCount.value === totalActivities.value) {
+  if (saveState.value === 'saving') return 'Guardando tu resultado'
+  if (saveState.value === 'failed') return 'Falta guardar'
+  if (passed.value && displayCorrect.value === displayTotal.value) {
     return '¡Perfecto!'
   }
   if (passed.value) return '¡Aprobaste!'
@@ -485,8 +604,37 @@ function optionClass(optionId) {
   return 'dl-lesson__option--dimmed'
 }
 
-function startActivities() {
-  phase.value = 'activity'
+function nuevaClaveIntento() {
+  try {
+    return crypto.randomUUID()
+  } catch {
+    return `intento-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`
+  }
+}
+
+// Comenzar exige una sesión (invitado o cuenta): el intento se guarda en el
+// servidor desde el primer momento. Si no hay sesión se crea una de invitado.
+async function startActivities() {
+  if (starting.value) return
+  starting.value = true
+  startError.value = null
+  try {
+    await initAuth()
+    if (!session.value) {
+      const guest = await startGuest()
+      if (!guest.ok) {
+        throw new Error('No se pudo iniciar la sesión de invitado.')
+      }
+    }
+    if (!attemptKey.value) attemptKey.value = nuevaClaveIntento()
+    const intento = await iniciarIntento(lessonParam, attemptKey.value)
+    attemptId.value = intento.id
+    phase.value = 'activity'
+  } catch (err) {
+    startError.value = err?.message ?? 'No se pudo iniciar el intento.'
+  } finally {
+    starting.value = false
+  }
 }
 
 function selectOption(optionId) {
@@ -494,20 +642,26 @@ function selectOption(optionId) {
   selectedOptionId.value = optionId
 }
 
-// Comprueba la respuesta en el servidor (RPC check_answer). Si la conexión
-// falla, NO se muestra como incorrecta: queda un mensaje y se puede reintentar.
+// Comprueba y guarda la respuesta en el servidor (RPC registrar_respuesta).
+// Si la conexión falla, NO se muestra como incorrecta: queda un mensaje y se
+// puede reintentar.
 async function check() {
   if (selectedOptionId.value === null) return
   if (checked.value || submitting.value) return // no se envía dos veces
+  if (!attemptId.value) return
   submitting.value = true
   checkError.value = null
   try {
-    const result = await checkAnswer(
+    const result = await registrarRespuesta(
+      attemptId.value,
       currentActivity.value.id,
       selectedOptionId.value
     )
-    if (!result) throw new Error('El servidor no devolvió un resultado.')
-    checkedResult.value = result
+    checkedResult.value = {
+      correcto: result.correcto,
+      explicacion: result.explicacion,
+      opcion_correcta_id: result.opcionCorrectaId
+    }
     checked.value = true
     if (result.correcto) {
       correctCount.value += 1
@@ -527,16 +681,38 @@ function next() {
   checkedResult.value = null
 }
 
+// El resultado oficial lo calcula el servidor con las respuestas guardadas.
+// La pantalla muestra "guardando" hasta que la RPC confirma; si falla, deja
+// reintentar el guardado sin afirmar que el intento quedó registrado.
 function finish() {
-  const total = totalActivities.value
-  const correct = correctCount.value
-  // La lección queda completada (intentada) y aprobada si alcanza el umbral.
-  completeAttempt(lessonParam, { correct, total })
+  if (saveState.value === 'saving') return
   phase.value = 'results'
+  guardarResultado()
+}
+
+async function guardarResultado() {
+  if (!attemptId.value) return
+  saveState.value = 'saving'
+  saveError.value = null
+  try {
+    const result = await finalizarIntento(attemptId.value)
+    serverResult.value = result
+    saveState.value = 'saved'
+    completeAttempt(lessonParam, { passed: result.aprobada })
+  } catch (err) {
+    saveError.value = err?.message ?? 'No se pudo guardar el resultado.'
+    saveState.value = 'failed'
+  }
 }
 
 function restart() {
   phase.value = 'intro'
+  attemptId.value = null
+  attemptKey.value = null
+  saveState.value = 'idle'
+  saveError.value = null
+  serverResult.value = null
+  startError.value = null
   currentIndex.value = 0
   selectedOptionId.value = null
   checked.value = false
@@ -916,6 +1092,39 @@ function goToNextLesson() {
     &--bad {
       background: #fff8f0;
       border-color: #ffd9a3;
+    }
+
+    &--pending {
+      background: #f6f9fc;
+      border-color: #cfe3f3;
+    }
+  }
+
+  &__save {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    max-width: 440px;
+
+    &--saving {
+      background: #eef6fd;
+      color: #176a9e;
+    }
+
+    &--saved {
+      background: #e9f7e2;
+      color: $dl-green-dark;
+    }
+
+    &--failed {
+      background: #ffe9e9;
+      color: #c00015;
     }
   }
 

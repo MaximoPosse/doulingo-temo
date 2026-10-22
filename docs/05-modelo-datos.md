@@ -123,26 +123,31 @@ opción correcta. Errores de negocio: `PR_QUESTION_NOT_PUBLISHED` y
 
 ## Fuente de verdad (scripts)
 
-| Artefacto                          | Archivo                               |
-| ---------------------------------- | ------------------------------------- |
-| Creación de tablas y restricciones | `supabase/migrations/0001_schema.sql` |
-| Carga inicial (datos)              | `supabase/migrations/0002_seed.sql`   |
-| Políticas RLS y `check_answer`     | `supabase/migrations/0003_rls.sql`    |
-| Script combinado                   | `supabase/setup.sql`                  |
-| Registro del proyecto y uso        | `supabase/README.md`                  |
+| Artefacto                          | Archivo                                 |
+| ---------------------------------- | --------------------------------------- |
+| Creación de tablas y restricciones | `supabase/migrations/0001_schema.sql`   |
+| Carga inicial (datos)              | `supabase/migrations/0002_seed.sql`     |
+| Políticas RLS y `check_answer`     | `supabase/migrations/0003_rls.sql`      |
+| Perfiles y progreso (etapa 4)      | `supabase/migrations/0004_auth.sql`     |
+| Intentos y respuestas (etapa 5)    | `supabase/migrations/0005_intentos.sql` |
+| Script combinado                   | `supabase/setup.sql`                    |
+| Registro del proyecto y uso        | `supabase/README.md`                    |
 
 No se incluyen contraseñas ni claves secretas: los scripts solo contienen
 estructura y contenido de ejemplo.
 
-## Progreso del participante (etapa posterior)
+## Progreso del participante (etapas 4 y 5)
 
-El avance individual todavía no está en la base compartida:
+El avance individual vive en la base compartida, atado al identificador de
+Supabase Auth (`auth.uid()`), y el dispositivo conserva una copia local de
+trabajo (`useProgress.js`, clave `doulingo-progress`):
 
-| Tabla lógica       | Implementación actual                                                       |
-| ------------------ | --------------------------------------------------------------------------- |
-| INTENTO_DE_LECCION | `src/composables/useProgress.js` → `localStorage` clave `doulingo-progress` |
+| Tabla lógica           | Implementación                                                             |
+| ---------------------- | -------------------------------------------------------------------------- |
+| INTENTO_DE_LECCION     | `public.intentos` (inicio, fin, total, aciertos, errores, aprobación)      |
+| RESPUESTA_DE_ACTIVIDAD | `public.intentos_respuestas` (una por actividad e intento)                 |
+| PROGRESO_POR_LECCION   | `public.participant_progress` (resumen: estado, intentos, mejor resultado) |
 
 Conceptos: **completada** (se terminó el intento), **aprobada** (≥ 60 % de
 aciertos) y **reprobada** (completada por debajo del umbral). Solo las lecciones
-aprobadas habilitan la siguiente. Se migrará a la base junto con la
-identificación de usuarios y los puntajes oficiales de la competencia.
+aprobadas habilitan la siguiente. El detalle está en `docs/13-intentos.md`.

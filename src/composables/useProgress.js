@@ -9,23 +9,21 @@
 //
 // Dónde vive el progreso:
 //   - En el dispositivo (localStorage) siempre, como copia local de trabajo.
-//   - En la base de datos cuando hay sesión: cada participante tiene su
-//     propia fila por lección (tabla participant_progress) y solo puede ver
-//     y modificar las suyas (RLS con auth.uid()).
+//   - En la base de datos cuando hay sesión: `participant_progress` guarda el
+//     avance por lección y lo escribe únicamente finalizar_intento() a partir
+//     de los intentos y respuestas guardados en el servidor.
 //   El identificador del participante es el id de Supabase Auth, así que el
 //   historial se conserva al convertir la sesión de invitado en cuenta
-//   permanente: es el mismo id.
+//   permanente: es el mismo id. El detalle de cada intento vive en las tablas
+//   `intentos` e `intentos_respuestas`.
 //
 // El contenido (lecciones/actividades, campos `disponible` de cada unidad)
 // proviene del repositorio remoto (Supabase); aquí solo se guarda el avance.
 
 import { ref, watch } from 'vue'
 
-import {
-  fetchProgress,
-  saveProgress,
-  clearServerProgress
-} from '@/data/authRepository'
+import { fetchProgress, clearServerProgress } from '@/data/authRepository'
+import { clearAttempts } from '@/data/attemptRepository'
 
 const STORAGE_KEY = 'doulingo-progress'
 const SCOPED_PREFIX = 'doulingo-progress:'
@@ -199,26 +197,16 @@ function lessonStatus(unit, lesson, lessonIndex, lessons) {
   return 'disponible'
 }
 
-// Registra un intento. La lección queda "completada" (intentada) siempre y
-// "aprobada" si alcanza el umbral.
-function completeAttempt(lessonId, { correct, total }) {
+// Registra en el dispositivo el resultado de un intento YA GUARDADO en el
+// servidor. La fila de participant_progress la escribe finalizar_intento():
+// acá solo se actualiza la copia local que usa la interfaz.
+function completeAttempt(lessonId, { passed }) {
   if (!isLessonAttempted(lessonId)) {
     progress.value.attemptedLessons.push(lessonId)
   }
-  const approved = passes(correct, total)
+  const approved = passed === true
   if (approved && !isLessonApproved(lessonId)) {
     progress.value.approvedLessons.push(lessonId)
-  }
-  if (currentUid) {
-    // El mismo intento se guarda en la base, atado al identificador del
-    // participante: si después crea una cuenta, conserva su historial.
-    saveProgress(currentUid, lessonId, {
-      correct,
-      total,
-      passed: approved
-    }).catch(err =>
-      console.warn('No se pudo guardar el progreso en la base', err)
-    )
   }
   return approved
 }
@@ -255,12 +243,13 @@ function resetProgress() {
   progress.value = emptyProgress()
 }
 
-// Borra el historial completo del participante: el local (dispositivo) y el
-// guardado en la base (solo sus propias filas, por RLS).
+// Borra el historial completo del participante: los intentos y el avance
+// guardados en la base (solo sus propias filas, por RLS) y la copia local.
 async function clearHistory() {
   const uid = currentUid
   resetProgress()
   if (!uid) return
+  await clearAttempts()
   await clearServerProgress(uid)
 }
 

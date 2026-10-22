@@ -195,20 +195,47 @@ if (CORREO_LIMITADO) {
 // --- A7: RLS · aislamiento de los datos de cada participante ---
 const uidA = guestAData?.user?.id
 const uidB = guestBData?.user?.id
+
+// Genera progreso por la vía oficial (etapa 5): el cliente crea el intento,
+// responde cada actividad con su opción correcta y finaliza. Así el avance lo
+// escribe el servidor (participant_progress), que es lo único permitido.
+// Las soluciones no son legibles por API: se descubren con check_answer().
+async function completarLeccion(client, leccionId) {
+  const inicio = await client.rpc('iniciar_intento', {
+    p_leccion: leccionId,
+    p_clave: `auth-${Math.random().toString(36).slice(2, 12)}`
+  })
+  const intento = inicio.data?.[0]?.intento
+  if (!intento) return { error: inicio.error ?? inicio.data }
+  const preguntas = await client
+    .from('preguntas')
+    .select('id, opciones(id)')
+    .eq('leccion_id', leccionId)
+  for (const pregunta of preguntas.data ?? []) {
+    let correcta = null
+    for (const opcion of pregunta.opciones ?? []) {
+      const check = await client.rpc('check_answer', {
+        p_pregunta: pregunta.id,
+        p_opcion: opcion.id
+      })
+      if (check.data?.[0]?.correcto === true) correcta = opcion.id
+    }
+    await client.rpc('registrar_respuesta', {
+      p_intento: intento,
+      p_pregunta: pregunta.id,
+      p_opcion: correcta
+    })
+  }
+  return client.rpc('finalizar_intento', { p_intento: intento })
+}
+
 if (uidA && uidB) {
   const LESSON = '20000000-0000-0000-0000-200000000001'
-  const insert = await guestB.from('participant_progress').insert({
-    id: uidB,
-    leccion_id: LESSON,
-    estado: 'aprobada',
-    intentos: 1,
-    mejor_aciertos: 3,
-    total_actividades: 3
-  })
+  const complete = await completarLeccion(guestB, LESSON)
   runner.check(
-    'A7 El invitado puede guardar su propio progreso',
-    !insert.error,
-    insert.error?.message
+    'A7 El invitado registra su progreso con intentos reales',
+    !complete.error,
+    complete.error?.message ?? JSON.stringify(complete.data?.[0])
   )
 
   const own = await guestB
@@ -231,28 +258,39 @@ if (uidA && uidB) {
     JSON.stringify(other.data)
   )
 
+  // Etapa 5: la escritura directa del progreso está revocada; solo la
+  // escribe finalizar_intento(). Da igual la fila destino.
   const foreignInsert = await guestA.from('participant_progress').insert({
     id: uidB,
     leccion_id: LESSON,
     estado: 'aprobada'
   })
   runner.check(
-    'A7 RLS: no puede escribir en el progreso de otro',
+    'A7 Escritura directa del progreso bloqueada (insertar)',
     !!foreignInsert.error,
     foreignInsert.error?.message
   )
 
-  // Con `select` PostgREST devuelve las filas que la RLS dejó pasar:
-  // si la política bloquea la actualización, la lista llega vacía.
   const foreignUpdate = await guestA
     .from('participant_progress')
     .update({ estado: 'intentada' })
     .eq('id', uidB)
     .select('estado')
   runner.check(
-    'A7 RLS: no puede modificar el progreso de otro',
-    !foreignUpdate.error && (foreignUpdate.data?.length ?? 0) === 0,
-    `error=${foreignUpdate.error?.message ?? 'ninguno'} data=${JSON.stringify(foreignUpdate.data)}`
+    'A7 Escritura directa del progreso bloqueada (modificar)',
+    !!foreignUpdate.error,
+    foreignUpdate.error?.message
+  )
+
+  const ownUpdate = await guestB
+    .from('participant_progress')
+    .update({ estado: 'intentada' })
+    .eq('id', uidB)
+    .select('estado')
+  runner.check(
+    'A7 Escritura directa del progreso bloqueada (incluso la propia)',
+    !!ownUpdate.error,
+    ownUpdate.error?.message
   )
 
   const profileB = await guestB

@@ -26,7 +26,9 @@
     "test:e2e:network": "node tests/e2e/case7.mjs",
     "test:e2e:auth": "node tests/e2e/auth.mjs",
     "test:e2e:auth-ui": "node tests/e2e/auth_ui.mjs",
-    "test:e2e:alias": "node tests/e2e/alias.mjs"
+    "test:e2e:alias": "node tests/e2e/alias.mjs",
+    "test:e2e:attempts": "node tests/e2e/attempts.mjs",
+    "test:e2e:attempts-ui": "node tests/e2e/attempts_ui.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.2",

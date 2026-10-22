@@ -321,25 +321,8 @@ export async function fetchProgress(uid) {
   return data ?? []
 }
 
-export async function saveProgress(uid, lessonId, { correct, total, passed }) {
-  const estado = passed ? 'aprobada' : 'intentada'
-  const { error } = await getSupabaseClient()
-    .from('participant_progress')
-    .upsert(
-      {
-        id: uid,
-        leccion_id: lessonId,
-        estado,
-        intentos: 1,
-        mejor_aciertos: correct ?? 0,
-        total_actividades: total ?? 0,
-        actualizado_en: new Date().toISOString()
-      },
-      { onConflict: 'id,leccion_id' }
-    )
-  if (error)
-    throw new Error(authErrorMessage(error, 'No se pudo guardar el progreso.'))
-}
+// El progreso se escribe ÚNICAMENTE desde la función finalizar_intento() del
+// servidor, con las respuestas guardadas. El cliente solo lo lee y lo borra.
 
 // Borra el historial del participante en la base (solo sus filas: la RLS
 // solo permite borrar lo propio).
