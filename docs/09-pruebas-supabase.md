@@ -57,6 +57,61 @@ seguridad (RLS), comprobación de respuestas y estados de UI.
   - Verificaciones REST con la anon key para RLS y `check_answer` (casos 4, 8, 9).
 - Herramientas locales en `edgetest/` (fuera del repositorio).
 
+## Re-verificación
+
+Ejecutada contra el proyecto Supabase real, en las dos formas de servir la
+app:
+
+| Suite                                   | Build de producción (`http://localhost:9100`) | Dev de Quasar (`http://localhost:9000`) |
+| --------------------------------------- | --------------------------------------------- | --------------------------------------- |
+| `buttons.mjs` (todos los botones)       | 26/26 OK                                      | 26/26 OK                                |
+| `dbtest.mjs` (REST + RLS + RPC + UI)    | 25/25 OK                                      | —                                       |
+| `case7.mjs` (fallo de red al comprobar) | 5/5 OK                                        | —                                       |
+
+`dbtest.mjs` verifica, contra la base real: 1 curso visible por RLS
+(`estado = 'disponible'`), 5 unidades con `orden` 1..5 y solo la 1 con
+`disponible = true`, 2 lecciones visibles en la unidad 1 y **0** lecciones
+visibles en las unidades en preparación, 3 preguntas ordenadas por `orden`, 4
+opciones por pregunta que **no** exponen cuál es la correcta,
+`SELECT` a `soluciones` → 401, `INSERT`/`UPDATE`/`DELETE` anónimos → 401, RPC
+`check_answer` con exactamente 1 de 4 opciones correcta (devuelve
+`correcto`, `explicacion` y `opcion_correcta_id`), `PR_OPTION_NOT_IN_QUESTION`
+para una opción ajena o inexistente y `PR_QUESTION_NOT_PUBLISHED` para una
+pregunta inexistente; en la UI, `/cursos` lista el curso de la base, las rutas
+inexistentes muestran su mensaje y un contexto de navegador limpio no arrastra
+progreso previo.
+
+## Diagnóstico: "No se pudo contactar al servidor"
+
+Si la app no puede leer la base, el mensaje friendly (`unwrap()`) es correcto,
+pero la causa suele estar fuera del código. Orden de verificación:
+
+1. **DNS del proyecto** (causa más frecuente):
+
+   ```powershell
+   nslookup <ref>.supabase.co 1.1.1.1
+   ```
+
+   Si responde `Non-existent domain` (NXDOMAIN) también en resolvers públicos
+   (1.1.1.1 / 8.8.8.8), el proyecto no está disponible; si responde bien en
+   1.1.1.1 pero no con el DNS del ISP, es caché negativa local → se resuelve
+   cambiando el DNS de la interfaz o reintentando.
+
+2. **Credenciales**: `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` en
+   `.env` (se reinicia el dev server para que las tome).
+3. **Alcance de red**: la CSP de `index.html` permite `connect-src` a
+   `https://*.supabase.co`; si se cambia el dominio del proyecto, hay que
+   actualizar esa lista.
+4. **Prueba directa de la API**:
+
+   ```powershell
+   Invoke-WebRequest "https://<ref>.supabase.co/rest/v1/cursos?select=id&limit=1" `
+     -Headers @{ apikey = $KEY; Authorization = "Bearer $KEY" }
+   ```
+
+   Un `401` con `apikey` válida significa credenciales incorrectas; un error de
+   resolución de nombre significa que el proyecto no responde.
+
 ## Resultados
 
 Ejecutado contra un proyecto Supabase real (tablas creadas con `setup.sql`).
@@ -91,9 +146,23 @@ soluciones`; la respuesta solo se obtiene vía RPC `check_answer`.
 - Recorrido de botones: **OK** — 26/26 comprobaciones en `buttons.mjs`
   (landing, navegación, tarjetas, links de volver, intro, CONFIRMAR/CONTINUAR,
   VER RESULTADOS, "Intentar nuevamente", "Repasar lección", "Siguiente lección",
-  "Volver a la unidad", botón X), sin errores de página.
+  "Volver a la unidad", botón X), sin errores de página. Re-verificado también
+  contra el dev server (`http://localhost:9000`).
+- Incidente real (DNS): durante una sesión el subdominio del proyecto devolvió
+  `Non-existent domain` desde el DNS del ISP; con 1.1.1.1 y 8.8.8.8 también
+  NXDOMAIN y luego volvió a resolver solo, con la API respondiendo `200`. La app
+  se comportó correctamente (estado de error con **Reintentar**, sin errores de
+  página) y no requirió cambios de código. Ver sección "Diagnóstico".
 - Corrección: se detectó que al pasar de una lección a la siguiente el
   componente reutilizado no recargaba los datos (los params de ruta no son
   reactivos). Se corrigió con `:key="$route.fullPath"` en el `router-view`.
 - Pendiente: caso 3 (edición manual de un título en Supabase), por ser un cambio
   de datos en el panel.
+
+## Etapa 4 (autenticación)
+
+La ampliación del esquema con `perfiles` y `participant_progress`, las políticas
+RLS por participante y las pruebas de acceso, sesión y alias están en
+[`docs/10-auth.md`](10-auth.md) y [`docs/11-pruebas-auth.md`](11-pruebas-auth.md).
+El script de base de datos combinado se regeneró en `supabase/setup.sql`
+(incluye `0004_auth.sql`).

@@ -43,7 +43,19 @@ export function getSupabaseClient() {
     throw supabaseNotConfiguredError()
   }
   if (!client) {
-    client = createClient(url, publicKey)
+    client = createClient(url, publicKey, {
+      auth: {
+        // La sesión se persiste en el dispositivo: al abrir la app se
+        // restaura (invitado o cuenta) sin volver a pedir credenciales.
+        persistSession: true,
+        autoRefreshToken: true,
+        // Necesario para los enlaces de retorno de confirmación y
+        // recuperación de contraseña (llegan con ?code=... o #access_token).
+        detectSessionInUrl: true,
+        // PKCE: es el flujo recomendado para las apps móviles (APK).
+        flowType: 'pkce'
+      }
+    })
   }
   return client
 }

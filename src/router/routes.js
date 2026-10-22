@@ -29,6 +29,18 @@ const routes = [
         component: () => import('@/pages/LessonPage.vue')
       },
       {
+        path: 'acceso',
+        name: 'acceso',
+        component: () => import('@/pages/AuthPage.vue')
+      },
+      {
+        path: 'perfil',
+        name: 'perfil',
+        // Ruta protegida: exige una sesión (invitado o cuenta permanente).
+        meta: { requiresAuth: true },
+        component: () => import('@/pages/ProfilePage.vue')
+      },
+      {
         path: '/:catchAll(.*)*',
         name: 'no-encontrada',
         component: () => import('@/pages/ErrorNotFound.vue')

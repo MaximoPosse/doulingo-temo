@@ -19,7 +19,13 @@
     "lint:check": "oxfmt --check && oxlint",
     "dev": "quasar dev",
     "build": "quasar build",
-    "postinstall": "quasar prepare --silent"
+    "postinstall": "quasar prepare --silent",
+    "serve:e2e": "node tests/e2e/serve.mjs",
+    "test:e2e:buttons": "node tests/e2e/buttons.mjs",
+    "test:e2e:db": "node tests/e2e/dbtest.mjs",
+    "test:e2e:network": "node tests/e2e/case7.mjs",
+    "test:e2e:auth": "node tests/e2e/auth.mjs",
+    "test:e2e:auth-ui": "node tests/e2e/auth_ui.mjs"
   },
   "dependencies": {
     "@quasar/extras": "^2.0.4",
@@ -33,7 +39,8 @@
     "autoprefixer": "^10.4.27",
     "oxfmt": "^0.x",
     "oxlint": "^1.x",
-    "postcss": "^8.5.8"
+    "postcss": "^8.5.8",
+    "puppeteer-core": "^24.10.0"
   },
   "engines": {
     "node": ">= 26 || ^24 || ^22.12"

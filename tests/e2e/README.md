@@ -1,0 +1,43 @@
+# Pruebas end-to-end
+
+Suites de comprobación automática (Puppeteer + el navegador del sistema) que
+verifican la aplicación contra el proyecto real de Supabase.
+
+## Preparación
+
+```bash
+npm install                      # instala puppeteer-core (dependencia de desarrollo)
+npm run build                    # genera dist/spa
+node tests/e2e/serve.mjs         # sirve la build en http://localhost:9100
+```
+
+La configuración del proyecto Supabase se lee del `.env` de la raíz
+(`VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`).
+
+Variables opcionales:
+
+| Variable       | Para qué sirve                     | Por defecto              |
+| -------------- | ---------------------------------- | ------------------------ |
+| `E2E_BASE_URL` | Origen de la app probada           | `http://localhost:9100`  |
+| `E2E_BROWSER`  | Ruta del navegador (Edge o Chrome) | se busca automáticamente |
+| `E2E_PORT`     | Puerto del servidor estático       | `9100`                   |
+
+## Suites
+
+| Comando                      | Qué comprueba                                                                                |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `node tests/e2e/buttons.mjs` | Recorrido de la interfaz: botones, navegación, estados de la lección (26 casos).             |
+| `node tests/e2e/dbtest.mjs`  | Contenido publicado, RLS, RPC `check_answer` y contexto limpio (25 casos).                   |
+| `node tests/e2e/case7.mjs`   | Fallo de red al comprobar una respuesta: avisa, no marca mal y permite reintentar (5 casos). |
+| `node tests/e2e/case3.mjs`   | Cambio de un título desde el panel de Supabase y su reflejo en la app.                       |
+| `node tests/e2e/auth.mjs`    | API de Supabase Auth: invitado, registro, login, recuperación, RLS y conversión (8 casos).   |
+| `node tests/e2e/auth.mjs ui` | Lo anterior más el recorrido de la pantalla de acceso en el navegador.                       |
+| `node tests/e2e/auth_ui.mjs` | Pantalla de acceso sin depender de la configuración del proyecto (5 casos).                  |
+
+`auth.mjs` y `auth.mjs ui` necesitan que el proyecto tenga **habilitados los
+invitados anónimos** y aplicado `supabase/migrations/0004_auth.sql`; si no, los
+casos dependientes fallan y lo indican en el mensaje.
+
+Los resultados de la última ejecución están en
+[`docs/11-pruebas-auth.md`](../../docs/11-pruebas-auth.md) y
+[`docs/09-pruebas-supabase.md`](../../docs/09-pruebas-supabase.md).

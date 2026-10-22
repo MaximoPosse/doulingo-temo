@@ -32,18 +32,21 @@ aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
 ```
 supabase/
 ├── README.md                 ← este archivo
+├── setup.sql                 ← los cuatro archivos en un solo script
 └── migrations/
     ├── 0001_schema.sql       ← tablas, PKs, FKs y restricciones
     ├── 0002_seed.sql         ← datos iniciales (curso JavaScript)
-    └── 0003_rls.sql          ← RLS + función check_answer()
+    ├── 0003_rls.sql          ← RLS + función check_answer()
+    └── 0004_auth.sql         ← perfiles, progreso del participante y RLS ampliada
 ```
 
 ## Cómo crear el proyecto y aplicar el esquema
 
 1. Crear un proyecto en [supabase.com](https://supabase.com) llamado
    **`doulingo`** (lanzar la base).
-2. Ir a **SQL Editor** y ejecutar, **en orden**, los tres archivos:
-   `0001_schema.sql`, `0002_seed.sql` y `0003_rls.sql`.
+2. Ir a **SQL Editor** y ejecutar, **en orden**, los cuatro archivos:
+   `0001_schema.sql`, `0002_seed.sql`, `0003_rls.sql` y `0004_auth.sql`
+   (o pegar `setup.sql`, que es la concatenación de los cuatro).
 3. En **Settings → API** copiar la **Project URL** y la **publishable key**
    (o **anon public key** en proyectos antiguos) y guardarlas localmente en
    `.env` (nunca en el repositorio):
@@ -54,6 +57,27 @@ supabase/
    ```
 
    Ver `.env.example` en la raíz del proyecto para la referencia.
+
+## Autenticación (etapa 4)
+
+`0004_auth.sql` agrega:
+
+| Tabla                  | Contenido                                                    | Acceso                                            |
+| ---------------------- | ------------------------------------------------------------ | ------------------------------------------------- |
+| `perfiles`             | Alias público (3-20 caracteres) + sufijo derivado del id     | Lectura pública; escritura solo de la fila propia |
+| `participant_progress` | Estado del participante por lección (`intentada`/`aprobada`) | Solo el propio participante (`auth.uid()`)        |
+
+Configuración necesaria en el panel:
+
+1. **Authentication → Providers → Anonymous Sign Ins → Enable** (si no, el
+   acceso como invitado no funciona).
+2. **Authentication → URL Configuration**: _Site URL_ y _Redirect URLs_ con los
+   orígenes de la app (desarrollo, publicación y el esquema propio del APK).
+3. **Correo**: el SMTP incluido solo entrega a miembros del equipo y tiene cupo
+   de envíos por hora; para probar confirmaciones reales conviene usar un
+   SMTP propio.
+
+Detalle completo del diseño en [`docs/10-auth.md`](../docs/10-auth.md).
 
 ## Seguridad (RLS)
 
