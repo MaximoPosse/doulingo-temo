@@ -704,7 +704,9 @@ revoke all on public.perfiles from anon;
 revoke delete on public.perfiles from anon, authenticated;
 grant select on public.perfiles to anon, authenticated;
 grant insert on public.perfiles to authenticated;
-grant update (alias) on public.perfiles to authenticated;
+-- Solo se pueden cambiar el alias (elegido por la persona) y la fecha de
+-- actualización: `es_invitado` lo cambia la función de conversión.
+grant update (alias, actualizado_en) on public.perfiles to authenticated;
 
 -- -------------------------------------------------------------
 -- RLS · PROGRESO POR PARTICIPANTE
