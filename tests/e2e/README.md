@@ -33,10 +33,15 @@ Variables opcionales:
 | `node tests/e2e/auth.mjs`    | API de Supabase Auth: invitado, registro, login, recuperación, RLS y conversión (8 casos).   |
 | `node tests/e2e/auth.mjs ui` | Lo anterior más el recorrido de la pantalla de acceso en el navegador.                       |
 | `node tests/e2e/auth_ui.mjs` | Pantalla de acceso sin depender de la configuración del proyecto (5 casos).                  |
+| `node tests/e2e/alias.mjs`   | Alias público, sufijo y aislamiento del perfil entre participantes (11 casos).               |
 
 `auth.mjs` y `auth.mjs ui` necesitan que el proyecto tenga **habilitados los
 invitados anónimos** y aplicado `supabase/migrations/0004_auth.sql`; si no, los
 casos dependientes fallan y lo indican en el mensaje.
+
+Los casos que necesitan **enviar correo** se marcan `SKIP` cuando el proyecto
+agotó su cupo de 2 correos por hora: el resumen los separa de los fallos
+reales y el proceso termina con éxito.
 
 Los resultados de la última ejecución están en
 [`docs/11-pruebas-auth.md`](../../docs/11-pruebas-auth.md) y

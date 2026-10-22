@@ -25,9 +25,12 @@
     "test:e2e:db": "node tests/e2e/dbtest.mjs",
     "test:e2e:network": "node tests/e2e/case7.mjs",
     "test:e2e:auth": "node tests/e2e/auth.mjs",
-    "test:e2e:auth-ui": "node tests/e2e/auth_ui.mjs"
+    "test:e2e:auth-ui": "node tests/e2e/auth_ui.mjs",
+    "test:e2e:alias": "node tests/e2e/alias.mjs"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3",
     "@quasar/extras": "^2.0.4",
     "@supabase/supabase-js": "^2.117.3",
     "quasar": "^2.32.0",

@@ -107,19 +107,35 @@ security definer
 set search_path = public
 as $$
 declare
-  v_alias   text;
-  v_sufijo  text;
+  v_alias    text;
+  v_hex      text;
+  v_sufijo   text;
   v_invitado boolean;
+  v_offset   integer := 1;
+  v_creado   boolean := false;
 begin
   v_alias := public.normalizar_alias(new.raw_user_meta_data ->> 'alias');
-  v_sufijo := substr(replace(new.id::text, '-', ''), 1, 4);
+  v_hex := replace(new.id::text, '-', '');
   -- `is_anonymous` solo existe si el proyecto tiene habilitados los
   -- invitados anónimos: se lee de forma tolerante a esa ausencia.
   v_invitado := coalesce((to_jsonb(new) ->> 'is_anonymous')::boolean, true);
 
-  insert into public.perfiles (id, alias, alias_sufijo, es_invitado)
-  values (new.id, v_alias, v_sufijo, v_invitado)
-  on conflict (id) do nothing;
+  -- El sufijo son 4 caracteres del identificador de Auth. Si esa combinación
+  -- (alias + sufijo) ya está tomada, se prueban las ventanas siguientes del
+  -- identificador: dos participantes con el mismo alias siempre quedan
+  -- distinguibles y el alta nunca falla por un choque de sufijo.
+  while v_offset <= 29 and not v_creado loop
+    v_sufijo := substr(v_hex, v_offset, 4);
+    begin
+      insert into public.perfiles (id, alias, alias_sufijo, es_invitado)
+      values (new.id, v_alias, v_sufijo, v_invitado)
+      on conflict (id) do nothing;
+      v_creado := true;
+    exception
+      when unique_violation then
+        v_offset := v_offset + 1;
+    end;
+  end loop;
 
   return new;
 end;

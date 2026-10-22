@@ -17,6 +17,7 @@ import { computed, ref } from 'vue'
 
 import {
   ensureProfile,
+  exchangeAuthCode,
   fetchProfile,
   getCurrentSession,
   markPermanentAccount,
@@ -32,6 +33,7 @@ import {
   upgradeGuestToAccount
 } from '@/data/authRepository'
 import { attachToUser } from '@/composables/useProgress'
+import { registerDeepLinkHandler } from '@/lib/deepLink'
 
 const LAST_UID_KEY = 'doulingo-last-uid'
 
@@ -106,7 +108,8 @@ async function applySession(newSession, { checkAccountChange = true } = {}) {
   try {
     profile.value = await ensureProfile(
       uid,
-      newSession.user.user_metadata?.alias
+      newSession.user.user_metadata?.alias,
+      { esInvitado: newSession.user.is_anonymous === true }
     )
   } catch {
     profile.value = null
@@ -141,9 +144,32 @@ export function initAuth() {
           await applySession(newSession)
         }, 0)
       })
+
+      // Dentro del APK, el enlace de confirmación o de recuperación abre la
+      // app con el esquema propio (doulingo://auth/callback?code=...): se
+      // intercepta para completar el intercambio PKCE.
+      try {
+        await registerDeepLinkHandler(code => completeDeepLink(code))
+      } catch {
+        /* en la web no hay deep links: se sigue con el flujo normal */
+      }
     })()
   }
   return readyPromise
+}
+
+// Completa el acceso a partir del código PKCE del deep link del APK.
+export async function completeDeepLink(code) {
+  authError.value = null
+  try {
+    await exchangeAuthCode(code)
+    const current = await getCurrentSession()
+    await applySession(current)
+    return { ok: true }
+  } catch (err) {
+    authError.value = err?.message ?? 'No se pudo completar el acceso.'
+    return { ok: false }
+  }
 }
 
 export function stopAuth() {
@@ -344,6 +370,7 @@ export function useAuth() {
     alias,
     initAuth,
     stopAuth,
+    completeDeepLink,
     refreshProfile,
     startGuest,
     register,

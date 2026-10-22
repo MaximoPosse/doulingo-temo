@@ -22,6 +22,7 @@ La mascota oficial es **Usagi**, del anime _Chiikawa_, en lugar del búho clási
 | [`docs/09-pruebas-supabase.md`](docs/09-pruebas-supabase.md) | Pruebas de la etapa de base de datos (Supabase).                |
 | [`docs/10-auth.md`](docs/10-auth.md)                         | Acceso, identidad y sesión (Supabase Auth).                     |
 | [`docs/11-pruebas-auth.md`](docs/11-pruebas-auth.md)         | Pruebas de la etapa de autenticación.                           |
+| [`docs/12-apk.md`](docs/12-apk.md)                           | El APK (Android) y el esquema de URL propio.                    |
 | [`supabase/README.md`](supabase/README.md)                   | Proyecto Supabase: esquema, seed, RLS y seguridad.              |
 
 ## Estado actual
@@ -62,6 +63,11 @@ relacional Supabase**:
     participante dueño de cada fila (`auth.uid()`), y `perfiles` solo se
     modifica en la fila propia.
   - Detalle del diseño en [`docs/10-auth.md`](docs/10-auth.md).
+- **Versión Android (APK)** con **Capacitor**: la misma SPA se empaqueta como
+  aplicación nativa y declara el **esquema de URL propio**
+  (`doulingo://auth/callback`) para que los enlaces de confirmación de correo
+  y de recuperación de contraseña abran la app. Ver
+  [`docs/12-apk.md`](docs/12-apk.md).
 - Progreso persistente en `localStorage` por identificador de participante
   (`useProgress`) y sincronizado con la tabla `participant_progress`.
 - Router con rutas nombradas y página 404.
@@ -71,6 +77,7 @@ relacional Supabase**:
 - **Vue.js 3** (Composition API, `<script setup>`)
 - **Quasar v2** (framework de componentes y CLI) junto a **Vite**
 - **Vue Router** (rutas nombradas con modo hash)
+- **Capacitor 8** (empaquetado Android de la SPA y deep links)
 - **Supabase** (Postgres + PostgREST + Auth) con **Row Level Security** y una
   función `SECURITY DEFINER` para comprobar respuestas.
 - **SCSS** para estilos (variables en `src/css/quasar.variables.scss`)
@@ -91,6 +98,9 @@ relacional Supabase**:
 │       ├── 0002_seed.sql
 │       ├── 0003_rls.sql
 │       └── 0004_auth.sql     # perfiles, progreso y RLS ampliada
+├── src-capacitor/            # Versión Android (Capacitor)
+│   ├── capacitor.config.js   # appId, appName y esquema del WebView
+│   └── android/              # Proyecto Android (Manifest, Gradle, Activity)
 ├── public/
 ├── docs/                     # Documentación de diseño y decisiones
 ├── tests/e2e/                # Pruebas automáticas (Puppeteer + Supabase real)
@@ -112,6 +122,7 @@ relacional Supabase**:
     │   ├── authRepository.js # Operaciones de Auth, perfil y progreso
     │   └── courseRepository.js # Consultas a Supabase (única puerta de datos)
     ├── lib/
+    │   ├── deepLink.js       # Deep link del APK (appUrlOpen) + código PKCE
     │   └── supabase.js       # Cliente centralizado (VITE_SUPABASE_*)
     ├── layouts/MainLayout.vue
     ├── pages/
@@ -150,6 +161,22 @@ npm run build        # genera ./dist/spa
 Sin un `.env` configurado, la aplicación arranca y muestra los estados de error
 con botón **Reintentar** en lugar de datos.
 
+### Versión Android (APK)
+
+Requiere **JDK 21** y el **SDK de Android** (ver
+[`docs/12-apk.md`](docs/12-apk.md)):
+
+```bash
+npx quasar build -m capacitor   # arma la web en src-capacitor/www
+cd src-capacitor
+npx cap sync android            # copia la web al proyecto Android
+npx cap open android            # Android Studio → Build → APK
+```
+
+El esquema de URL de la app es `doulingo://auth/callback` (declarado en el
+`AndroidManifest.xml` de `src-capacitor/android`) y tiene que estar en
+Supabase → Authentication → URL Configuration → Redirect URLs.
+
 Servir la build de producción:
 
 ```bash
@@ -163,6 +190,8 @@ npm run serve:e2e           # sirve la build en http://localhost:9100
 npm run test:e2e:buttons    # recorrido de la interfaz
 npm run test:e2e:db         # contenido, RLS y RPC contra Supabase
 npm run test:e2e:auth-ui    # pantalla de acceso
+npm run test:e2e:auth       # API de Supabase Auth (+ "ui" para el recorrido)
+npm run test:e2e:alias      # alias público, sufijo y aislamiento del perfil
 ```
 
 ## Navegación interna

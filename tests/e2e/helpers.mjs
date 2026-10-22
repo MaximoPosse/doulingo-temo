@@ -136,6 +136,7 @@ export async function launchBrowser(options = {}) {
 // Acumulador de resultados con salida formateada.
 export function createRunner(title) {
   const results = []
+  const skipped = []
   console.log(title)
   return {
     check(name, condition, extra = '') {
@@ -146,11 +147,25 @@ export function createRunner(title) {
       )
       return ok
     },
+    // Caso que no se puede verificar por una limitación externa (por ejemplo
+    // el cupo de correos de Supabase): se informa pero no cuenta como error.
+    skip(name, reason = '') {
+      skipped.push([name, reason])
+      console.log(`SKIP  ${name}${reason ? ' :: ' + reason : ''}`)
+      return true
+    },
     summary(label) {
       const failed = results.filter(result => !result[1])
+      const extra = skipped.length ? ` (${skipped.length} omitidos)` : ''
       console.log(
-        `\nRESUMEN ${label}: ${results.length - failed.length}/${results.length} OK`
+        `\nRESUMEN ${label}: ${results.length - failed.length}/${results.length} OK${extra}`
       )
+      if (skipped.length) {
+        console.log('OMITIDOS:')
+        skipped.forEach(([name, reason]) =>
+          console.log(`  · ${name}${reason ? ' :: ' + reason : ''}`)
+        )
+      }
       return failed.length
     }
   }

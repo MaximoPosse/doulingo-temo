@@ -7,6 +7,7 @@
 // por eso todas las consultas de datos personales pasan por RLS.
 
 import { getSupabaseClient } from '@/lib/supabase'
+import { isNativeApp } from '@/lib/deepLink'
 
 const ALIAS_MIN = 3
 const ALIAS_MAX = 20
@@ -24,9 +25,18 @@ function authErrorMessage(err, fallback) {
   }
   if (
     raw.includes('user already registered') ||
-    raw.includes('already registered')
+    raw.includes('already registered') ||
+    raw.includes('email_exists')
   ) {
     return 'Ese correo ya tiene una cuenta. Iniciá sesión o recuperá tu acceso.'
+  }
+  // Supabase oculta si el correo ya existe (ofuscado de correo): el alta de
+  // un correo repetido responde como si el correo fuera inválido.
+  if (raw.includes('email_address_invalid') || raw.includes('is invalid')) {
+    return (
+      'Ese correo no es válido o ya tiene una cuenta. ' +
+      'Si ya te registraste, iniciá sesión o recuperá tu acceso.'
+    )
   }
   if (raw.includes('invalid login credentials')) {
     return 'Correo o contraseña incorrectos.'
@@ -59,6 +69,12 @@ function authErrorMessage(err, fallback) {
   ) {
     return 'No se pudo contactar al servidor. Revisá tu conexión.'
   }
+  if (raw.includes('perfiles_pkey')) {
+    return 'Ese perfil ya existe.'
+  }
+  if (raw.includes('duplicate key') || raw.includes('unique constraint')) {
+    return 'Ese alias ya está en uso con ese sufijo. Probá con otro alias.'
+  }
   return err?.message || fallback
 }
 
@@ -86,8 +102,16 @@ export function validateAlias(alias) {
 
 // URL a la que Supabase devuelve al usuario tras confirmar el correo o
 // recuperar la contraseña. En web es el origen de la app; en el APK se
-// define con VITE_SUPABASE_REDIRECT_URL (esquema propio de la app).
+// devuelve con el esquema propio de la app (doulingo://auth/callback), que
+// además debe estar declarado en Supabase → Authentication → URL
+// Configuration → Redirect URLs.
 export function authRedirectUrl() {
+  if (isNativeApp()) {
+    return (
+      import.meta.env.VITE_SUPABASE_NATIVE_REDIRECT_URL ??
+      'doulingo://auth/callback'
+    )
+  }
   const configured = import.meta.env.VITE_SUPABASE_REDIRECT_URL
   if (configured) return configured
   return `${window.location.origin}/`
@@ -182,6 +206,17 @@ export async function updatePassword(password) {
     )
 }
 
+// Completa el intercambio del código PKCE que llega en el enlace de
+// confirmación de correo o de recuperación de contraseña. En el APK ese
+// enlace llega como deep link (doulingo://auth/callback?code=...).
+export async function exchangeAuthCode(code) {
+  const { error } = await getSupabaseClient().auth.exchangeCodeForSession(code)
+  if (error)
+    throw new Error(
+      authErrorMessage(error, 'No se pudo completar el acceso con el enlace.')
+    )
+}
+
 // Conversión de invitado a cuenta permanente: se completa la MISMA sesión
 // (mismo id de Auth) con correo y contraseña. No se crea otra cuenta ni se
 // copian resultados desde el cliente: la identidad y el historial se
@@ -211,26 +246,34 @@ export async function fetchProfile(uid) {
 
 // El perfil puede no existir todavía (por ejemplo, si el trigger de la base
 // no está aplicado): el propio participante se lo crea con su alias.
-export async function ensureProfile(uid, alias) {
+export async function ensureProfile(uid, alias, { esInvitado = true } = {}) {
   const existente = await fetchProfile(uid)
   if (existente) return existente
   const cleanAlias = normalizeAlias(alias) || 'invitado'
-  const sufijo = uid.replace(/-/g, '').slice(0, 4)
-  const { data, error } = await getSupabaseClient()
-    .from('perfiles')
-    .insert({
-      id: uid,
-      alias: cleanAlias,
-      alias_sufijo: sufijo,
-      es_invitado: true
-    })
-    .select('id, alias, alias_sufijo, es_invitado, creado_en')
-    .maybeSingle()
-  if (error) {
-    // Si otro proceso lo creó primero, se vuelve a leer.
-    return fetchProfile(uid)
+  const hex = uid.replace(/-/g, '')
+  // El sufijo son 4 caracteres del identificador. Si la combinación
+  // alias+sufijo ya está tomada por otra persona, se prueban las ventanas
+  // siguientes del identificador: el alias repetido nunca bloquea el alta.
+  for (let offset = 0; offset <= 28; offset++) {
+    const sufijo = hex.slice(offset, offset + 4)
+    const { data, error } = await getSupabaseClient()
+      .from('perfiles')
+      .insert({
+        id: uid,
+        alias: cleanAlias,
+        alias_sufijo: sufijo,
+        es_invitado: esInvitado
+      })
+      .select('id, alias, alias_sufijo, es_invitado, creado_en')
+      .maybeSingle()
+    if (!error) return data
+    // Si el conflicto es el identificador, el perfil ya existía: no hay que
+    // seguir probando ventanas.
+    const detalle = `${error.message ?? ''} ${error.details ?? ''}`
+    if (detalle.includes('(id)') || detalle.includes('perfiles_pkey')) break
   }
-  return data ?? null
+  // Si otro proceso lo creó primero, se vuelve a leer.
+  return fetchProfile(uid)
 }
 
 export async function saveAlias(uid, alias) {

@@ -44,8 +44,13 @@ Decisiones:
 - **Sin duplicación de datos:** el progreso no copia títulos ni contenido, solo
   referencias (`leccion_id`). El contenido sigue en sus tablas.
 - **El alias no es único por sí solo.** La pareja `alias#alias_sufijo` sí lo es:
-  el sufijo son los 4 primeros caracteres hexadecimales del id de Auth, de
-  modo que dos personas con el mismo alias se distinguen (`usagi#3f1a`).
+  el sufijo son 4 caracteres hexadecimales del id de Auth, de modo que dos
+  personas con el mismo alias se distinguen (`usagi#3f1a`).
+- **Un choque de sufijo nunca bloquea un alta.** Como la pareja es única en la
+  base, si el sufijo propuesto ya estuviera tomado el alta fallaría. Por eso el
+  trigger `handle_new_user` y el cliente (`ensureProfile`) prueban ventanas
+  sucesivas del identificador (`3f1a`, `3f1a…`, `3f1a…`) hasta encontrar una
+  pareja libre.
 - **Alias permitido:** 3 a 20 caracteres, minúsculas, dígitos y guion bajo. Se
   normaliza en el cliente (`normalizar_alias`) y en el servidor
   (`normalizar_alias(text)`); si queda vacío se usa `invitado`.
@@ -97,6 +102,11 @@ escribir datos de otro. La tabla `perfiles` solo permite actualizar la columna
      reenviarlo. La cuenta existe, pero no hay sesión hasta confirmar.
 4. El alta del perfil la hace el trigger `on_auth_user_created`, que normaliza
    el alias y calcula el sufijo.
+5. **Correo ya utilizado:** Supabase tiene activo el ofuscado de correo, así que
+   un alta repetida responde `email_address_invalid` (igual que un correo
+   inválido) y no `email_exists`. La app traduce ese error a _“Ese correo no es
+   válido o ya tiene una cuenta. Si ya te registraste, iniciá sesión o recuperá
+   tu acceso.”_.
 
 ### 4.3 Inicio de sesión
 
@@ -181,12 +191,25 @@ Pasos pendientes en el panel del proyecto:
 ### Enlaces de retorno dentro del APK
 
 - El enlace de confirmación y el de recuperación abren la app (esquema propio)
-  y vuelven con `?code=...`; `detectSessionInUrl` lo procesa y la sesión queda
-  iniciada.
+  y vuelven con `?code=...`.
+- En la web ese `code` lo procesa `detectSessionInUrl` del cliente de Supabase.
+  En el APK el enlace entra como **deep link**
+  (`doulingo://auth/callback?code=...`) y no pasa por la URL del WebView: lo
+  intercepta `src/lib/deepLink.js` (evento `appUrlOpen` de
+  `@capacitor/app`) y completa el intercambio PKCE con
+  `exchangeCodeForSession`.
 - Para que el esquema propio funcione hay que declararlo como _Redirect URL_
-  en el panel y, en la app, definir `VITE_SUPABASE_REDIRECT_URL`
-  (por ejemplo `doulingo://auth/callback`). Si no se define, se usa el origen
-  desde el que se abrió la app.
+  en el panel, tener el `intent-filter` en el `AndroidManifest.xml` y definir
+  `VITE_SUPABASE_NATIVE_REDIRECT_URL` (`doulingo://auth/callback`). Si no se
+  define, dentro del APK se usa ese mismo valor por omisión; en la web se usa
+  `VITE_SUPABASE_REDIRECT_URL` o, si está vacío, el origen desde el que se
+  abrió la app.
+- El flujo de recuperación sigue funcionando: al intercambiar el código,
+  Supabase dispara el evento `PASSWORD_RECOVERY` y la app muestra el
+  formulario de contraseña nueva.
+
+El detalle completo (proyecto Android, generación del APK y pruebas) está en
+[`docs/12-apk.md`](12-apk.md).
 
 ## 7. Límites de altas anónimas
 
@@ -213,6 +236,7 @@ dirección IP**). La app lo respeta:
 | `src/pages/ProfilePage.vue`         | Ruta protegida: alias, historial, privacidad, acciones                            |
 | `src/router/routes.js`, `index.js`  | Rutas `/acceso` y `/perfil` + guard de sesión                                     |
 | `src/layouts/MainLayout.vue`        | Botón de cuenta y aviso de cambio de cuenta                                       |
+| `src/lib/deepLink.js`               | Deep link del APK (`appUrlOpen`) e intercambio del código PKCE                    |
 
 Las pruebas y sus resultados están en
 [`docs/11-pruebas-auth.md`](11-pruebas-auth.md).
