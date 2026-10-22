@@ -40,6 +40,15 @@ function authErrorMessage(err, fallback) {
   ) {
     return 'El registro está deshabilitado en el proyecto de Supabase.'
   }
+  if (
+    raw.includes('over_email_send_rate_limit') ||
+    raw.includes('email rate limit')
+  ) {
+    return (
+      'El proyecto alcanzó el límite de correos por hora que puede enviar. ' +
+      'Probá de nuevo en un rato.'
+    )
+  }
   if (raw.includes('rate limit') || raw.includes('too many')) {
     return 'Demasiados intentos seguidos. Probá de nuevo en unos instantes.'
   }

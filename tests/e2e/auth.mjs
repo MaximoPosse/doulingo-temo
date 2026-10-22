@@ -201,14 +201,17 @@ if (uidA && uidB) {
     foreignInsert.error?.message
   )
 
+  // Con `select` PostgREST devuelve las filas que la RLS dejó pasar:
+  // si la política bloquea la actualización, la lista llega vacía.
   const foreignUpdate = await guestA
     .from('participant_progress')
     .update({ estado: 'intentada' })
     .eq('id', uidB)
+    .select('estado')
   runner.check(
     'A7 RLS: no puede modificar el progreso de otro',
-    foreignUpdate.data?.length === 0,
-    JSON.stringify(foreignUpdate.data)
+    !foreignUpdate.error && (foreignUpdate.data?.length ?? 0) === 0,
+    `error=${foreignUpdate.error?.message ?? 'ninguno'} data=${JSON.stringify(foreignUpdate.data)}`
   )
 
   const profileB = await guestB
