@@ -84,6 +84,41 @@ Unidad completada  ──► Unidad siguiente disponible (si está publicada)
   queda `en_curso`: no cuenta como lección completada hasta que se finaliza.
 - El detalle del modelo y las decisiones están en `docs/13-intentos.md`.
 
+## Competencia de expo (etapa 6)
+
+La competencia **no es una lección** y no afecta el avance de los cursos:
+
+| Aspecto            | Práctica (lecciones)                                | Competencia (expo)                                      |
+| ------------------ | --------------------------------------------------- | ------------------------------------------------------- |
+| Banco de preguntas | `preguntas` / `opciones` / `soluciones`             | `desafio_preguntas` / `desafio_opciones` / `desafio_soluciones` |
+| Corrección         | `registrar_respuesta()` / `check_answer()`          | `responder_partida()` (solo servidor)                   |
+| Repetición         | Cada intento se guarda; se conserva el mejor        | Intentos limitados por desafío; solo el mejor válido compite |
+| Efecto en el avance| Desbloquea la lección siguiente                     | Ninguno: no modifica `participant_progress`             |
+| Ranking            | No aplica                                           | `ranking_desafio()` por mejor intento válido            |
+
+Reglas de la competencia:
+
+- El **servidor** crea la partida, fija las preguntas y las reglas del intento
+  (puntos por acierto, duración y tolerancia) y registra el dueño.
+- Cada inicio con una clave nueva **consume un intento**; repetir la misma
+  clave devuelve la misma partida. Al agotar `intentos_permitidos` no se puede
+  empezar otra.
+- Los **puntos y los tiempos** se calculan y guardan solo en el servidor. El
+  cliente no puede insertar ni modificar puntajes oficiales.
+- Una sola respuesta por partida y pregunta: la primera queda firme y un envío
+  repetido no vuelve a sumar.
+- Estados de una partida: `en_curso`, `finalizada` (todas respondidas dentro del
+  plazo), `incompleta` (cierre anticipado) y `vencida` (fuera de
+  `expira_en + tolerancia`).
+- Solo `finalizada` compite. Desempate: más puntos, menor `duracion_ms` medida
+  en el servidor y finalización más temprana.
+- El tiempo se mide en el servidor; la interfaz muestra el temporizador con
+  `hora_servidor()` para no depender del reloj del celular.
+- Después de `expira_en` no se aceptan respuestas nuevas, pero se puede
+  finalizar durante la tolerancia para guardar lo ya respondido.
+
+El detalle completo está en `docs/14-desafios.md`.
+
 ## Diferenciación publicación vs avance
 
 - La **publicación** (unidad `published`, curso `status`) es propiedad del

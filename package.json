@@ -28,7 +28,9 @@
     "test:e2e:auth-ui": "node tests/e2e/auth_ui.mjs",
     "test:e2e:alias": "node tests/e2e/alias.mjs",
     "test:e2e:attempts": "node tests/e2e/attempts.mjs",
-    "test:e2e:attempts-ui": "node tests/e2e/attempts_ui.mjs"
+    "test:e2e:attempts-ui": "node tests/e2e/attempts_ui.mjs",
+    "test:e2e:challenges": "node tests/e2e/challenges.mjs",
+    "test:e2e:challenges-ui": "node tests/e2e/challenges_ui.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.2",

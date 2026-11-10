@@ -14,6 +14,7 @@
         <nav class="dl-nav">
           <q-btn flat no-caps label="Inicio" to="/" />
           <q-btn flat no-caps label="Cursos" to="/cursos" />
+          <q-btn flat no-caps label="Expo" to="/expo" />
           <q-btn
             flat
             no-caps

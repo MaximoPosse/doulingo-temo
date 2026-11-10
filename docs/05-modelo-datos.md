@@ -130,6 +130,8 @@ opción correcta. Errores de negocio: `PR_QUESTION_NOT_PUBLISHED` y
 | Políticas RLS y `check_answer`     | `supabase/migrations/0003_rls.sql`      |
 | Perfiles y progreso (etapa 4)      | `supabase/migrations/0004_auth.sql`     |
 | Intentos y respuestas (etapa 5)    | `supabase/migrations/0005_intentos.sql` |
+| Competencia de expo (etapa 6)      | `supabase/migrations/0006_desafios.sql` |
+| Datos de la expo (etapa 6)         | `supabase/migrations/0007_seed_desafios.sql` |
 | Script combinado                   | `supabase/setup.sql`                    |
 | Registro del proyecto y uso        | `supabase/README.md`                    |
 
@@ -151,3 +153,35 @@ trabajo (`useProgress.js`, clave `doulingo-progress`):
 Conceptos: **completada** (se terminó el intento), **aprobada** (≥ 60 % de
 aciertos) y **reprobada** (completada por debajo del umbral). Solo las lecciones
 aprobadas habilitan la siguiente. El detalle está en `docs/13-intentos.md`.
+
+## Competencia de expo (etapa 6)
+
+La competencia es un **mundo de datos separado de la práctica**. Usa su propio
+banco de preguntas y nunca pasa por `check_answer()`:
+
+| Tabla                 | Contenido                                                              |
+| --------------------- | ---------------------------------------------------------------------- |
+| `eventos`             | Evento de expo (`borrador`/`publicado`/`cerrado`, fechas y `es_prueba`) |
+| `desafios`            | Dificultad, duración, puntos por acierto, intentos y tolerancia        |
+| `desafio_preguntas`   | Preguntas del banco del desafío (independientes de `preguntas`)        |
+| `desafio_opciones`    | Opciones visibles del desafío (sin marca de solución)                  |
+| `desafio_soluciones`  | Opción correcta y explicación (**privada**, sin lectura por API)       |
+| `partidas`            | Intento del participante: foto de reglas, tiempos y resultado          |
+| `partida_preguntas`   | Preguntas fijadas para esa partida                                     |
+| `partida_respuestas`  | Una respuesta por partida/pregunta (corrección y puntos del servidor)  |
+
+Reglas clave:
+
+- El **servidor** crea la partida (`iniciar_partida`), fija las preguntas y las
+  reglas del intento, y calcula puntos y tiempos. El cliente solo envía IDs de
+  partida, pregunta y opción.
+- Una **respuesta por partida y pregunta** (`UNIQUE`): la primera queda firme;
+  un envío repetido devuelve la existente sin volver a sumar.
+- El ranking usa el **mejor intento válido** (`estado = 'finalizada'`) por
+  participante y desafío; `incompleta` y `vencida` no compiten.
+- El cliente no puede insertar, modificar ni borrar puntajes oficiales por
+  REST: solo leer sus propias partidas.
+- Los eventos y desafíos con `es_prueba = true` son internos: la interfaz los
+  oculta, pero la API los lee para las pruebas automáticas sin `service_role`.
+
+El diseño completo está en `docs/14-desafios.md`.

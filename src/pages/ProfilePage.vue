@@ -118,6 +118,10 @@
               <span class="dl-stat__label">Sin terminar</span>
             </div>
             <div class="dl-stat">
+              <span class="dl-stat__value">{{ validChallenges.length }}</span>
+              <span class="dl-stat__label">Desafíos válidos</span>
+            </div>
+            <div class="dl-stat">
               <span class="dl-stat__value">{{ identityType }}</span>
               <span class="dl-stat__label">Tipo de sesión</span>
             </div>
@@ -258,6 +262,71 @@
           </p>
         </section>
 
+        <!-- Desafíos de la expo -->
+        <section class="dl-card q-mt-md">
+          <h2 class="dl-card__title">Desafíos de la expo</h2>
+          <p class="dl-card__empty q-mb-sm">
+            Cada partida conserva su estado y su puntaje. Solo las partidas
+            válidas (todas las respuestas dentro del plazo) compiten en el
+            ranking; repetir un desafío no suma puntos extra.
+          </p>
+
+          <q-banner v-if="challengesError" rounded class="dl-error-banner">
+            <q-icon name="error_outline" size="22px" color="negative" />
+            {{ challengesError }}
+          </q-banner>
+
+          <ul v-else-if="challengeHistory.length" class="dl-attempts">
+            <li
+              v-for="partida in challengeHistory"
+              :key="partida.id"
+              class="dl-attempt"
+            >
+              <div class="dl-attempt__row">
+                <div class="dl-attempt__main">
+                  <span class="dl-attempt__lesson">{{
+                    partida.challengeTitle
+                  }}</span>
+                  <span class="dl-attempt__meta">
+                    {{
+                      formatDate(partida.finalizadoEn || partida.iniciadoEn)
+                    }}
+                    · {{ challengeDetail(partida) }}
+                  </span>
+                </div>
+                <span class="dl-badge" :class="challengeBadgeClass(partida)">
+                  {{ challengeLabel(partida) }}
+                </span>
+                <q-btn
+                  no-caps
+                  flat
+                  dense
+                  color="primary"
+                  label="Ver desafío"
+                  :to="{
+                    name: 'desafio',
+                    params: { challengeId: partida.desafioId }
+                  }"
+                />
+              </div>
+            </li>
+          </ul>
+
+          <p v-else class="dl-card__empty">
+            Todavía no jugaste ningún desafío. Entrá a la expo para competir por
+            el mejor puntaje.
+          </p>
+
+          <q-btn
+            no-caps
+            outline
+            color="primary"
+            class="dl-btn-ghost full-width q-mt-md"
+            label="IR A LA EXPO"
+            :to="{ name: 'expo' }"
+          />
+        </section>
+
         <!-- Acciones -->
         <section class="dl-card q-mt-md">
           <h2 class="dl-card__title">Acciones</h2>
@@ -313,6 +382,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useProgress } from '@/composables/useProgress'
 import { getUnits } from '@/data/courseRepository'
 import { fetchAttemptAnswers, fetchAttempts } from '@/data/attemptRepository'
+import { fetchMyChallengeHistory } from '@/data/challengeRepository'
 
 const router = useRouter()
 const {
@@ -336,6 +406,8 @@ const attemptsError = ref(null)
 const answersByAttempt = ref({})
 const expandedAttemptId = ref(null)
 const loadingAnswers = ref(null)
+const challengeHistory = ref([])
+const challengesError = ref(null)
 
 const identityType = computed(() => (isGuest.value ? 'Invitado' : 'Permanente'))
 const approved = computed(() => progress.value.approvedLessons)
@@ -350,6 +422,9 @@ const inProgressAttempts = computed(() =>
   attempts.value.filter(attempt => attempt.estado === 'en_curso')
 )
 const lastAttempt = computed(() => finalizedAttempts.value[0] ?? null)
+const validChallenges = computed(() =>
+  challengeHistory.value.filter(partida => partida.estado === 'finalizada')
+)
 
 const aliasRule = value => {
   const clean = (value ?? '')
@@ -399,6 +474,32 @@ function attemptDetail(attempt) {
   return `${attempt.aciertos} de ${attempt.totalActividades} correctas`
 }
 
+function challengeLabel(partida) {
+  return (
+    {
+      en_curso: 'Sin terminar',
+      finalizada: 'Válida',
+      incompleta: 'Incompleta',
+      vencida: 'Vencida'
+    }[partida.estado] ?? partida.estado
+  )
+}
+
+function challengeBadgeClass(partida) {
+  if (partida.estado === 'finalizada') return 'dl-badge--available'
+  if (partida.estado === 'en_curso') return 'dl-badge--info'
+  return 'dl-badge--locked'
+}
+
+function challengeDetail(partida) {
+  if (partida.estado === 'en_curso') {
+    return `${partida.aciertos + partida.errores} de ${
+      partida.totalPreguntas
+    } respondidas`
+  }
+  return `${partida.puntos} pts · ${partida.aciertos} de ${partida.totalPreguntas} correctas`
+}
+
 function answersFor(attempt) {
   return answersByAttempt.value[attempt.id] ?? []
 }
@@ -435,6 +536,16 @@ async function loadAttempts() {
   }
 }
 
+async function loadChallengeHistory() {
+  challengesError.value = null
+  try {
+    challengeHistory.value = await fetchMyChallengeHistory()
+  } catch (err) {
+    challengesError.value =
+      err?.message ?? 'No se pudo leer el historial de desafíos.'
+  }
+}
+
 async function loadTitles() {
   try {
     const units = await getUnits('javascript')
@@ -451,7 +562,7 @@ async function loadTitles() {
 onMounted(async () => {
   aliasDraft.value = profile.value?.alias ?? ''
   await initAuth()
-  await Promise.all([loadTitles(), loadAttempts()])
+  await Promise.all([loadTitles(), loadAttempts(), loadChallengeHistory()])
   loading.value = false
 })
 

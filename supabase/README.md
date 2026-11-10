@@ -8,9 +8,11 @@ aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
 
 - **Nombre del proyecto:** `doulingo`
 - **Propósito:** almacenar el contenido educativo de la plataforma (cursos,
-  unidades, lecciones, preguntas, opciones y soluciones) de forma relacional
-  como fuente única de verdad. La aplicación Vue/Quasar consulta este backend
-  vía REST (PostgREST) usando las credenciales anónimas del cliente.
+  unidades, lecciones, preguntas, opciones y soluciones), el avance de cada
+  participante (perfiles, intentos y progreso) y la competencia de la expo
+  (eventos, desafíos, partidas y ranking), de forma relacional como fuente
+  única de verdad. La aplicación Vue/Quasar consulta este backend vía REST
+  (PostgREST) usando las credenciales anónimas del cliente.
 - **Organización de tablas (resumen):**
 
   | Tabla        | Contenido                                                        | Relación                          |
@@ -21,6 +23,11 @@ aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
   | `preguntas`  | Enunciados (opción múltiple)                                     | `leccion_id` FK a `lecciones`     |
   | `opciones`   | Opciones visibles de cada pregunta (**sin** marca de solución)   | `pregunta_id` FK a `preguntas`    |
   | `soluciones` | Opción correcta + explicación de cada pregunta (**privada**)     | `pregunta_id` PK/FK a `preguntas` |
+  | `eventos`    | Evento de expo (`borrador`/`publicado`/`cerrado`, fechas)        | —                                 |
+  | `desafios`   | Desafío: dificultad, duración, puntos, intentos y tolerancia     | `evento_id` FK a `eventos`        |
+  | `desafio_preguntas` / `desafio_opciones` | Banco propio de la competencia (sin soluciones visibles) | `desafio_id` / `pregunta_id`      |
+  | `desafio_soluciones` | Solución privada de cada pregunta de desafío              | `pregunta_id` PK/FK               |
+  | `partidas` / `partida_preguntas` / `partida_respuestas` | Intentos, preguntas asignadas y respuestas de la competencia | `participante_id`, `partida_id` |
   - Todas las secuencias (`orden` de unidades, lecciones, preguntas y
     opciones) se almacenan en una columna `orden int > 0`; la aplicación nunca
     depende del orden físico de inserción.
@@ -32,23 +39,25 @@ aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
 ```
 supabase/
 ├── README.md                 ← este archivo
-├── setup.sql                 ← los cinco archivos en un solo script
+├── setup.sql                 ← los siete archivos en un solo script
 └── migrations/
     ├── 0001_schema.sql       ← tablas, PKs, FKs y restricciones
     ├── 0002_seed.sql         ← datos iniciales (curso JavaScript)
     ├── 0003_rls.sql          ← RLS + función check_answer()
     ├── 0004_auth.sql         ← perfiles, progreso del participante y RLS ampliada
-    └── 0005_intentos.sql     ← intentos, respuestas y resultado calculado en el servidor
+    ├── 0005_intentos.sql     ← intentos, respuestas y resultado calculado en el servidor
+    ├── 0006_desafios.sql     ← competencia de expo: evento, desafíos, partidas y ranking
+    └── 0007_seed_desafios.sql ← datos de la expo y desafíos internos de prueba
 ```
 
 ## Cómo crear el proyecto y aplicar el esquema
 
 1. Crear un proyecto en [supabase.com](https://supabase.com) llamado
    **`doulingo`** (lanzar la base).
-2. Ir a **SQL Editor** y ejecutar, **en orden**, los cinco archivos:
-   `0001_schema.sql`, `0002_seed.sql`, `0003_rls.sql`, `0004_auth.sql` y
-   `0005_intentos.sql` (o pegar `setup.sql`, que es la concatenación de los
-   cinco).
+2. Ir a **SQL Editor** y ejecutar, **en orden**, los siete archivos:
+   `0001_schema.sql`, `0002_seed.sql`, `0003_rls.sql`, `0004_auth.sql`,
+   `0005_intentos.sql`, `0006_desafios.sql` y `0007_seed_desafios.sql` (o pegar
+   `setup.sql`, que es la concatenación de los siete).
 3. En **Settings → API** copiar la **Project URL** y la **publishable key**
    (o **anon public key** en proyectos antiguos) y guardarlas localmente en
    `.env` (nunca en el repositorio):
@@ -115,6 +124,50 @@ Reglas del modelo:
 
 Detalle del diseño en [`docs/13-intentos.md`](../docs/13-intentos.md).
 
+## Competencia de expo (etapa 6)
+
+`0006_desafios.sql` agrega la competencia y `0007_seed_desafios.sql` la carga
+inicial. Es un mundo **separado de la práctica**: usa su propio banco y
+`check_answer()` no lo consulta.
+
+| Tabla                                                | Contenido                                                              | Acceso                                          |
+| ---------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------- |
+| `eventos`                                            | Evento de expo con fechas, estado y `es_prueba`                        | Lectura pública si está `publicado` o `cerrado` |
+| `desafios`                                           | Dificultad, duración, puntos por acierto, intentos y tolerancia        | Lectura pública si el evento está visible       |
+| `desafio_preguntas` / `desafio_opciones`             | Banco de preguntas y opciones del desafío                              | Lectura pública si el desafío está visible      |
+| `desafio_soluciones`                                 | Opción correcta + explicación (**privada**)                            | Sin lectura: solo funciones del servidor        |
+| `partidas`                                           | Intento: foto de reglas, inicio/cierre y resultado                     | Solo el propio participante                     |
+| `partida_preguntas` / `partida_respuestas`           | Preguntas fijadas y una respuesta por partida/pregunta                 | Solo el propio participante                     |
+
+| Función                                             | Qué hace                                                                                                                   |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `iniciar_partida(desafio, clave)`                   | Crea la partida, fija preguntas y reglas y consume un intento. La misma `clave` devuelve la MISMA partida (idempotencia).   |
+| `responder_partida(partida, pregunta, opcion)`      | Valida pertenencia, vigencia y opción; guarda la primera respuesta y calcula los puntos en el servidor.                     |
+| `finalizar_partida(partida)`                        | Cierra como `finalizada`, `incompleta` o `vencida`, calcula el resultado y es idempotente.                                  |
+| `resultado_partida(partida)`                        | Detalle de una partida cerrada; revela la solución solo cuando el desafío o el evento cerraron.                             |
+| `ranking_desafio(desafio, limite)`                  | Mejor intento válido por participante; desempata por puntos, duración del servidor y finalización más temprana.             |
+| `hora_servidor()`                                   | Hora oficial para el temporizador, sin depender del reloj del celular.                                                      |
+
+Reglas del modelo:
+
+- El **servidor crea la partida**, registra al dueño y fija las preguntas y las
+  reglas del intento (puntos, duración y tolerancia). El cliente solo envía IDs
+  de partida, pregunta y opción.
+- **Una respuesta por partida y pregunta**: la primera queda firme; un envío
+  repetido devuelve la existente sin volver a sumar.
+- **Puntos y tiempos oficiales solo en el servidor**: el cliente no puede
+  insertar, modificar ni borrar partidas, preguntas asignadas ni respuestas por
+  REST (tampoco borrar partidas para reiniciar intentos).
+- **Ranking comparable**: solo `estado = 'finalizada'`; repetir un desafío no
+  suma puntos sin límite porque cada inicio consume un intento.
+- `es_prueba = true` oculta eventos y desafíos en la interfaz de la expo, pero
+  la API los lee para las pruebas automáticas sin usar `service_role`.
+- El tiempo se mide en el servidor: después de `expira_en` no se aceptan
+  respuestas nuevas, pero se puede finalizar durante `tolerancia_segundos` para
+  guardar lo ya respondido.
+
+Detalle del diseño en [`docs/14-desafios.md`](../docs/14-desafios.md).
+
 ## Seguridad (RLS)
 
 - **Lectura pública** (usuario anónimo): cursos `disponible` y el listado de
@@ -128,6 +181,11 @@ Detalle del diseño en [`docs/13-intentos.md`](../docs/13-intentos.md).
   soluciones se cargan desde **Table Editor (admin)** o SQL Editor.
 - **Soluciones ocultas**: la tabla `soluciones` no tiene política de lectura
   y además se revocan sus permisos → `SELECT` directo devuelve vacío/denegado.
+  Lo mismo aplica a `desafio_soluciones` en la competencia.
+- **Partidas protegidas**: `partidas`, `partida_preguntas` y
+  `partida_respuestas` solo se leen si `participante_id = auth.uid()`; no hay
+  políticas de INSERT/UPDATE/DELETE, así que los puntajes oficiales solo los
+  escriben las funciones de la etapa 6.
 - **Comprobación de respuestas**: la aplicación llama a la función
   `check_answer(pregunta_id, opcion_id)` (RPC). La función es
   `SECURITY DEFINER`, valida en el servidor que la pregunta exista y esté
@@ -141,9 +199,13 @@ Detalle del diseño en [`docs/13-intentos.md`](../docs/13-intentos.md).
 
 - Los archivos `0001` a `0003` son idempotentes (re-ejecutables) gracias a
   `ON CONFLICT DO NOTHING` y `create ... if not exists` / `drop policy if
-exists`. `0004` y `0005` también: usan `create ... if not exists`,
-  `create or replace function` y `drop policy if exists`.
+  exists`. `0004` a `0007` también: usan `create ... if not exists`,
+  `create or replace function`, `drop policy if exists` y
+  `ON CONFLICT DO UPDATE` en los datos iniciales.
 - Con la sesión iniciada, el avance por lección se guarda en la base
   (`participant_progress` como resumen y `intentos`/`intentos_respuestas` como
   historial); el dispositivo conserva además una copia local (`localStorage`,
   `useProgress`) para funcionar sin conexión.
+- La competencia de la expo vive en sus propias tablas (`eventos`, `desafios`,
+  `partidas`, etc.) y no modifica `participant_progress` ni el avance de los
+  cursos. El ranking se consulta con `ranking_desafio()`.

@@ -29,6 +29,16 @@ const routes = [
         component: () => import('@/pages/LessonPage.vue')
       },
       {
+        path: 'expo',
+        name: 'expo',
+        component: () => import('@/pages/ExpoPage.vue')
+      },
+      {
+        path: 'expo/:challengeId',
+        name: 'desafio',
+        component: () => import('@/pages/ChallengePage.vue')
+      },
+      {
         path: 'acceso',
         name: 'acceso',
         component: () => import('@/pages/AuthPage.vue')

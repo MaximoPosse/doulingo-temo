@@ -36,6 +36,8 @@ Variables opcionales:
 | `node tests/e2e/alias.mjs`       | Alias público, sufijo y aislamiento del perfil entre participantes (11 casos).                                                              |
 | `node tests/e2e/attempts.mjs`    | Intentos, respuestas, idempotencia, progreso calculado en el servidor y aislamiento (35 casos).                                             |
 | `node tests/e2e/attempts_ui.mjs` | Guardado confirmado, perfil (último intento + historial + respuestas), aislamiento entre dispositivos y fallo de red al guardar (14 casos). |
+| `node tests/e2e/challenges.mjs`  | Competencia de expo: banco separado, partidas, validaciones, doble envío, dos jugadores, vencida, ranking y puntajes bloqueados.            |
+| `node tests/e2e/challenges_ui.mjs` | Expo, juego como invitado, resultado, detalle sin soluciones, ranking, perfil, vencida y reintento de guardado.                            |
 
 `auth.mjs` y `auth.mjs ui` necesitan que el proyecto tenga **habilitados los
 invitados anónimos** y aplicado `supabase/migrations/0004_auth.sql`; si no, los
@@ -44,6 +46,12 @@ casos dependientes fallan y lo indican en el mensaje.
 `attempts.mjs`, `attempts_ui.mjs` y el guardado real de resultados necesitan
 además `supabase/migrations/0005_intentos.sql` aplicada: sin ella la app avisa
 "No se pudo comenzar el intento" y no permite responder.
+
+`challenges.mjs` y `challenges_ui.mjs` necesitan `0006_desafios.sql` y
+`0007_seed_desafios.sql` aplicadas. Los desafíos internos (`es_prueba = true`)
+permiten jugar, vencer y agotar intentos sin tocar los datos públicos de la
+expo; la interfaz de la expo no los muestra, pero las pruebas los abren por URL
+directa.
 
 Los casos que necesitan **enviar correo** se marcan `SKIP` cuando el proyecto
 agotó su cupo de 2 correos por hora: el resumen los separa de los fallos
