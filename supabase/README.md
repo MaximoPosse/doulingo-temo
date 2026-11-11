@@ -209,3 +209,14 @@ Detalle del diseño en [`docs/14-desafios.md`](../docs/14-desafios.md).
 - La competencia de la expo vive en sus propias tablas (`eventos`, `desafios`,
   `partidas`, etc.) y no modifica `participant_progress` ni el avance de los
   cursos. El ranking se consulta con `ranking_desafio()`.
+# Aplicación de cambios
+
+Después de `0007_seed_desafios.sql`, aplicar también
+`migrations/0008_ranking_admin.sql`. El script agrega la proyección pública de
+ranking, Realtime y roles administrativos. No usar `service_role` en el
+frontend ni incluirlo en respaldos.
+
+En instalaciones que ya aplicaron 0008, aplicar también
+`migrations/0009_admin_content_guards.sql` para habilitar la lectura
+administrativa de soluciones y validar opciones distintas y relaciones de
+solución.

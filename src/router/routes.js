@@ -39,6 +39,17 @@ const routes = [
         component: () => import('@/pages/ChallengePage.vue')
       },
       {
+        path: 'ranking/:eventId?',
+        name: 'ranking-publico',
+        component: () => import('@/pages/PublicRankingPage.vue')
+      },
+      {
+        path: 'admin',
+        name: 'admin',
+        meta: { requiresAuth: true },
+        component: () => import('@/pages/AdminPage.vue')
+      },
+      {
         path: 'acceso',
         name: 'acceso',
         component: () => import('@/pages/AuthPage.vue')
