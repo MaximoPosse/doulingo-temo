@@ -5,6 +5,7 @@
         <q-icon name="arrow_back" size="18px" />
         Volver a cursos
       </router-link>
+      <MascotCorner name="hachiware-sentado" />
 
       <!-- Cargando -->
       <div v-if="loading" class="dl-states">
@@ -90,6 +91,7 @@
 </template>
 
 <script setup>
+import MascotCorner from '@/components/MascotCorner.vue'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCourseBySlug, getUnits } from '@/data/courseRepository'

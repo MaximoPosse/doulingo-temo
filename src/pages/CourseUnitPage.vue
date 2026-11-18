@@ -5,6 +5,7 @@
         <q-icon name="arrow_back" size="18px" />
         Volver al curso
       </router-link>
+      <MascotCorner name="usagi-tumbado" />
 
       <!-- Cargando -->
       <div v-if="loading" class="dl-states">
@@ -95,6 +96,7 @@
 </template>
 
 <script setup>
+import MascotCorner from '@/components/MascotCorner.vue'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCourseBySlug, getUnits } from '@/data/courseRepository'

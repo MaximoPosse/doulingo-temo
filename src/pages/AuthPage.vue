@@ -1,6 +1,7 @@
 <template>
   <q-page class="dl-page">
     <div class="dl-page__inner dl-auth">
+      <FriendsRow compact class="dl-auth__friends" />
       <div class="dl-auth__card">
         <img :src="logoImg" alt="Logo de CodeLingua" class="dl-auth__mascot" />
         <h1 class="dl-auth__title">{{ title }}</h1>
@@ -294,6 +295,7 @@
 </template>
 
 <script setup>
+import FriendsRow from '@/components/FriendsRow.vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 

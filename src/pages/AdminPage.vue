@@ -1,6 +1,7 @@
 <template>
   <q-page class="admin-page"
     ><main class="admin-page__shell">
+      <MascotCorner name="hachiware-tumbado" />
       <header class="admin-page__header"
         ><div
           ><span class="eyebrow">Panel seguro</span><h1>Contenido y eventos</h1
@@ -127,6 +128,7 @@
 </template>
 
 <script setup>
+import MascotCorner from '@/components/MascotCorner.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { getSupabaseClient } from '@/lib/supabase'
 

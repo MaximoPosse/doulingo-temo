@@ -5,6 +5,7 @@
         <q-icon name="arrow_back" size="18px" />
         Volver a la expo
       </router-link>
+      <MascotCorner name="chiikawa-saludo" />
 
       <div v-if="loading" class="dl-challenge__state">
         <q-spinner color="primary" size="34px" class="q-mb-sm" />
@@ -740,6 +741,7 @@
 </template>
 
 <script setup>
+import MascotCorner from '@/components/MascotCorner.vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 

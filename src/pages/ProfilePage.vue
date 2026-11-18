@@ -5,6 +5,7 @@
         <q-icon name="arrow_back" size="18px" />
         Volver a los cursos
       </router-link>
+      <MascotCorner name="usagi-rodando" />
 
       <div v-if="loading" class="dl-states">
         <q-spinner color="primary" size="34px" class="q-mb-sm" />
@@ -373,6 +374,7 @@
 </template>
 
 <script setup>
+import MascotCorner from '@/components/MascotCorner.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 

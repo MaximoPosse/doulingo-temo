@@ -2,6 +2,7 @@
   <q-page class="public-ranking">
     <main class="public-ranking__shell">
       <header class="public-ranking__header">
+        <MascotCorner name="hachiware-helado" />
         <div>
           <span class="public-ranking__eyebrow">Ranking en vivo · Expo</span>
           <h1>{{ event?.titulo || 'Ranking de la expo' }}</h1>
@@ -82,6 +83,7 @@
 </template>
 
 <script setup>
+import MascotCorner from '@/components/MascotCorner.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
