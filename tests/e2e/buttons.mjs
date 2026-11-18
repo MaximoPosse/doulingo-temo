@@ -5,11 +5,18 @@
 // Requiere la app servida (por defecto http://localhost:9100, la build de
 // producción servida con `node tests/e2e/serve.mjs`).
 
-import { BASE_URL, createRunner, launchBrowser, sleep } from './helpers.mjs'
+import {
+  BASE_URL,
+  createRunner,
+  launchBrowser,
+  sleep,
+  entrarComoInvitado
+} from './helpers.mjs'
 
 const runner = createRunner('=== Recorrido de botones e interfaz ===')
 const browser = await launchBrowser()
 const page = await browser.newPage()
+await entrarComoInvitado(page)
 const pageErrors = []
 page.on('pageerror', error => pageErrors.push(String(error)))
 

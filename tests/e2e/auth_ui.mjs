@@ -63,12 +63,12 @@ try {
   await sleep(3000)
   const guestText = await waitForText(
     guestPage,
-    /Sesión activa|Mi cuenta|no está habilitado|Anonymous/i
+    /Sesión activa|Mi cuenta|invitado#|no está habilitado|Anonymous/i
   )
   runner.check(
     'El acceso como invitado funciona (o explica cómo habilitarlo)',
     /no está habilitado|Anonymous/i.test(guestText) ||
-      /Sesión activa|Mi cuenta/i.test(guestText),
+      /Sesión activa|Mi cuenta|invitado#/i.test(guestText),
     guestText.slice(0, 180)
   )
 

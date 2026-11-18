@@ -11,7 +11,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { BASE_URL, createRunner, launchBrowser, sleep } from './helpers.mjs'
+import {
+  BASE_URL,
+  createRunner,
+  launchBrowser,
+  sleep,
+  entrarComoInvitado
+} from './helpers.mjs'
 
 const runner = createRunner('Diseño adaptable (celulares)')
 
@@ -51,6 +57,7 @@ if (shotsDir) fs.mkdirSync(shotsDir, { recursive: true })
 const browser = await launchBrowser()
 try {
   const page = await browser.newPage()
+  await entrarComoInvitado(page)
   for (const ancho of ANCHOS) {
     await page.setViewport({
       width: ancho.w,

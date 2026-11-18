@@ -12,7 +12,8 @@ import {
   createRunner,
   launchBrowser,
   rest,
-  sleep
+  sleep,
+  entrarComoInvitado
 } from './helpers.mjs'
 
 const UNIT_ID = '10000000-0000-0000-0000-000000000001'
@@ -59,6 +60,7 @@ if (current === initial) {
 
 const browser = await launchBrowser()
 const page = await browser.newPage()
+await entrarComoInvitado(page)
 try {
   await page.goto(`${BASE_URL}/#/cursos/javascript`, {
     waitUntil: 'networkidle0'

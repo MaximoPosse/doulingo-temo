@@ -8,7 +8,7 @@ import {
 
 import routes from './routes.js'
 import { initAuth, useAuth } from '@/composables/useAuth'
-import { isNativeApp } from '@/lib/deepLink'
+import { alerta } from '@/lib/alertas'
 
 /*
  * If not building with SSR mode, you can
@@ -36,20 +36,17 @@ export default defineRouter((/* { store, ssrContext } */) => {
     history: createHistory(import.meta.env.QUASAR_VUE_ROUTER_BASE)
   })
 
-  // Rutas protegidas: requieren una sesión activa (invitado o cuenta).
-  // Antes de decidir se espera a que la sesión se restaure, para no
-  // expulsar a un participante que ya tenía su sesión guardada.
+  // Todo exige una sesión (invitado o cuenta) salvo el inicio, la pantalla de
+  // acceso, el ranking público (se proyecta en la expo) y la página de error.
+  // Antes de decidir se espera a que la sesión se restaure, para no expulsar
+  // a un participante que ya tenía su sesión guardada.
+  const PUBLICAS = ['inicio', 'acceso', 'ranking-publico', 'no-encontrada']
   Router.beforeEach(async to => {
-    // En el APK todo el recorrido exige sesión: la persona se registra con
-    // su correo y su usuario antes de empezar, así sus datos y su puntaje
-    // quedan en el ranking.
-    const exigeSesion =
-      to.meta?.requiresAuth ||
-      (isNativeApp() && to.name !== 'acceso' && to.name !== 'ranking-publico')
-    if (!exigeSesion) return true
+    if (PUBLICAS.includes(to.name)) return true
     await initAuth()
     const { session, recoveryMode } = useAuth()
     if (session.value || recoveryMode.value) return true
+    alerta('aviso', 'Para continuar entrá como invitado o creá una cuenta.')
     return { name: 'acceso', query: { next: to.fullPath } }
   })
 

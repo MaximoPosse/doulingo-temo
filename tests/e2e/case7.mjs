@@ -5,11 +5,18 @@
 // La app no debe marcar la opción como incorrecta cuando falla la red, debe
 // avisar y permitir reintentar; la lección debe poder completarse igual.
 
-import { BASE_URL, createRunner, launchBrowser, sleep } from './helpers.mjs'
+import {
+  BASE_URL,
+  createRunner,
+  launchBrowser,
+  sleep,
+  entrarComoInvitado
+} from './helpers.mjs'
 
 const runner = createRunner('=== Caso 7: fallo de red al comprobar ===')
 const browser = await launchBrowser()
 const page = await browser.newPage()
+await entrarComoInvitado(page)
 
 try {
   await page.goto(`${BASE_URL}/#/`, { waitUntil: 'networkidle0' })

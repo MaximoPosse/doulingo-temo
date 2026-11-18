@@ -33,6 +33,7 @@ import {
   upgradeGuestToAccount
 } from '@/data/authRepository'
 import { attachToUser } from '@/composables/useProgress'
+import { alerta } from '@/lib/alertas'
 import { registerDeepLinkHandler } from '@/lib/deepLink'
 
 const LAST_UID_KEY = 'doulingo-last-uid'
@@ -53,6 +54,18 @@ const authError = ref(null)
 const notice = ref(null)
 const accountChanged = ref(false)
 const recoveryMode = ref(false)
+
+// Cada aviso se guarda para mostrarlo dentro de la pantalla y además sale como
+// alerta emergente, así se nota siempre aunque la persona no mire el cartel.
+function avisoOk(mensaje) {
+  notice.value = mensaje
+  alerta('ok', mensaje)
+}
+
+function avisoError(mensaje) {
+  authError.value = mensaje
+  alerta('error', mensaje)
+}
 
 let readyPromise = null
 let unsubscribe = null
@@ -133,7 +146,7 @@ export function initAuth() {
         const current = await getCurrentSession()
         await applySession(current)
       } catch (err) {
-        authError.value = err?.message ?? 'No se pudo leer la sesión.'
+        avisoError(err?.message ?? 'No se pudo leer la sesión.')
         status.value = 'sin-sesion'
       }
 
@@ -143,8 +156,9 @@ export function initAuth() {
         setTimeout(async () => {
           if (event === 'PASSWORD_RECOVERY') {
             recoveryMode.value = true
-            notice.value =
+            avisoOk(
               'Acceso recuperado: definí una nueva contraseña para tu cuenta.'
+            )
           }
           if (event === 'SIGNED_OUT') {
             await applySession(null)
@@ -186,7 +200,7 @@ export async function completeDeepLink(code) {
     await applySession(current)
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo completar el acceso.'
+    avisoError(err?.message ?? 'No se pudo completar el acceso.')
     return { ok: false }
   }
 }
@@ -215,10 +229,10 @@ export async function startGuest() {
   try {
     const newSession = await startGuestSession()
     await applySession(newSession)
+    avisoOk('Entraste como invitado. Tu avance queda guardado con esta sesión.')
     return { ok: true }
   } catch (err) {
-    authError.value =
-      err?.message ?? 'No se pudo iniciar la sesión de invitado.'
+    avisoError(err?.message ?? 'No se pudo iniciar la sesión de invitado.')
     return { ok: false }
   }
 }
@@ -234,8 +248,7 @@ export async function register({ email, password, alias: newAlias }) {
     })
     if (newSession) {
       await applySession(newSession)
-      notice.value =
-        '¡Cuenta creada! Ya podés entrar con tu correo y contraseña.'
+      avisoOk('¡Cuenta creada! Ya podés entrar con tu correo y contraseña.')
       return { ok: true, confirmed: true }
     }
     // Si el proyecto no exige confirmar el correo, el alta ya devuelve la
@@ -244,17 +257,17 @@ export async function register({ email, password, alias: newAlias }) {
     try {
       const entered = await signInWithPassword({ email, password })
       await applySession(entered)
-      notice.value =
-        '¡Cuenta creada! Ya podés entrar con tu correo y contraseña.'
+      avisoOk('¡Cuenta creada! Ya podés entrar con tu correo y contraseña.')
       return { ok: true, confirmed: true }
     } catch {
-      notice.value =
+      avisoOk(
         'Cuenta creada. Confirmá el correo que te enviamos y después ' +
-        'ingresá con tu correo y contraseña.'
+          'ingresá con tu correo y contraseña.'
+      )
       return { ok: true, confirmed: false }
     }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo crear la cuenta.'
+    avisoError(err?.message ?? 'No se pudo crear la cuenta.')
     return { ok: false }
   }
 }
@@ -265,9 +278,10 @@ export async function signIn({ email, password }) {
   try {
     const newSession = await signInWithPassword({ email, password })
     await applySession(newSession)
+    avisoOk('¡Bienvenido! Iniciaste sesión.')
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo iniciar sesión.'
+    avisoError(err?.message ?? 'No se pudo iniciar sesión.')
     return { ok: false }
   }
 }
@@ -278,13 +292,14 @@ export async function signOut() {
   try {
     await signOutSession()
     await applySession(null)
-    notice.value =
+    avisoOk(
       'Cerraste sesión. Tu historial de invitado queda guardado en este ' +
-      'dispositivo, pero si lo borrás o cambiás de dispositivo no vas a ' +
-      'poder recuperarlo.'
+        'dispositivo, pero si lo borrás o cambiás de dispositivo no vas a ' +
+        'poder recuperarlo.'
+    )
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo cerrar la sesión.'
+    avisoError(err?.message ?? 'No se pudo cerrar la sesión.')
     return { ok: false }
   }
 }
@@ -294,12 +309,13 @@ export async function requestRecovery(email) {
   notice.value = null
   try {
     await requestPasswordRecovery(email)
-    notice.value =
+    avisoOk(
       'Si el correo está registrado, te enviamos un enlace para definir una ' +
-      'nueva contraseña.'
+        'nueva contraseña.'
+    )
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo enviar el correo.'
+    avisoError(err?.message ?? 'No se pudo enviar el correo.')
     return { ok: false }
   }
 }
@@ -309,10 +325,10 @@ export async function resendConfirmation(email) {
   notice.value = null
   try {
     await resendConfirmationEmail(email)
-    notice.value = 'Reenviamos el correo de confirmación.'
+    avisoOk('Reenviamos el correo de confirmación.')
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo reenviar el correo.'
+    avisoError(err?.message ?? 'No se pudo reenviar el correo.')
     return { ok: false }
   }
 }
@@ -323,10 +339,10 @@ export async function setNewPassword(password) {
   try {
     await updatePassword(password)
     recoveryMode.value = false
-    notice.value = '¡Contraseña actualizada!'
+    avisoOk('¡Contraseña actualizada!')
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo actualizar la contraseña.'
+    avisoError(err?.message ?? 'No se pudo actualizar la contraseña.')
     return { ok: false }
   }
 }
@@ -347,12 +363,13 @@ export async function convertToAccount({ email, password }) {
     } catch {
       /* la función puede no estar aplicada todavía */
     }
-    notice.value =
+    avisoOk(
       '¡Listo! Tu cuenta ahora es permanente: conservás tu alias, tu ' +
-      'historial y tu identificador.'
+        'historial y tu identificador.'
+    )
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo convertir la cuenta.'
+    avisoError(err?.message ?? 'No se pudo convertir la cuenta.')
     return { ok: false }
   }
 }
@@ -362,15 +379,15 @@ export async function changeAlias(newAlias) {
   notice.value = null
   const uid = session.value?.user?.id
   if (!uid) {
-    authError.value = 'Necesitás una sesión para cambiar el alias.'
+    avisoError('Necesitás una sesión para cambiar el alias.')
     return { ok: false }
   }
   try {
     profile.value = await saveAlias(uid, newAlias)
-    notice.value = 'Alias actualizado.'
+    avisoOk('Alias actualizado.')
     return { ok: true }
   } catch (err) {
-    authError.value = err?.message ?? 'No se pudo guardar el alias.'
+    avisoError(err?.message ?? 'No se pudo guardar el alias.')
     return { ok: false }
   }
 }

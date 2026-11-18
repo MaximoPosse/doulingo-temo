@@ -7,7 +7,13 @@
 // y comprueba que los corazones bajen con cada error, que al llegar a cero el
 // botón pase a "VER MI RESULTADO" y que se muestre el resultado guardado.
 
-import { BASE_URL, createRunner, launchBrowser, sleep } from './helpers.mjs'
+import {
+  BASE_URL,
+  createRunner,
+  entrarComoInvitado,
+  launchBrowser,
+  sleep
+} from './helpers.mjs'
 
 const runner = createRunner('Gran desafío (interfaz, vidas)')
 const DESAFIO = '50000000-0000-0000-0000-000000000010'
@@ -16,6 +22,7 @@ const browser = await launchBrowser()
 try {
   const page = await browser.newPage()
   await page.setViewport({ width: 390, height: 844, isMobile: true })
+  await entrarComoInvitado(page)
   await page.goto(`${BASE_URL}/#/expo/${DESAFIO}`, {
     waitUntil: 'networkidle0'
   })

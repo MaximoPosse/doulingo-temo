@@ -172,3 +172,21 @@ export function createRunner(title) {
 }
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+// Como toda la app exige una sesión, las pruebas de interfaz entran primero
+// como invitado desde la pantalla de acceso (igual que una persona).
+export async function entrarComoInvitado(page) {
+  await page.goto(`${BASE_URL}/#/acceso`, { waitUntil: 'networkidle0' })
+  await page.waitForSelector('.dl-auth__card', { timeout: 20000 })
+  for (const boton of await page.$$('.q-btn')) {
+    const texto = await boton.evaluate(el => el.textContent)
+    if (/continuar como invitado/i.test(texto)) {
+      await boton.click()
+      break
+    }
+  }
+  await page.waitForFunction(() => !location.hash.includes('/acceso'), {
+    timeout: 30000
+  })
+  await sleep(600)
+}

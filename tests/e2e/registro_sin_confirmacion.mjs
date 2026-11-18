@@ -59,11 +59,14 @@ try {
       boton?.click()
     })
 
-    // Entra al instante: pasa a /perfil con sesión.
+    // Entra al instante: sale de la pantalla de acceso con sesión.
     let enPerfil = false
     for (let t = 0; t < 30 && !enPerfil; t++) {
       await sleep(500)
-      enPerfil = page.url().includes('/perfil')
+      enPerfil = !page.url().includes('/acceso')
+    }
+    if (enPerfil) {
+      await page.goto(`${BASE_URL}/#/perfil`, { waitUntil: 'networkidle0' })
     }
     const aviso = await page.evaluate(
       () =>
@@ -128,7 +131,7 @@ try {
     let volvio = false
     for (let t = 0; t < 30 && !volvio; t++) {
       await sleep(500)
-      volvio = page.url().includes('/perfil')
+      volvio = !page.url().includes('/acceso')
     }
     runner.check(
       `cuenta ${i}: vuelve a ingresar con correo y contraseña`,

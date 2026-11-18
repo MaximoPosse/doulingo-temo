@@ -10,7 +10,13 @@
 // (la expo pública lo oculta porque es_prueba = true). Así la interfaz se
 // prueba sin depender de los datos de producción de la expo.
 
-import { BASE_URL, createRunner, launchBrowser, sleep } from './helpers.mjs'
+import {
+  BASE_URL,
+  createRunner,
+  launchBrowser,
+  sleep,
+  entrarComoInvitado
+} from './helpers.mjs'
 
 const runner = createRunner('=== Etapa 6 · Desafíos (interfaz) ===')
 const browser = await launchBrowser()
@@ -93,6 +99,7 @@ try {
   // ----------------------------------------------------------------
   const contextA = await browser.createBrowserContext()
   const pageA = await contextA.newPage()
+  await entrarComoInvitado(pageA)
   const errorsA = []
   pageA.on('pageerror', error => errorsA.push(String(error)))
 
@@ -277,6 +284,7 @@ try {
   // ----------------------------------------------------------------
   const contextB = await browser.createBrowserContext()
   const pageB = await contextB.newPage()
+  await entrarComoInvitado(pageB)
   await openApp(pageB, EXPIRED_PATH)
   await pageB.waitForSelector('.dl-challenge__rules-card', { timeout: 20000 })
   await startChallenge(pageB)
@@ -325,6 +333,7 @@ try {
   // ----------------------------------------------------------------
   const contextC = await browser.createBrowserContext()
   const pageC = await contextC.newPage()
+  await entrarComoInvitado(pageC)
   await openApp(pageC, CHALLENGE_PATH)
   await pageC.waitForSelector('.dl-challenge__rules-card', { timeout: 20000 })
   await startChallenge(pageC)

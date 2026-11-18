@@ -7,7 +7,13 @@
 // (Inicio, Cursos, Expo, Acceder) acompaña el desplazamiento, que la flecha
 // aparece recién después de bajar y que al tocarla vuelve al principio.
 
-import { BASE_URL, createRunner, launchBrowser, sleep } from './helpers.mjs'
+import {
+  BASE_URL,
+  createRunner,
+  launchBrowser,
+  sleep,
+  entrarComoInvitado
+} from './helpers.mjs'
 
 const runner = createRunner('Encabezado fijo y flecha para volver arriba')
 
@@ -21,6 +27,7 @@ const rutas = ['/', '/cursos', '/expo']
 const browser = await launchBrowser()
 try {
   const page = await browser.newPage()
+  await entrarComoInvitado(page)
   for (const pantalla of pantallas) {
     await page.setViewport({
       width: pantalla.w,

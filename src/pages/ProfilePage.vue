@@ -378,6 +378,7 @@ import MascotCorner from '@/components/MascotCorner.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { alerta } from '@/lib/alertas'
 import { useAuth } from '@/composables/useAuth'
 import { useProgress } from '@/composables/useProgress'
 import { getCourses, getUnits } from '@/data/courseRepository'
@@ -590,6 +591,7 @@ async function submitClear() {
     answersByAttempt.value = {}
     expandedAttemptId.value = null
     notice.value = 'Se borró tu historial (en el dispositivo y en la base).'
+    alerta('ok', notice.value)
   } catch (err) {
     notice.value = ''
     authError.value = err?.message ?? 'No se pudo borrar el historial.'
