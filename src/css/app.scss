@@ -2,8 +2,46 @@
 // Botones, tarjetas, badges y utilidades para la página, compartidos por todas
 // las vistas. La paleta vive en src/css/quasar.variables.scss.
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   font-family: 'Nunito', 'Quicksand', 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+// Los títulos de Quasar traen un interlineado enorme: en pantallas chicas
+// el texto se parte en varias líneas y se ve desparejo.
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.2;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+// Tamaños base fluidos (cada pantalla puede sobrescribirlos con su clase).
+h1 {
+  font-size: clamp(26px, 6.5vw, 38px);
+}
+
+h2 {
+  font-size: clamp(21px, 5.5vw, 28px);
+}
+
+h3 {
+  font-size: clamp(18px, 4.5vw, 22px);
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
 }
 
 // ------- Página base -------
@@ -19,7 +57,7 @@ body {
   }
 
   &__title {
-    font-size: clamp(28px, 4vw, 38px);
+    font-size: clamp(26px, 6.5vw, 38px);
     font-weight: 800;
     color: $dl-ink-dark;
     margin: 0 0 8px;
@@ -39,6 +77,28 @@ body {
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
+  }
+}
+
+// Celulares: menos margen lateral (respetando las muescas del APK) y textos
+// un poco más chicos para que entren bien en 320-430 px de ancho.
+@media (max-width: 600px) {
+  .dl-page__inner {
+    padding: 24px max(16px, env(safe-area-inset-right)) 56px
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .dl-page__lead {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .dl-section-title {
+    font-size: 22px;
+  }
+
+  .dl-btn-main--big {
+    font-size: 16px;
   }
 }
 
@@ -151,7 +211,7 @@ body {
 
 .dl-grid-3 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 20px;
 }
 

@@ -69,7 +69,13 @@ const hasSession = computed(() => !!session.value)
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 20px;
+  flex-wrap: wrap;
+  row-gap: 2px;
+  /* En el APK la app ocupa toda la pantalla: se deja lugar a la barra de
+     estado y a las muescas (viewport-fit=cover). */
+  padding: 6px max(20px, env(safe-area-inset-right)) 6px
+    max(20px, env(safe-area-inset-left));
+  padding-top: calc(6px + env(safe-area-inset-top));
   background: #ffffff;
   color: #3c3c3c;
   border-bottom: 2px solid #e5e5e5;
@@ -104,6 +110,68 @@ const hasSession = computed(() => !!session.value)
 .dl-nav .q-btn {
   font-weight: 700;
   color: #6b6b6b;
+  min-height: 40px;
+}
+
+.dl-nav__account {
+  max-width: 220px;
+}
+
+.dl-nav .q-btn :deep(.q-btn__content) {
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.dl-nav .q-btn :deep(.block) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Celulares: el logo arriba y los cuatro accesos repartidos en una fila. */
+@media (max-width: 600px) {
+  .dl-bar {
+    justify-content: center;
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+  }
+
+  .dl-brand__mascot {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dl-brand__name {
+    font-size: 21px;
+  }
+
+  .dl-nav {
+    width: 100%;
+    gap: 2px;
+    justify-content: space-between;
+  }
+
+  .dl-nav .q-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 13px;
+  }
+
+  .dl-nav__account {
+    flex: 2 1 0;
+    max-width: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .dl-nav .q-btn {
+    font-size: 12px;
+  }
+
+  .dl-nav__account :deep(.q-icon) {
+    display: none;
+  }
 }
 
 .dl-nav__account {

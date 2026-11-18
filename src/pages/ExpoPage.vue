@@ -416,12 +416,17 @@ function difficultyClass(difficulty) {
     gap: 10px;
 
     li {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
+      position: relative;
+      padding-left: 28px;
       font-size: 14px;
       line-height: 1.55;
       color: $dl-ink;
+
+      .q-icon {
+        position: absolute;
+        left: 0;
+        top: 3px;
+      }
     }
   }
 }
