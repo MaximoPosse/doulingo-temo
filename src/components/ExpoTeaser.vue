@@ -128,9 +128,6 @@ import partyImg from '@/assets/amigos/chiikawa-fiesta.webp'
     flex: 0 0 auto;
     width: min(300px, 34vw);
     height: auto;
-    background: #ffffff;
-    border-radius: 22px;
-    padding: 4px;
     object-fit: contain;
   }
 }

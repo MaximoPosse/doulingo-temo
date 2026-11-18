@@ -21,7 +21,7 @@
           rounded
           class="dl-auth__banner dl-notice-banner"
         >
-          <q-icon name="check_circle" size="22px" color="positive" />
+          <q-icon name="check_circle" size="22px" color="primary" />
           {{ notice }}
         </q-banner>
 

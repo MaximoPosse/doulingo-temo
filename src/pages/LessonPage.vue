@@ -431,7 +431,7 @@ import {
 import { useAuth } from '@/composables/useAuth'
 import { useProgress } from '@/composables/useProgress'
 import { useRemoteData } from '@/composables/useRemoteData'
-import usagiImg from '@/assets/amigos/hachiware-saludo.webp'
+import usagiImg from '@/assets/amigos/hachiware-sentado.webp'
 import usagiOkImg from '@/assets/amigos/usagi-ok.webp'
 import usagiCafeImg from '@/assets/amigos/usagi-cafe.webp'
 import chiikawaImg from '@/assets/amigos/chiikawa-tumbado.webp'

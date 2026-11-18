@@ -4,14 +4,7 @@
       <img
         :src="usagiImg"
         alt="Hachiware, perdido"
-        style="
-          width: 180px;
-          height: 180px;
-          object-fit: contain;
-          background: #ffffff;
-          border-radius: 22px;
-          padding: 4px;
-        "
+        style="width: 180px; height: 180px; object-fit: contain"
       />
       <h2
         class="q-mb-sm"
@@ -35,5 +28,5 @@
 </template>
 
 <script setup>
-import usagiImg from '@/assets/amigos/hachiware-saludo.webp'
+import usagiImg from '@/assets/amigos/hachiware-tumbado.webp'
 </script>

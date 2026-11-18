@@ -67,9 +67,6 @@ const friends = [
   width: 130px;
   height: 130px;
   object-fit: contain;
-  background: #ffffff;
-  border-radius: 22px;
-  padding: 4px;
 }
 
 .dl-friend__name {

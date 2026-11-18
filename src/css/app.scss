@@ -235,15 +235,11 @@ video {
   gap: 20px;
 }
 
-// Las ilustraciones de los personajes tienen fondo blanco: sobre el fondo
-// negro se muestran como una figurita redondeada de fondo blanco.
+// Las ilustraciones de los personajes son PNG/WebP con fondo transparente.
 .dl-demo__mascot,
 .dl-expo__mascot,
 .dl-expo__hero-mascot,
 .dl-lesson__result-mascot,
 .dl-lesson__notfound-mascot {
-  background: #ffffff;
-  border-radius: 22px;
-  padding: 4px;
   object-fit: contain;
 }

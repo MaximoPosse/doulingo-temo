@@ -161,7 +161,7 @@
           <h2 class="dl-card__title">Cómo se decide el ranking</h2>
           <ul class="dl-expo__rules">
             <li>
-              <q-icon name="workspace_premium" size="18px" color="positive" />
+              <q-icon name="workspace_premium" size="18px" color="primary" />
               Cuenta el <strong>mejor intento válido</strong> de cada
               participante en cada desafío.
             </li>

@@ -214,8 +214,8 @@ onUnmounted(() => {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #58a700;
-  box-shadow: 0 0 0 5px #58a70022;
+  background: #f8c848;
+  box-shadow: 0 0 0 5px #f8c84833;
 }
 .public-ranking__offline {
   background: #2b210c;

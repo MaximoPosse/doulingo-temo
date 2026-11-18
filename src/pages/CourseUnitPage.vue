@@ -113,12 +113,12 @@ const unitParam = computed(() => route.params.unitId)
 const { unitStatus, countApprovedLessons } = useProgress()
 
 const { data, loading, error, load } = useRemoteData(async () => {
-  const course = (await getCourseBySlug(slug.value)) ?? { color: '#58cc02' }
+  const course = (await getCourseBySlug(slug.value)) ?? { color: '#f8c848' }
   const units = await getUnits(slug.value)
   return { course, units }
 })
 
-const course = computed(() => data.value?.course ?? { color: '#58cc02' })
+const course = computed(() => data.value?.course ?? { color: '#f8c848' })
 const units = computed(() => data.value?.units ?? [])
 const unit = computed(
   () => units.value.find(u => u.id === unitParam.value) ?? null

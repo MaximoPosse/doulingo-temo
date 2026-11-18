@@ -24,7 +24,7 @@
           {{ authError }}
         </q-banner>
         <q-banner v-if="notice" rounded class="dl-notice-banner q-mb-md">
-          <q-icon name="check_circle" size="22px" color="positive" />
+          <q-icon name="check_circle" size="22px" color="primary" />
           {{ notice }}
         </q-banner>
 
@@ -130,7 +130,7 @@
 
           <ul v-if="approvedDetails.length" class="dl-history">
             <li v-for="lesson in approvedDetails" :key="lesson.id">
-              <q-icon name="check_circle" size="18px" color="positive" />
+              <q-icon name="check_circle" size="18px" color="primary" />
               {{ lesson.title }}
             </li>
           </ul>

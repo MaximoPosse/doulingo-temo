@@ -108,7 +108,6 @@ const hasSession = computed(() => !!session.value)
   width: 52px;
   height: 52px;
   object-fit: contain;
-  border-radius: 12px;
 }
 
 .dl-brand__name {
@@ -196,7 +195,7 @@ const hasSession = computed(() => !!session.value)
 }
 
 .dl-to-top {
-  box-shadow: 0 4px 0 #58a700;
+  box-shadow: 0 4px 0 $dl-yellow-shadow;
   /* En el APK se evita la barra de gestos del celular. */
   margin-bottom: env(safe-area-inset-bottom);
 }

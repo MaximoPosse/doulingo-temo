@@ -471,7 +471,7 @@
           </template>
 
           <div v-else class="dl-challenge__state">
-            <q-icon name="task_alt" size="48px" color="positive" />
+            <q-icon name="task_alt" size="48px" color="primary" />
             <h2 class="dl-challenge__state-title">Respondiste todo</h2>
             <p class="dl-challenge__state-text">
               Finalizá la partida para que el servidor calcule el resultado.
