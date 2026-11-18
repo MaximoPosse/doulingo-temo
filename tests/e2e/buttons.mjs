@@ -44,13 +44,17 @@ async function clickLabel(containerSelector, text) {
   await sleep(450)
 }
 
+// Posición (0 = A) de la opción correcta de cada pregunta de la lección 1 de
+// JavaScript tras 0011_variar_respuestas.sql: B, D y A.
+const CORRECTAS_LECCION_1 = [1, 3, 0]
+
 async function runLessonAllCorrect() {
   await page.click('.dl-lesson__intro-actions .dl-btn-main')
   await sleep(400)
   for (let i = 0; i < 3; i++) {
     await page.waitForSelector('.dl-lesson__option', { timeout: 15000 })
     const options = await page.$$('.dl-lesson__option')
-    await options[0].click()
+    await options[CORRECTAS_LECCION_1[i]].click()
     await sleep(150)
     await page.click('.dl-lesson__actions .dl-btn-main')
     await page.waitForSelector(

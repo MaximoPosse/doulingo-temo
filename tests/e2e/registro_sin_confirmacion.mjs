@@ -88,13 +88,19 @@ try {
     )
 
     // Cierra sesión y vuelve a ingresar con correo y contraseña.
-    await page.evaluate(() => {
-      const boton = [...document.querySelectorAll('.q-btn')].find(el =>
-        /cerrar sesi/i.test(el.textContent)
-      )
-      boton?.click()
-    })
-    await sleep(2000)
+    await page.waitForFunction(
+      () => /cerrar sesi/i.test(document.body.textContent),
+      { timeout: 30000 }
+    )
+    for (const boton of await page.$$('.q-btn')) {
+      const etiqueta = await boton.evaluate(el => el.textContent)
+      if (/cerrar sesi/i.test(etiqueta)) {
+        await boton.evaluate(el => el.scrollIntoView({ block: 'center' }))
+        await boton.click()
+        break
+      }
+    }
+    await sleep(2500)
     await page.goto(`${BASE_URL}/#/acceso`, { waitUntil: 'networkidle0' })
     await page.evaluate(() => {
       const tab = [...document.querySelectorAll('.q-tab')].find(el =>
@@ -106,6 +112,10 @@ try {
     const campos2 = []
     for (const campo of await page.$$('.q-tab-panel input')) {
       if (await campo.isVisible()) campos2.push(campo)
+    }
+    if (campos2.length < 2) {
+      const texto2 = await page.evaluate(() => document.body.innerText)
+      console.log('DEBUG acceso:', texto2.slice(0, 300))
     }
     await campos2[0].type(correo)
     await campos2[1].type(clave)
