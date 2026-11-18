@@ -3,6 +3,8 @@
 // las vistas. La paleta vive en src/css/quasar.variables.scss.
 
 html {
+  // El encabezado queda fijo: al enfocar o saltar a un elemento no se tapa.
+  scroll-padding-top: 110px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }

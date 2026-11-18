@@ -19,6 +19,9 @@ const pathIs = async part =>
 async function clickNth(selector, index = 0) {
   const elements = await page.$$(selector)
   if (!elements[index]) throw new Error(`no existe ${selector}[${index}]`)
+  // Con el encabezado fijo, un elemento que queda justo arriba puede quedar
+  // tapado: se lo centra en pantalla antes de tocarlo.
+  await elements[index].evaluate(el => el.scrollIntoView({ block: 'center' }))
   await elements[index].click()
   await sleep(450)
 }
