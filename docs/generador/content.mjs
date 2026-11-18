@@ -225,7 +225,7 @@ export const informe = [
       ],
       [
         'Ensayo en dos celulares físicos',
-        '**Pendiente** (no había dispositivos conectados). Ver checklist en *Pruebas*.'
+        '**Pendiente** (no había dispositivos conectados).'
       ]
     ],
     [55, 45]
@@ -621,7 +621,7 @@ cd src-capacitor\\android
   h2('Registro de la ejecución del 17/11/2026'),
   ul(
     '`assembleDebug`: BUILD SUCCESSFUL, `app-debug.apk` de 6,3 MB firmado con el certificado Android Debug.',
-    '`assembleRelease`: BUILD SUCCESSFUL, `app-release.apk` de 4,5 MB; `apksigner verify` válido con certificado `CN=CodeLingua` (SHA-256 `4fa56639…d171f0`).',
+    '`assembleRelease`: BUILD SUCCESSFUL, `app-release.apk` de 4,5 MB; `apksigner verify` válido con certificado `CN=Doulingo` (SHA-256 `4fa56639…d171f0`).',
     '`aapt2`: `com.doulingo.app`, versionCode 1, versionName 1.0, minSdk 24, targetSdk 36.',
     '`assets/public/index.html` y `assets/capacitor.config.json` presentes dentro del APK.',
     'Advertencia no fatal de Gradle (`flatDir`) proveniente del wiring de Capacitor/Cordova.',
@@ -673,30 +673,6 @@ cd src-capacitor\\android
   ul(
     'AVD Pixel 6, Android 16 (API 36). Deep link con la app abierta y en arranque en frío procesado; enlace falso muestra aviso en español; enlace repetido se ignora.',
     'Invitado creado desde el APK, sesión persistente tras `force-stop` y reapertura.'
-  ),
-  h2('Checklist en celulares físicos (pendiente)'),
-  p(
-    'Completar con al menos dos celulares reales instalando la misma build. Anotar modelo, versión de Android, fecha y resultado. Hasta hacerlo físicamente, estos pasos **no están certificados**.'
-  ),
-  table(
-    ['Prueba', 'Celular 1', 'Celular 2'],
-    [
-      ['Instalación del APK y apertura', '☐', '☐'],
-      ['Acceso a Supabase (cursos cargan)', '☐', '☐'],
-      ['Ingreso como invitado', '☐', '☐'],
-      ['Registro con correo y confirmación por enlace', '☐', '☐'],
-      ['Recuperación de contraseña por enlace', '☐', '☐'],
-      ['Preguntas de práctica y retroalimentación', '☐', '☐'],
-      ['Progreso guardado y lección siguiente habilitada', '☐', '☐'],
-      ['Partida de desafío con puntaje del servidor', '☐', '☐'],
-      ['Aparición en el ranking público (ambos celulares)', '☐', '☐'],
-      ['Botón Atrás (pantallas internas, inicio, salida)', '☐', '☐'],
-      ['Teclado: no tapa campos ni botones', '☐', '☐'],
-      ['Pantalla pequeña (≤ 360 dp) y giro', '☐', '☐'],
-      ['Cierre y reapertura (partida en curso, sesión)', '☐', '☐'],
-      ['Modo avión durante la partida y reconexión', '☐', '☐']
-    ],
-    [60, 20, 20]
   ),
   p(
     '**Puntos a observar:** el botón Atrás usa el comportamiento por defecto de Capacitor (retrocede en el historial del WebView y sale de la app al llegar al inicio); no hay un manejador propio. `MainActivity` no define `windowSoftInputMode`; si el teclado tapa campos, agregar `adjustResize`. Ambos son candidatos de mejora si el ensayo físico los confirma.'
@@ -770,7 +746,7 @@ end if;`),
   h2('Pendiente'),
   ul(
     'Verificar en el proyecto activo las migraciones 0008 y 0009 (ranking público y administración) y la publicación Realtime de `resultados_publicos`; las suites automáticas cubren hasta la 0006.',
-    'Instalar el APK en al menos dos celulares físicos y completar el checklist.',
+    'Instalar el APK en al menos dos celulares físicos y probar el recorrido completo.',
     'Probar registro y recuperación con correo real (SMTP propio o cupo disponible).',
     'Respaldar la clave release en un lugar seguro adicional.'
   ),
@@ -842,7 +818,7 @@ end if;`),
       [
         'P03',
         'Sin dispositivos físicos para el ensayo del APK.',
-        'Abierto: ejecutar el checklist'
+        'Abierto: probar en celulares'
       ],
       [
         'P04',
@@ -909,11 +885,11 @@ end if;`),
       ],
       [
         'Instalación en dos celulares y verificaciones',
-        'Checklist (pendiente de ejecución física)'
+        'Pendiente de ejecución física'
       ],
       [
         'Atrás, teclado, pantallas pequeñas, cierre y errores',
-        'Checklist y puntos a observar'
+        'Pendiente de ejecución física; puntos a observar en Pruebas'
       ],
       [
         'Release firmado y clave fuera del repositorio',
@@ -948,7 +924,7 @@ end if;`),
 
   h1('Conclusión'),
   p(
-    'CodeLingua cumple el recorrido completo de la Etapa 8 en lo técnico: la aplicación se empaqueta como APK desde terminal con el Gradle Wrapper, existe una versión release firmada con la clave resguardada fuera del repositorio, la seguridad de los puntajes y de las respuestas se garantiza en PostgreSQL y el ranking se comparte entre celulares en tiempo real. Lo que falta para cerrar con evidencia es operativo: completar el ensayo en celulares físicos y verificar en el proyecto activo las migraciones 0008 y 0009. El informe deja el procedimiento, el checklist y el registro de problemas listos para hacerlo.'
+    'CodeLingua cumple el recorrido completo de la Etapa 8 en lo técnico: la aplicación se empaqueta como APK desde terminal con el Gradle Wrapper, existe una versión release firmada con la clave resguardada fuera del repositorio, la seguridad de los puntajes y de las respuestas se garantiza en PostgreSQL y el ranking se comparte entre celulares en tiempo real. Lo que falta para cerrar con evidencia es operativo: completar el ensayo en celulares físicos y verificar en el proyecto activo las migraciones 0008 y 0009. El informe deja el procedimiento y el registro de problemas listos para hacerlo.'
   )
 ]
 

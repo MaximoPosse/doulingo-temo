@@ -378,7 +378,7 @@ El **15 de noviembre de 2026** se ejecutó la compilación desde terminal:
   `DOULINGO_*` se cargaron en la terminal desde un archivo local.
 - `gradlew.bat assembleRelease`: **BUILD SUCCESSFUL**
   (`app-release.apk`, 4,5 MB). `apksigner verify --print-certs` válido
-  (`CN=CodeLingua`, SHA-256 `4fa56639…d171f0`); `aapt2`: `com.doulingo.app`,
+  (`CN=Doulingo`, SHA-256 `4fa56639…d171f0`); `aapt2`: `com.doulingo.app`,
   versionCode 1, versionName 1.0, minSdk 24, targetSdk 36.
 - `assets/public/index.html` y `capacitor.config.json` (sin `server.url`)
   confirmados dentro del APK.

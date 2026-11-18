@@ -13,7 +13,7 @@ El informe sigue la estructura de ColegioGest (portada, índice, fundamentación
 alcance, objetivo, roles, stakeholders, arquitectura, DER, demostración,
 código, dificultad técnica, resultados, defensa, entrega) y suma lo que pide la
 etapa 8: historias de usuario, cronograma, reglas de negocio, seguridad,
-versiones y procedimiento del APK, checklist en celulares, cierre de la expo y
+versiones y procedimiento del APK, cierre de la expo y
 registro de problemas.
 
 ## Verificado el 17/11/2026
@@ -33,7 +33,7 @@ registro de problemas.
 
 1. Verificar que las migraciones 0008–0009 y Realtime estén aplicados en el
    proyecto activo (las suites automáticas cubren hasta la 0006).
-2. Instalar la misma build en dos celulares y completar el checklist del informe
+2. Instalar la misma build en dos celulares y probar el recorrido completo
    (Atrás, teclado, pantalla pequeña, cierre/reapertura, sin conexión, enlaces
    de confirmación y recuperación).
 3. Respaldar la clave release (`doulingo-release.jks`) en un segundo lugar
