@@ -133,7 +133,7 @@
             align="justify"
             class="dl-auth__tabs"
           >
-            <q-tab name="invitado" label="Invitado" />
+            <q-tab v-if="!native" name="invitado" label="Invitado" />
             <q-tab name="registro" label="Crear cuenta" />
             <q-tab name="entrar" label="Ingresar" />
           </q-tabs>
@@ -166,13 +166,14 @@
             <!-- Registro -->
             <q-tab-panel name="registro" class="dl-auth__block">
               <p class="dl-auth__hint">
-                Creá tu cuenta con correo y contraseña. Te enviamos un correo
-                para confirmarla (según la configuración del proyecto).
+                Elegí un usuario, escribí tu correo y una contraseña de al menos
+                6 caracteres. No hace falta confirmar nada: entrás al instante y
+                tus resultados quedan guardados en el ranking.
               </p>
               <q-input
                 v-model="alias"
                 outlined
-                label="Alias público"
+                label="Usuario"
                 hint="3 a 20 caracteres: minúsculas, números y guion bajo"
                 :rules="[aliasRule]"
                 class="q-mb-sm"
@@ -192,7 +193,7 @@
                 type="password"
                 label="Contraseña"
                 autocomplete="new-password"
-                :rules="[value => !!value || 'Ingresá una contraseña']"
+                :rules="[passwordRule]"
                 class="q-mb-md"
               />
               <q-btn
@@ -301,6 +302,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import logoImg from '@/assets/logo.webp'
 import { useAuth } from '@/composables/useAuth'
+import { isNativeApp } from '@/lib/deepLink'
 
 const route = useRoute()
 const router = useRouter()
@@ -322,7 +324,8 @@ const {
   clearMessages
 } = useAuth()
 
-const tab = ref('invitado')
+const native = isNativeApp()
+const tab = ref(native ? 'registro' : 'invitado')
 const email = ref('')
 const password = ref('')
 const password2 = ref('')
@@ -347,8 +350,13 @@ const lead = computed(() => {
   if (mode.value === 'convertir') {
     return 'Tu sesión de invitado se convierte en una cuenta permanente.'
   }
-  return 'Entrá como invitado, creá tu cuenta o ingresá con tu correo.'
+  return native
+    ? 'Creá tu cuenta con un correo o ingresá con la que ya tenés.'
+    : 'Entrá como invitado, creá tu cuenta o ingresá con tu correo.'
 })
+
+const passwordRule = value =>
+  (value ?? '').length >= 6 || 'La contraseña necesita al menos 6 caracteres'
 
 const aliasRule = value => {
   const clean = (value ?? '')
@@ -423,7 +431,9 @@ async function submitConvert() {
 <style scoped>
 .dl-auth {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .dl-auth__card {
@@ -434,6 +444,22 @@ async function submitConvert() {
   border-radius: 18px;
   padding: 24px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 480px) {
+  .dl-auth__card {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+
+  .dl-auth__mascot {
+    width: 72px;
+    height: 72px;
+  }
+
+  .dl-auth__title {
+    font-size: 22px;
+  }
 }
 
 .dl-auth__mascot {
@@ -460,6 +486,17 @@ async function submitConvert() {
 
 .dl-auth__tabs {
   color: #6b6b6b;
+}
+
+.dl-auth__tabs :deep(.q-tab) {
+  padding: 0 8px;
+  min-width: 0;
+}
+
+@media (max-width: 400px) {
+  .dl-auth__tabs :deep(.q-tab__label) {
+    font-size: 13px;
+  }
 }
 
 .dl-auth__panels {

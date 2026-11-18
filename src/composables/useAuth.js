@@ -238,10 +238,21 @@ export async function register({ email, password, alias: newAlias }) {
         '¡Cuenta creada! Ya podés entrar con tu correo y contraseña.'
       return { ok: true, confirmed: true }
     }
-    notice.value =
-      'Te enviamos un correo para confirmar la cuenta. ' +
-      'Confirmalo y después podés iniciar sesión.'
-    return { ok: true, confirmed: false }
+    // Si el proyecto no exige confirmar el correo, el alta ya devuelve la
+    // sesión. Si todavía lo exige, se intenta entrar igual: solo falla
+    // cuando el correo realmente está sin confirmar.
+    try {
+      const entered = await signInWithPassword({ email, password })
+      await applySession(entered)
+      notice.value =
+        '¡Cuenta creada! Ya podés entrar con tu correo y contraseña.'
+      return { ok: true, confirmed: true }
+    } catch {
+      notice.value =
+        'Cuenta creada. Confirmá el correo que te enviamos y después ' +
+        'ingresá con tu correo y contraseña.'
+      return { ok: true, confirmed: false }
+    }
   } catch (err) {
     authError.value = err?.message ?? 'No se pudo crear la cuenta.'
     return { ok: false }

@@ -380,7 +380,7 @@ import { useRouter } from 'vue-router'
 
 import { useAuth } from '@/composables/useAuth'
 import { useProgress } from '@/composables/useProgress'
-import { getUnits } from '@/data/courseRepository'
+import { getCourses, getUnits } from '@/data/courseRepository'
 import { fetchAttemptAnswers, fetchAttempts } from '@/data/attemptRepository'
 import { fetchMyChallengeHistory } from '@/data/challengeRepository'
 
@@ -548,10 +548,13 @@ async function loadChallengeHistory() {
 
 async function loadTitles() {
   try {
-    const units = await getUnits('javascript')
+    const courses = await getCourses()
     const map = new Map()
-    for (const unit of units) {
-      for (const lesson of unit.lessons) map.set(lesson.id, lesson.title)
+    for (const course of courses) {
+      const units = await getUnits(course.slug)
+      for (const unit of units) {
+        for (const lesson of unit.lessons) map.set(lesson.id, lesson.title)
+      }
     }
     lessonTitles.value = map
   } catch {
