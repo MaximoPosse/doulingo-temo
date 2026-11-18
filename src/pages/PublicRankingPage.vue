@@ -363,6 +363,18 @@ onUnmounted(() => {
   }
   .public-ranking__table {
     font-size: 0.93rem;
+    table-layout: fixed;
+  }
+  .public-ranking__table th:first-child,
+  .public-ranking__table td:first-child {
+    width: 3.6rem;
+  }
+  .public-ranking__table th:nth-child(3),
+  .public-ranking__table td:nth-child(3) {
+    width: 4.6rem;
+  }
+  .public-ranking__table td.alias {
+    overflow-wrap: anywhere;
   }
   .public-ranking__table th,
   .public-ranking__table td {
