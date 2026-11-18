@@ -1261,7 +1261,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .dl-challenge {
-  background: #ffffff;
+  background: $dl-bg;
   min-height: 100vh;
 
   &__inner {
@@ -1274,7 +1274,7 @@ onBeforeUnmount(() => {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #6b6b6b;
+    color: #bdbdbd;
     font-weight: 800;
     text-transform: uppercase;
     font-size: 13px;
@@ -1314,7 +1314,7 @@ onBeforeUnmount(() => {
   &__description {
     font-size: 15px;
     line-height: 1.6;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0;
   }
 
@@ -1336,7 +1336,7 @@ onBeforeUnmount(() => {
   &__status-card,
   &__ranking-card,
   &__detail-card {
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     border-radius: 18px;
     padding: 22px;
@@ -1350,8 +1350,8 @@ onBeforeUnmount(() => {
   }
 
   &__rule {
-    background: #f8faf7;
-    border: 1px solid #e5e5e5;
+    background: #171717;
+    border: 1px solid $dl-gray;
     border-radius: 14px;
     padding: 12px 14px;
   }
@@ -1369,21 +1369,21 @@ onBeforeUnmount(() => {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin-top: 2px;
   }
 
   &__rule-note {
     font-size: 12px;
     line-height: 1.55;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin: 14px 0 0;
   }
 
   &__status-text {
     font-size: 14px;
     line-height: 1.6;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0 0 10px;
   }
 
@@ -1403,8 +1403,8 @@ onBeforeUnmount(() => {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    background: #eef6fd;
-    color: #176a9e;
+    background: #0f1a24;
+    color: #7cc7f2;
     border-radius: 14px;
     padding: 14px 16px;
     margin-top: 16px;
@@ -1420,8 +1420,8 @@ onBeforeUnmount(() => {
     }
 
     &--expired {
-      background: #fff8e6;
-      color: #8a5b00;
+      background: #211b0b;
+      color: #ffd88a;
     }
   }
 
@@ -1436,8 +1436,8 @@ onBeforeUnmount(() => {
     display: flex;
     gap: 10px;
     align-items: flex-start;
-    background: #ffe9e9;
-    color: #c00015;
+    background: #3a1414;
+    color: #ff8a8a;
     border-radius: 14px;
     padding: 14px 16px;
     margin-top: 16px;
@@ -1466,19 +1466,19 @@ onBeforeUnmount(() => {
   &__ranking-note {
     font-size: 12px;
     line-height: 1.55;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin: 0 0 14px;
   }
 
   &__detail-hint {
     font-size: 12px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin-bottom: 14px;
   }
 
   &__empty {
     font-size: 14px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin: 0;
   }
 
@@ -1501,7 +1501,7 @@ onBeforeUnmount(() => {
   &__state-text {
     font-size: 14px;
     line-height: 1.55;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0;
     max-width: 480px;
   }
@@ -1519,7 +1519,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     gap: 16px;
-    background: #f8faf7;
+    background: #171717;
     border: 2px solid $dl-gray;
     border-radius: 14px;
     padding: 10px 14px;
@@ -1556,7 +1556,7 @@ onBeforeUnmount(() => {
     font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 
   &__track {
@@ -1580,7 +1580,7 @@ onBeforeUnmount(() => {
     gap: 12px;
     font-size: 13px;
     font-weight: 700;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin: 8px 0 18px;
   }
 
@@ -1588,8 +1588,8 @@ onBeforeUnmount(() => {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    background: #fff8e6;
-    color: #8a5b00;
+    background: #211b0b;
+    color: #ffd88a;
     border-radius: 14px;
     padding: 14px 16px;
     margin-bottom: 18px;
@@ -1609,8 +1609,8 @@ onBeforeUnmount(() => {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    background: #eef6fd;
-    color: #176a9e;
+    background: #0f1a24;
+    color: #7cc7f2;
     border-radius: 14px;
     padding: 16px 18px;
     margin-bottom: 18px;
@@ -1643,7 +1643,7 @@ onBeforeUnmount(() => {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: #ffeed9;
+    background: #2b210c;
     color: $dl-orange;
     display: flex;
     align-items: center;
@@ -1651,7 +1651,7 @@ onBeforeUnmount(() => {
   }
 
   &__question-bubble {
-    background: #f6fbf4;
+    background: #17150c;
     border: 2px solid $dl-gray;
     border-radius: 16px 16px 16px 4px;
     padding: 16px 18px;
@@ -1691,7 +1691,7 @@ onBeforeUnmount(() => {
     gap: 14px;
     width: 100%;
     text-align: left;
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     border-radius: 14px;
     padding: 14px 16px;
@@ -1702,8 +1702,8 @@ onBeforeUnmount(() => {
       box-shadow 0.15s ease;
 
     &:hover:not(:disabled) {
-      background: #f6fbf4;
-      border-color: #b5e3a3;
+      background: #17150c;
+      border-color: #6b5a1c;
     }
 
     &:disabled {
@@ -1711,13 +1711,13 @@ onBeforeUnmount(() => {
     }
 
     &--selected {
-      background: #f6fbf4;
+      background: #17150c;
       border-color: $dl-blue;
       box-shadow: 0 3px 0 rgba(28, 176, 246, 0.3);
     }
 
     &--chosen {
-      background: #eef6fd;
+      background: #0f1a24;
       border-color: $dl-blue;
     }
   }
@@ -1727,8 +1727,8 @@ onBeforeUnmount(() => {
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    background: #f0f4f0;
-    color: #6b6b6b;
+    background: #202020;
+    color: #bdbdbd;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1761,13 +1761,13 @@ onBeforeUnmount(() => {
     }
 
     &--ok {
-      background: #e9f7e2;
-      color: $dl-green-dark;
+      background: #2a2410;
+      color: $dl-success-dark;
     }
 
     &--bad {
-      background: #ffe9e9;
-      color: #c00015;
+      background: #3a1414;
+      color: #ff8a8a;
     }
   }
 
@@ -1795,18 +1795,18 @@ onBeforeUnmount(() => {
     align-items: center;
 
     &--ok {
-      background: #f4fbf0;
-      border-color: #b5e3a3;
+      background: #0f1f0a;
+      border-color: #2f7d1a;
     }
 
     &--bad {
-      background: #fff8f0;
-      border-color: #ffd9a3;
+      background: #221a0f;
+      border-color: #7a5a1c;
     }
 
     &--pending {
-      background: #f6f9fc;
-      border-color: #cfe3f3;
+      background: #12181d;
+      border-color: #2d4a60;
     }
   }
 
@@ -1822,13 +1822,13 @@ onBeforeUnmount(() => {
     text-align: left;
 
     &--saved {
-      background: #e9f7e2;
+      background: #2a2410;
       color: $dl-green-dark;
     }
 
     &--failed {
-      background: #ffe9e9;
-      color: #c00015;
+      background: #3a1414;
+      color: #ff8a8a;
     }
   }
 
@@ -1850,13 +1850,13 @@ onBeforeUnmount(() => {
     font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 
   &__result-message {
     font-size: 14px;
     line-height: 1.55;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 8px 0 18px;
     max-width: 460px;
   }
@@ -1870,7 +1870,7 @@ onBeforeUnmount(() => {
   }
 
   &__result-stat {
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     border-radius: 14px;
     padding: 12px 6px;
@@ -1889,7 +1889,7 @@ onBeforeUnmount(() => {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin-top: 2px;
   }
 
@@ -1903,7 +1903,7 @@ onBeforeUnmount(() => {
   &__result-note {
     font-size: 12px;
     line-height: 1.55;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin: 14px 0 0;
     max-width: 460px;
   }
@@ -1922,7 +1922,7 @@ onBeforeUnmount(() => {
     display: flex;
     gap: 10px;
     align-items: flex-start;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #2a2a2a;
     padding-bottom: 12px;
 
     &:last-child {
@@ -1951,7 +1951,7 @@ onBeforeUnmount(() => {
   &__answer-explain {
     font-size: 12px;
     line-height: 1.55;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin-top: 2px;
   }
 }
@@ -1966,26 +1966,26 @@ onBeforeUnmount(() => {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     padding: 6px 8px;
     border-bottom: 2px solid $dl-gray;
   }
 
   td {
     padding: 8px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #2a2a2a;
     color: $dl-ink;
   }
 
   &__me td {
-    background: #f6fbf4;
+    background: #17150c;
     font-weight: 700;
   }
 
   &__tag {
     display: inline-block;
     background: $dl-green;
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 10px;
     font-weight: 800;
     border-radius: 999px;

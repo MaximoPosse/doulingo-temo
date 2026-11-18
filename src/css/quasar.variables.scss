@@ -12,12 +12,12 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary: #58cc02;
+$primary: #f8c848; // amarillo de Usagi
 $secondary: #1cb0f6;
 $accent: #ce82ff;
 
-$dark: #1d1d1d;
-$dark-page: #121212;
+$dark: #141414;
+$dark-page: #000000;
 
 $positive: #58cc02;
 $negative: #ff4b4b;
@@ -25,12 +25,22 @@ $info: #1cb0f6;
 $warning: #ffc800;
 
 // CodeLingua brand palette
-$dl-green: #58cc02;
-$dl-green-dark: #58a700;
+// Marca: amarillo de Usagi. Los nombres $dl-green* se conservan por
+// compatibilidad, pero ahora son amarillos; el verde queda para los estados
+// de éxito ($dl-success).
+$dl-yellow: #f8c848;
+$dl-yellow-hover: #ffd75e;
+$dl-yellow-shadow: #b8861a;
+$dl-green: $dl-yellow;
+$dl-green-dark: #ffd24d;
+$dl-success: #58cc02;
+$dl-success-dark: #3f8f00;
 $dl-blue: #1cb0f6;
 $dl-gold: #ffc800;
 $dl-orange: #ff9600;
 $dl-red: #ff4b4b;
-$dl-gray: #e5e5e5;
-$dl-ink: #4b4b4b;
-$dl-ink-dark: #3c3c3c;
+$dl-gray: #303030;
+$dl-ink: #dcdcdc;
+$dl-ink-dark: #f5f5f5;
+$dl-bg: #000000;
+$dl-surface: #141414;

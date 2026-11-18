@@ -205,7 +205,7 @@ const pathNodes = [
 
 <style lang="scss" scoped>
 .dl-landing {
-  background: #ffffff;
+  background: $dl-bg;
   font-family: 'Nunito', 'Quicksand', 'Segoe UI', sans-serif;
 }
 
@@ -213,7 +213,7 @@ const pathNodes = [
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #ffffff;
+  background: $dl-surface;
   border-bottom: 2px solid $dl-gray;
 
   &__inner {
@@ -254,9 +254,9 @@ const pathNodes = [
 
 .dl-btn-main {
   background: $dl-green;
-  color: #ffffff;
+  color: #1a1a1a;
   border: none;
-  box-shadow: 0 4px 0 $dl-green-dark;
+  box-shadow: 0 4px 0 $dl-yellow-shadow;
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: 0.5px;
@@ -266,7 +266,7 @@ const pathNodes = [
   }
 
   &--big {
-    box-shadow: 0 6px 0 $dl-green-dark;
+    box-shadow: 0 6px 0 $dl-yellow-shadow;
   }
 }
 
@@ -276,10 +276,10 @@ const pathNodes = [
   font-weight: 700;
 
   &--card {
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     color: $dl-ink-dark;
-    box-shadow: 0 6px 0 #d8d8d8;
+    box-shadow: 0 6px 0 #2a2a2a;
   }
 }
 
@@ -340,7 +340,7 @@ const pathNodes = [
     top: -14px;
     right: -10px;
     background: $dl-gold;
-    color: #3c3c3c;
+    color: #f5f5f5;
     font-weight: 800;
     padding: 8px 16px;
     border-radius: 18px;
@@ -368,7 +368,7 @@ const pathNodes = [
 
 .dl-promise {
   background: $dl-green;
-  color: #ffffff;
+  color: #1a1a1a;
 
   &__inner {
     max-width: 1100px;
@@ -415,7 +415,7 @@ const pathNodes = [
 }
 
 .dl-card {
-  background: #ffffff;
+  background: $dl-surface;
   border: 2px solid $dl-gray;
   border-radius: 18px;
   padding: 26px 22px;
@@ -475,7 +475,7 @@ const pathNodes = [
 }
 
 .dl-path {
-  background: #f0fff2;
+  background: #0f0f08;
 
   &__inner {
     max-width: 1100px;
@@ -530,7 +530,7 @@ const pathNodes = [
     width: 96px;
     height: 96px;
     border-radius: 50%;
-    background: #ffffff;
+    background: $dl-surface;
     border: 3px solid $dl-gold;
     display: flex;
     align-items: center;
@@ -568,8 +568,8 @@ const pathNodes = [
     align-items: center;
     justify-content: center;
     background: $dl-green;
-    color: #ffffff;
-    box-shadow: 0 4px 0 $dl-green-dark;
+    color: #1a1a1a;
+    box-shadow: 0 4px 0 $dl-yellow-shadow;
   }
 
   &__node--current {
@@ -584,7 +584,7 @@ const pathNodes = [
     .dl-demo__circle {
       background: $dl-gray;
       color: #afafaf;
-      box-shadow: 0 4px 0 #cfcfcf;
+      box-shadow: 0 4px 0 #2a2a2a;
     }
   }
 
@@ -629,7 +629,7 @@ const pathNodes = [
   &__note {
     margin: 0;
     font-size: 14px;
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 }
 

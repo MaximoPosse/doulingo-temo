@@ -259,8 +259,8 @@ function difficultyClass(difficulty) {
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    background: linear-gradient(135deg, #f6fbf4 0%, #fff8e6 100%);
-    border: 2px solid #dcefd2;
+    background: linear-gradient(135deg, #17150c 0%, #211b0b 100%);
+    border: 2px solid #3a331a;
     border-radius: 22px;
     padding: 28px 26px;
   }
@@ -299,7 +299,7 @@ function difficultyClass(difficulty) {
     flex-wrap: wrap;
     font-size: 13px;
     font-weight: 700;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin-top: 12px;
   }
 
@@ -313,8 +313,8 @@ function difficultyClass(difficulty) {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    background: #f8faf7;
-    border: 1px solid #e5e5e5;
+    background: #171717;
+    border: 1px solid $dl-gray;
     border-radius: 14px;
     padding: 14px 16px;
 
@@ -329,14 +329,14 @@ function difficultyClass(difficulty) {
       margin: 0;
       font-size: 13px;
       line-height: 1.55;
-      color: #6b6b6b;
+      color: #bdbdbd;
     }
   }
 
   &__lead-small {
     font-size: 14px;
     line-height: 1.6;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0 0 18px;
   }
 
@@ -349,7 +349,7 @@ function difficultyClass(difficulty) {
   &__card {
     display: flex;
     flex-direction: column;
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     border-radius: 18px;
     padding: 18px;
@@ -369,7 +369,7 @@ function difficultyClass(difficulty) {
     gap: 4px;
     font-size: 12px;
     font-weight: 800;
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 
   &__card-title {
@@ -382,7 +382,7 @@ function difficultyClass(difficulty) {
   &__card-text {
     font-size: 13px;
     line-height: 1.55;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0 0 14px;
     flex: 1 1 auto;
   }
@@ -398,7 +398,7 @@ function difficultyClass(difficulty) {
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.3px;
-      color: #8a8a8a;
+      color: #a3a3a3;
     }
 
     dd {

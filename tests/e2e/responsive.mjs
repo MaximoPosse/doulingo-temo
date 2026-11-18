@@ -74,6 +74,21 @@ try {
             continue
           if (el.closest('.q-drawer, .q-menu, .q-dialog, [aria-hidden=true]'))
             continue
+          // Lo que está dentro de un contenedor con desplazamiento propio (por
+          // ejemplo la tabla del ranking) no ensancha la página.
+          let dentroDeScroll = false
+          for (
+            let padre = el.parentElement;
+            padre && padre !== document.body;
+            padre = padre.parentElement
+          ) {
+            const x = getComputedStyle(padre).overflowX
+            if (x === 'auto' || x === 'scroll') {
+              dentroDeScroll = true
+              break
+            }
+          }
+          if (dentroDeScroll) continue
           if (r.right > vw + 1 || r.left < -1) {
             fuera.push(
               `${el.tagName.toLowerCase()}.${String(el.className).split(' ').slice(0, 2).join('.')} (${Math.round(r.left)}..${Math.round(r.right)})`

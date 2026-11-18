@@ -108,14 +108,14 @@ function openCourse(course) {
   &__text {
     font-size: 14px;
     line-height: 1.55;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0;
     max-width: 480px;
   }
 }
 
 .dl-empty-banner {
-  background: #f6fbf4;
+  background: #17150c;
   color: $dl-ink;
 }
 </style>

@@ -746,7 +746,7 @@ function goToNextLesson() {
 
 <style lang="scss" scoped>
 .dl-lesson {
-  background: #ffffff;
+  background: $dl-bg;
   min-height: 100vh;
 
   &__inner {
@@ -759,7 +759,7 @@ function goToNextLesson() {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #6b6b6b;
+    color: #bdbdbd;
     font-weight: 800;
     text-transform: uppercase;
     font-size: 13px;
@@ -790,7 +790,7 @@ function goToNextLesson() {
     transition: background 0.15s ease;
 
     &:hover {
-      background: #f0f4f0;
+      background: #202020;
     }
   }
 
@@ -822,7 +822,7 @@ function goToNextLesson() {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 
   &__sep {
@@ -839,12 +839,12 @@ function goToNextLesson() {
     margin-left: auto;
     font-size: 13px;
     font-weight: 700;
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 
   // ---------- Intro ----------
   &__intro {
-    background: #f6fbf4;
+    background: #17150c;
     border: 2px solid $dl-gray;
     border-radius: 18px;
     padding: 28px 24px;
@@ -911,7 +911,7 @@ function goToNextLesson() {
     width: 54px;
     height: 54px;
     border-radius: 50%;
-    background: #ffeed9;
+    background: #2b210c;
     color: $dl-orange;
     display: flex;
     align-items: center;
@@ -919,7 +919,7 @@ function goToNextLesson() {
   }
 
   &__bubble {
-    background: #f6fbf4;
+    background: #17150c;
     border: 2px solid $dl-gray;
     border-radius: 16px 16px 16px 4px;
     padding: 16px 18px;
@@ -946,7 +946,7 @@ function goToNextLesson() {
     gap: 14px;
     width: 100%;
     text-align: left;
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     border-radius: 14px;
     padding: 14px 16px;
@@ -957,8 +957,8 @@ function goToNextLesson() {
       box-shadow 0.15s ease;
 
     &:hover:not(:disabled) {
-      background: #f6fbf4;
-      border-color: #b5e3a3;
+      background: #17150c;
+      border-color: #6b5a1c;
     }
 
     &:disabled {
@@ -966,14 +966,14 @@ function goToNextLesson() {
     }
 
     &--selected {
-      background: #f6fbf4;
+      background: #17150c;
       border-color: $dl-blue;
       box-shadow: 0 3px 0 rgba(28, 176, 246, 0.3);
     }
 
     &--correct {
-      background: $dl-green;
-      border-color: $dl-green;
+      background: $dl-success;
+      border-color: $dl-success;
       color: #ffffff;
     }
 
@@ -993,8 +993,8 @@ function goToNextLesson() {
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    background: #f0f4f0;
-    color: #6b6b6b;
+    background: #202020;
+    color: #bdbdbd;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1024,14 +1024,14 @@ function goToNextLesson() {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #e6e6e6;
-    color: #8a8a8a;
+    background: #2a2a2a;
+    color: #a3a3a3;
     display: flex;
     align-items: center;
     justify-content: center;
 
     &--ok {
-      background: $dl-green-dark;
+      background: $dl-success-dark;
       color: #ffffff;
     }
 
@@ -1060,13 +1060,13 @@ function goToNextLesson() {
     }
 
     &--ok {
-      background: #e9f7e2;
-      color: $dl-green-dark;
+      background: #2a2410;
+      color: $dl-success-dark;
     }
 
     &--bad {
-      background: #ffe9e9;
-      color: #c00015;
+      background: #3a1414;
+      color: #ff8a8a;
     }
   }
 
@@ -1093,18 +1093,18 @@ function goToNextLesson() {
     align-items: center;
 
     &--ok {
-      background: #f4fbf0;
-      border-color: #b5e3a3;
+      background: #0f1f0a;
+      border-color: #2f7d1a;
     }
 
     &--bad {
-      background: #fff8f0;
-      border-color: #ffd9a3;
+      background: #221a0f;
+      border-color: #7a5a1c;
     }
 
     &--pending {
-      background: #f6f9fc;
-      border-color: #cfe3f3;
+      background: #12181d;
+      border-color: #2d4a60;
     }
   }
 
@@ -1121,18 +1121,18 @@ function goToNextLesson() {
     max-width: 440px;
 
     &--saving {
-      background: #eef6fd;
-      color: #176a9e;
+      background: #0f1a24;
+      color: #7cc7f2;
     }
 
     &--saved {
-      background: #e9f7e2;
+      background: #2a2410;
       color: $dl-green-dark;
     }
 
     &--failed {
-      background: #ffe9e9;
-      color: #c00015;
+      background: #3a1414;
+      color: #ff8a8a;
     }
   }
 
@@ -1152,7 +1152,7 @@ function goToNextLesson() {
 
   &__result-summary {
     font-size: 14px;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0 0 20px;
   }
 
@@ -1165,17 +1165,17 @@ function goToNextLesson() {
   }
 
   &__result-stat {
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     border-radius: 14px;
     padding: 12px 6px;
 
     &--ok {
-      border-color: #b5e3a3;
+      border-color: #2f7d1a;
     }
 
     &--bad {
-      border-color: #ffc9c9;
+      border-color: #7a2a2a;
     }
   }
 
@@ -1192,14 +1192,14 @@ function goToNextLesson() {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin-top: 2px;
   }
 
   &__result-note {
     font-size: 13px;
     line-height: 1.5;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0 0 22px;
     max-width: 440px;
   }
@@ -1231,7 +1231,7 @@ function goToNextLesson() {
   &__state-text {
     font-size: 14px;
     line-height: 1.55;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0;
     max-width: 480px;
   }
@@ -1240,8 +1240,8 @@ function goToNextLesson() {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    background: #fff8e6;
-    color: #8a5b00;
+    background: #211b0b;
+    color: #ffd88a;
     border-radius: 14px;
     padding: 16px 18px;
     margin-bottom: 20px;

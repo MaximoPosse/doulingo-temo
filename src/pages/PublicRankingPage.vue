@@ -160,10 +160,10 @@ onUnmounted(() => {
 <style scoped>
 .public-ranking {
   min-height: 100vh;
-  color: #21301e;
+  color: #f0f0f0;
   background:
-    radial-gradient(circle at 8% 8%, rgba(255, 255, 255, 0.9), transparent 30%),
-    linear-gradient(135deg, #eaf7e5 0%, #fff8df 52%, #f4f8f0 100%);
+    radial-gradient(circle at 8% 8%, rgba(248, 200, 72, 0.18), transparent 32%),
+    linear-gradient(135deg, #1c1809 0%, #211b0b 52%, #171717 100%);
 }
 .public-ranking__shell {
   max-width: 1240px;
@@ -178,19 +178,19 @@ onUnmounted(() => {
   margin-bottom: 20px;
   padding: clamp(22px, 4vw, 42px);
   border-radius: 30px;
-  background: linear-gradient(120deg, #ffffffed, #fafff5e8);
-  border: 1px solid #d8e9ce;
-  box-shadow: 0 18px 55px #6f8d5b1c;
+  background: linear-gradient(120deg, #1a1a1a, #141414);
+  border: 1px solid #3a331a;
+  box-shadow: 0 18px 55px #00000080;
 }
 .public-ranking h1 {
   margin: 8px 0 4px;
   font-size: clamp(2.2rem, 5.5vw, 5.4rem);
   line-height: 0.98;
   letter-spacing: -0.06em;
-  color: #20351c;
+  color: #f0f0f0;
 }
 .public-ranking__eyebrow {
-  color: #4d9500;
+  color: #ffd24d;
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -198,7 +198,7 @@ onUnmounted(() => {
 }
 .public-ranking__header p {
   margin: 12px 0 0;
-  color: #687765;
+  color: #b5b5b5;
   font-size: clamp(1rem, 1.8vw, 1.35rem);
 }
 .public-ranking__meta {
@@ -206,7 +206,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 9px;
   margin: 18px 4px;
-  color: #657362;
+  color: #b5b5b5;
   font-size: clamp(0.85rem, 1.4vw, 1rem);
   font-weight: 700;
 }
@@ -218,8 +218,8 @@ onUnmounted(() => {
   box-shadow: 0 0 0 5px #58a70022;
 }
 .public-ranking__offline {
-  background: #fff1d6;
-  color: #764c00;
+  background: #2b210c;
+  color: #ffd88a;
   margin: 12px 0;
 }
 .podium {
@@ -239,25 +239,25 @@ onUnmounted(() => {
   padding: 22px 16px;
   overflow: hidden;
   text-align: center;
-  border: 1px solid #e5d9a4;
+  border: 1px solid #6b5a1c;
   border-radius: 24px;
-  background: linear-gradient(145deg, #fffdf2, #fff4c9);
+  background: linear-gradient(145deg, #1d1a0e, #2f2509);
   box-shadow: 0 14px 32px #a07e251c;
 }
 .podium__card--1 {
   min-height: 245px;
   transform: translateY(-12px);
-  border-color: #edc541;
-  background: linear-gradient(145deg, #fffdf2, #ffe49a);
+  border-color: #c99a1e;
+  background: linear-gradient(145deg, #1d1a0e, #3a2d0a);
   box-shadow: 0 20px 40px #a07e2538;
 }
 .podium__card--2 {
-  background: linear-gradient(145deg, #ffffff, #edf1ed);
-  border-color: #ced7cf;
+  background: linear-gradient(145deg, $dl-surface, #222222);
+  border-color: #555555;
 }
 .podium__card--3 {
-  background: linear-gradient(145deg, #fffaf4, #f4dec9);
-  border-color: #e8c2a2;
+  background: linear-gradient(145deg, #221a0f, #2b2016);
+  border-color: #8a5a2a;
 }
 .podium__medal {
   font-size: 2.4rem;
@@ -265,7 +265,7 @@ onUnmounted(() => {
 }
 .podium__position {
   margin: 10px 0 6px;
-  color: #806d35;
+  color: #d9c07a;
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -279,7 +279,7 @@ onUnmounted(() => {
 }
 .podium b {
   margin-top: 5px;
-  color: #438000;
+  color: #ffd24d;
   font-size: clamp(1.25rem, 2.8vw, 2rem);
 }
 .podium small {
@@ -288,7 +288,7 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #687765;
+  color: #b5b5b5;
 }
 .public-ranking__table {
   width: 100%;
@@ -297,7 +297,7 @@ onUnmounted(() => {
   font-size: clamp(1rem, 2.1vw, 1.55rem);
 }
 .public-ranking__table th {
-  color: #6b7567;
+  color: #b5b5b5;
   text-align: left;
   font-size: 0.66em;
   text-transform: uppercase;
@@ -305,21 +305,21 @@ onUnmounted(() => {
   padding: 8px 18px;
 }
 .public-ranking__table td {
-  background: #fffffff2;
+  background: #141414;
   padding: 16px 18px;
-  border-top: 1px solid #e5eee0;
-  border-bottom: 1px solid #e5eee0;
+  border-top: 1px solid #2c2c2c;
+  border-bottom: 1px solid #2c2c2c;
 }
 .public-ranking__table td:first-child {
-  border-left: 1px solid #e5eee0;
+  border-left: 1px solid #2c2c2c;
   border-radius: 15px 0 0 15px;
 }
 .public-ranking__table td:last-child {
-  border-right: 1px solid #e5eee0;
+  border-right: 1px solid #2c2c2c;
   border-radius: 0 15px 15px 0;
 }
 .public-ranking__table tr:hover td {
-  background: #f9fff5;
+  background: #171717;
 }
 .public-ranking__table--rest {
   margin-top: -4px;
@@ -327,7 +327,7 @@ onUnmounted(() => {
 .position,
 .points {
   font-weight: 900;
-  color: #438000;
+  color: #ffd24d;
 }
 .alias {
   font-weight: 850;
@@ -337,7 +337,7 @@ onUnmounted(() => {
 .public-ranking__error {
   text-align: center;
   padding: 55px;
-  color: #6b7567;
+  color: #b5b5b5;
 }
 @media (max-width: 680px) {
   .public-ranking__header {

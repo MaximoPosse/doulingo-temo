@@ -92,9 +92,9 @@ const hasSession = computed(() => !!session.value)
   padding: 6px max(20px, env(safe-area-inset-right)) 6px
     max(20px, env(safe-area-inset-left));
   padding-top: calc(6px + env(safe-area-inset-top));
-  background: #ffffff;
-  color: #3c3c3c;
-  border-bottom: 2px solid #e5e5e5;
+  background: $dl-surface;
+  color: #f5f5f5;
+  border-bottom: 2px solid $dl-gray;
 }
 
 .dl-brand {
@@ -108,13 +108,14 @@ const hasSession = computed(() => !!session.value)
   width: 52px;
   height: 52px;
   object-fit: contain;
+  border-radius: 12px;
 }
 
 .dl-brand__name {
   font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  color: #58a700;
+  color: #ffd24d;
 }
 
 .dl-nav {
@@ -125,7 +126,7 @@ const hasSession = computed(() => !!session.value)
 
 .dl-nav .q-btn {
   font-weight: 700;
-  color: #6b6b6b;
+  color: #bdbdbd;
   min-height: 40px;
 }
 
@@ -175,7 +176,7 @@ const hasSession = computed(() => !!session.value)
   }
 
   .dl-nav__account {
-    flex: 2 1 0;
+    flex: 2.6 1 0;
     max-width: none;
   }
 }
@@ -191,7 +192,7 @@ const hasSession = computed(() => !!session.value)
 }
 
 .dl-nav__account {
-  color: #58a700 !important;
+  color: #ffd24d !important;
 }
 
 .dl-to-top {
@@ -201,13 +202,13 @@ const hasSession = computed(() => !!session.value)
 }
 
 .dl-account-banner {
-  background: #fff8e1;
-  color: #6b6b6b;
+  background: #211b0b;
+  color: #bdbdbd;
   font-size: 13px;
 }
 
 .dl-account-banner__close {
-  color: #58a700;
+  color: #ffd24d;
   font-weight: 700;
 }
 </style>

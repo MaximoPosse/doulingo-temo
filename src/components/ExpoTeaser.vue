@@ -60,7 +60,7 @@ import partyImg from '@/assets/amigos/chiikawa-fiesta.webp'
 
 <style lang="scss" scoped>
 .dl-teaser {
-  background: #fff8e1;
+  background: #211b0b;
   padding: 56px 0;
 
   &__inner {
@@ -128,7 +128,9 @@ import partyImg from '@/assets/amigos/chiikawa-fiesta.webp'
     flex: 0 0 auto;
     width: min(300px, 34vw);
     height: auto;
-    mix-blend-mode: multiply;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 4px;
     object-fit: contain;
   }
 }

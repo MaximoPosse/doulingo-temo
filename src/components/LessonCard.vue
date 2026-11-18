@@ -111,7 +111,7 @@ function handleClick() {
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  background: #ffffff;
+  background: $dl-surface;
   border: 2px solid $dl-gray;
   border-radius: 16px;
   padding: 18px 20px;
@@ -129,7 +129,7 @@ function handleClick() {
 
   &--disabled {
     cursor: not-allowed;
-    background: #fafafa;
+    background: #171717;
 
     &:hover {
       transform: none;
@@ -156,7 +156,7 @@ function handleClick() {
 
     &--aprobada {
       background: $dl-green;
-      box-shadow: 0 3px 0 $dl-green-dark;
+      box-shadow: 0 3px 0 $dl-yellow-shadow;
     }
 
     &--reprobada {
@@ -167,8 +167,8 @@ function handleClick() {
     &--bloqueada,
     &--pendiente {
       background: $dl-gray;
-      color: #9a9a9a;
-      box-shadow: 0 3px 0 #cfcfcf;
+      color: #8f8f8f;
+      box-shadow: 0 3px 0 #2a2a2a;
     }
   }
 
@@ -191,7 +191,7 @@ function handleClick() {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin-bottom: 2px;
   }
 
@@ -223,7 +223,7 @@ function handleClick() {
     color: $dl-green-dark;
 
     &--disabled {
-      color: #9a9a9a;
+      color: #8f8f8f;
     }
   }
 }

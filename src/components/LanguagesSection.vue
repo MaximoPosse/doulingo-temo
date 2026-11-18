@@ -125,7 +125,7 @@ const languages = computed(() => {
 
 <style lang="scss" scoped>
 .dl-langs {
-  background: #ffffff;
+  background: $dl-surface;
   padding: 56px 0;
 
   &__inner {
@@ -162,10 +162,10 @@ const languages = computed(() => {
   padding: 14px 16px;
   border: 2px solid $dl-gray;
   border-radius: 16px;
-  background: #ffffff;
+  background: $dl-surface;
   color: inherit;
   text-decoration: none;
-  box-shadow: 0 4px 0 #e5e5e5;
+  box-shadow: 0 4px 0 #2a2a2a;
   transition:
     transform 0.12s ease,
     border-color 0.12s ease;
@@ -229,7 +229,7 @@ const languages = computed(() => {
   }
 
   &--soon &__state {
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 }
 

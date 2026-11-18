@@ -27,7 +27,9 @@ const src = computed(
   width: 96px;
   height: 96px;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 4px;
   margin: 0 0 6px auto;
   pointer-events: none;
 }

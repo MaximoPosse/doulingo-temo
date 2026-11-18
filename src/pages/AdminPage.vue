@@ -507,8 +507,8 @@ onMounted(check)
 <style scoped>
 .admin-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #eef8e9, #fff9e9);
-  color: #263524;
+  background: linear-gradient(135deg, #1c1809, #211b0b);
+  color: #f0f0f0;
 }
 .admin-page__shell {
   max-width: 1180px;
@@ -531,27 +531,27 @@ onMounted(check)
   color: #697766;
 }
 .eyebrow {
-  color: #58a700;
+  color: #ffd24d;
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .denied {
-  background: #fff1d6;
+  background: #2b210c;
 }
 .tabs {
   margin-bottom: 18px;
-  background: #ffffffc9;
+  background: #141414;
   border-radius: 16px;
-  border: 1px solid #dbe8d3;
+  border: 1px solid #3a331a;
 }
 .panel {
   padding: 26px;
-  border: 1px solid #dcebd5;
+  border: 1px solid #3a331a;
   border-radius: 24px;
-  background: #fffffff0;
-  box-shadow: 0 18px 50px #76975d20;
+  background: #141414;
+  box-shadow: 0 18px 50px #00000080;
 }
 .panel__bar {
   display: flex;
@@ -594,8 +594,8 @@ onMounted(check)
 }
 .form-error {
   margin-top: 14px;
-  background: #fff0ee;
-  color: #9a3028;
+  background: #3a1414;
+  color: #ff8a8a;
 }
 @media (max-width: 700px) {
   .admin-page__header {

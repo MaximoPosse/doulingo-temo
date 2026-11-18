@@ -8,7 +8,9 @@
           width: 180px;
           height: 180px;
           object-fit: contain;
-          mix-blend-mode: multiply;
+          background: #ffffff;
+          border-radius: 22px;
+          padding: 4px;
         "
       />
       <h2

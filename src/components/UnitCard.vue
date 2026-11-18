@@ -171,14 +171,14 @@ function handleClick() {
 
     &--completada {
       background: $dl-green;
-      box-shadow: 0 4px 0 $dl-green-dark;
+      box-shadow: 0 4px 0 $dl-yellow-shadow;
     }
 
     &--bloqueada,
     &--pendiente {
       background: $dl-gray;
-      color: #9a9a9a;
-      box-shadow: 0 4px 0 #cfcfcf;
+      color: #8f8f8f;
+      box-shadow: 0 4px 0 #2a2a2a;
     }
 
     &--current {
@@ -197,7 +197,7 @@ function handleClick() {
   &__card {
     flex: 1 1 0;
     min-width: 0;
-    background: #ffffff;
+    background: $dl-surface;
     border: 2px solid $dl-gray;
     border-radius: 16px;
     padding: 18px 20px;
@@ -216,7 +216,7 @@ function handleClick() {
 
     &--disabled {
       cursor: not-allowed;
-      background: #fafafa;
+      background: #171717;
 
       &:hover {
         transform: none;
@@ -240,7 +240,7 @@ function handleClick() {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #8a8a8a;
+    color: #a3a3a3;
     margin-bottom: 2px;
   }
 
@@ -292,7 +292,7 @@ function handleClick() {
     margin-top: 6px;
     font-size: 12px;
     font-weight: 700;
-    color: #6b6b6b;
+    color: #bdbdbd;
   }
 
   &__go {
@@ -300,15 +300,15 @@ function handleClick() {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #e9f7e2;
+    background: #2a2410;
     color: $dl-green-dark;
     display: flex;
     align-items: center;
     justify-content: center;
 
     &--disabled {
-      background: #efefef;
-      color: #9a9a9a;
+      background: #262626;
+      color: #8f8f8f;
     }
   }
 }

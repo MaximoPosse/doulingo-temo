@@ -437,8 +437,8 @@ async function submitConvert() {
 .dl-auth__card {
   width: 100%;
   max-width: 520px;
-  background: #ffffff;
-  border: 2px solid #e5e5e5;
+  background: $dl-surface;
+  border: 2px solid $dl-gray;
   border-radius: 18px;
   padding: 24px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
@@ -469,12 +469,12 @@ async function submitConvert() {
 .dl-auth__title {
   font-size: 26px;
   font-weight: 800;
-  color: #3c3c3c;
+  color: #f5f5f5;
   margin: 8px 0 4px;
 }
 
 .dl-auth__lead {
-  color: #6b6b6b;
+  color: #bdbdbd;
   margin: 0 0 16px;
 }
 
@@ -483,7 +483,7 @@ async function submitConvert() {
 }
 
 .dl-auth__tabs {
-  color: #6b6b6b;
+  color: #bdbdbd;
 }
 
 .dl-auth__tabs :deep(.q-tab) {
@@ -506,7 +506,7 @@ async function submitConvert() {
 }
 
 .dl-auth__hint {
-  color: #6b6b6b;
+  color: #bdbdbd;
   margin: 0 0 14px;
 }
 
@@ -514,13 +514,13 @@ async function submitConvert() {
   display: flex;
   gap: 6px;
   align-items: flex-start;
-  color: #8a8a8a;
+  color: #a3a3a3;
   font-size: 13px;
   margin: 14px 0 0;
 }
 
 .dl-auth__link {
-  color: #58a700;
+  color: #ffd24d;
   font-weight: 700;
   margin-top: 8px;
 }

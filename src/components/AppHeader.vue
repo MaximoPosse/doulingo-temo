@@ -47,7 +47,7 @@ const navItems = [
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #ffffff;
+  background: $dl-surface;
   border-bottom: 2px solid $dl-gray;
 
   &__inner {
@@ -89,7 +89,7 @@ const navItems = [
 
 .dl-nav-link {
   text-decoration: none;
-  color: #6b6b6b;
+  color: #bdbdbd;
   font-weight: 800;
   font-size: 15px;
   text-transform: uppercase;
@@ -101,13 +101,13 @@ const navItems = [
     color 0.15s ease;
 
   &:hover {
-    background: #f0f4f0;
+    background: #202020;
     color: $dl-green-dark;
   }
 
   &.router-link-active {
     color: $dl-green-dark;
-    background: #e9f7e2;
+    background: #2a2410;
   }
 }
 

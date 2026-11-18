@@ -67,24 +67,26 @@ const friends = [
   width: 130px;
   height: 130px;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 4px;
 }
 
 .dl-friend__name {
   font-weight: 800;
-  color: #58a700;
+  color: #ffd24d;
   font-size: 15px;
 }
 
 .dl-friend__bubble {
   display: inline-block;
-  background: #fff;
-  border: 2px solid #e5e5e5;
+  background: $dl-surface;
+  border: 2px solid $dl-gray;
   border-radius: 14px;
   padding: 4px 10px;
   font-size: 13px;
   font-weight: 700;
-  color: #4b4b4b;
+  color: #dcdcdc;
   margin-bottom: 6px;
 }
 

@@ -10,8 +10,26 @@ html {
 }
 
 body {
+  background: $dl-bg;
+  color: $dl-ink;
   font-family: 'Nunito', 'Quicksand', 'Segoe UI', sans-serif;
   overflow-x: hidden;
+}
+
+// Encabezado fijo oscuro (Quasar lo pinta con el color primario).
+.q-header {
+  background: #0b0b0b;
+  color: $dl-ink;
+}
+
+// Enlaces sin estilo propio y pestañas activas en amarillo.
+a {
+  color: $dl-green-dark;
+}
+
+.q-tab--active,
+.q-tab--active .q-tab__indicator {
+  color: $dl-yellow;
 }
 
 // Los títulos de Quasar traen un interlineado enorme: en pantallas chicas
@@ -49,7 +67,7 @@ video {
 // ------- Página base -------
 
 .dl-page {
-  background: #ffffff;
+  background: $dl-bg;
   min-height: 100vh;
 
   &__inner {
@@ -116,20 +134,20 @@ video {
 
 .dl-btn-main {
   background: $dl-green;
-  color: #ffffff;
+  color: #1a1a1a;
   border: none;
-  box-shadow: 0 4px 0 $dl-green-dark;
+  box-shadow: 0 4px 0 $dl-yellow-shadow;
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: 0.5px;
 
   &:hover {
-    background: #63d60e;
+    background: $dl-yellow-hover;
   }
 
   &:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 0 $dl-green-dark;
+    box-shadow: 0 2px 0 $dl-yellow-shadow;
   }
 
   &--small {
@@ -137,7 +155,7 @@ video {
   }
 
   &--big {
-    box-shadow: 0 6px 0 $dl-green-dark;
+    box-shadow: 0 6px 0 $dl-yellow-shadow;
     font-size: 17px;
   }
 
@@ -152,17 +170,17 @@ video {
 }
 
 .dl-btn-ghost {
-  background: #ffffff;
+  background: $dl-surface;
   border: 2px solid $dl-gray;
   color: $dl-ink-dark;
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 0 #d8d8d8;
+  box-shadow: 0 4px 0 #2a2a2a;
 
   &:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 0 #d8d8d8;
+    box-shadow: 0 2px 0 #2a2a2a;
   }
 }
 
@@ -184,27 +202,27 @@ video {
   }
 
   &--available {
-    background: #e9f7e2;
+    background: #2a2410;
     color: $dl-green-dark;
   }
 
   &--completed {
-    background: #e3f3fd;
-    color: #1899d6;
+    background: #10202c;
+    color: #5cc8ff;
   }
 
   &--info {
-    background: #e3f3fd;
-    color: #1899d6;
+    background: #10202c;
+    color: #5cc8ff;
   }
 
   &--locked {
-    background: #efefef;
-    color: #8a8a8a;
+    background: #262626;
+    color: #a3a3a3;
   }
 
   &--orange {
-    background: #fff3e0;
+    background: #2b210c;
     color: $dl-orange;
   }
 }
@@ -217,12 +235,15 @@ video {
   gap: 20px;
 }
 
-// Las ilustraciones de los personajes tienen fondo blanco: se mezclan con el fondo de la pantalla.
+// Las ilustraciones de los personajes tienen fondo blanco: sobre el fondo
+// negro se muestran como una figurita redondeada de fondo blanco.
 .dl-demo__mascot,
 .dl-expo__mascot,
 .dl-expo__hero-mascot,
 .dl-lesson__result-mascot,
 .dl-lesson__notfound-mascot {
-  mix-blend-mode: multiply;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 4px;
   object-fit: contain;
 }

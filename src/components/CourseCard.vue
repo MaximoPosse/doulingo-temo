@@ -86,7 +86,7 @@ function handleClick() {
   display: flex;
   align-items: flex-start;
   gap: 18px;
-  background: #ffffff;
+  background: $dl-surface;
   border: 2px solid $dl-gray;
   border-radius: 18px;
   padding: 20px;
@@ -151,7 +151,7 @@ function handleClick() {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #8a8a8a;
+    color: #a3a3a3;
   }
 
   &__title {
@@ -180,7 +180,7 @@ function handleClick() {
     gap: 6px;
     font-size: 13px;
     font-weight: 700;
-    color: #6b6b6b;
+    color: #bdbdbd;
   }
 
   &__arrow {
@@ -188,7 +188,7 @@ function handleClick() {
     width: 46px;
     height: 46px;
     border-radius: 50%;
-    background: #e9f7e2;
+    background: #2a2410;
     color: $dl-green-dark;
     display: flex;
     align-items: center;
@@ -196,8 +196,8 @@ function handleClick() {
     align-self: center;
 
     &--disabled {
-      background: #efefef;
-      color: #9a9a9a;
+      background: #262626;
+      color: #8f8f8f;
     }
   }
 }

@@ -601,8 +601,8 @@ async function submitClear() {
 
 <style scoped>
 .dl-card {
-  background: #ffffff;
-  border: 2px solid #e5e5e5;
+  background: $dl-surface;
+  border: 2px solid $dl-gray;
   border-radius: 16px;
   padding: 20px;
 }
@@ -610,12 +610,12 @@ async function submitClear() {
 .dl-card__title {
   font-size: 19px;
   font-weight: 800;
-  color: #3c3c3c;
+  color: #f5f5f5;
   margin: 0 0 12px;
 }
 
 .dl-card__empty {
-  color: #8a8a8a;
+  color: #a3a3a3;
   font-size: 13px;
   margin: 10px 0 0;
 }
@@ -637,13 +637,13 @@ async function submitClear() {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #9a9a9a;
+  color: #8f8f8f;
 }
 
 .dl-identity__name {
   font-size: 24px;
   font-weight: 800;
-  color: #58a700;
+  color: #ffd24d;
 }
 
 .dl-identity__fields {
@@ -664,7 +664,7 @@ async function submitClear() {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  color: #6b6b6b;
+  color: #bdbdbd;
   font-size: 14px;
 }
 
@@ -682,14 +682,14 @@ async function submitClear() {
 .dl-stat__value {
   font-size: 26px;
   font-weight: 800;
-  color: #3c3c3c;
+  color: #f5f5f5;
 }
 
 .dl-stat__label {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #9a9a9a;
+  color: #8f8f8f;
 }
 
 .dl-history {
@@ -699,7 +699,7 @@ async function submitClear() {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  color: #6b6b6b;
+  color: #bdbdbd;
 }
 
 .dl-last {
@@ -719,12 +719,12 @@ async function submitClear() {
 .dl-last__lesson {
   font-size: 18px;
   font-weight: 800;
-  color: #3c3c3c;
+  color: #f5f5f5;
 }
 
 .dl-last__date {
   font-size: 13px;
-  color: #8a8a8a;
+  color: #a3a3a3;
 }
 
 .dl-last__numbers {
@@ -732,7 +732,7 @@ async function submitClear() {
   flex-wrap: wrap;
   gap: 14px;
   font-size: 14px;
-  color: #6b6b6b;
+  color: #bdbdbd;
 }
 
 .dl-attempts {
@@ -744,7 +744,7 @@ async function submitClear() {
 }
 
 .dl-attempt {
-  border-top: 1px solid #efefef;
+  border-top: 1px solid #2a2a2a;
   padding: 12px 0;
 }
 
@@ -770,18 +770,18 @@ async function submitClear() {
 .dl-attempt__lesson {
   font-size: 15px;
   font-weight: 800;
-  color: #3c3c3c;
+  color: #f5f5f5;
 }
 
 .dl-attempt__meta {
   font-size: 13px;
-  color: #8a8a8a;
+  color: #a3a3a3;
 }
 
 .dl-attempt__answers {
   margin-top: 10px;
   padding: 10px 12px;
-  background: #f8faf8;
+  background: #171717;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -793,7 +793,7 @@ async function submitClear() {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #6b6b6b;
+  color: #bdbdbd;
 }
 
 .dl-answer {
@@ -806,11 +806,11 @@ async function submitClear() {
 .dl-answer__question {
   display: block;
   font-weight: 700;
-  color: #3c3c3c;
+  color: #f5f5f5;
 }
 
 .dl-answer__choice {
   display: block;
-  color: #6b6b6b;
+  color: #bdbdbd;
 }
 </style>

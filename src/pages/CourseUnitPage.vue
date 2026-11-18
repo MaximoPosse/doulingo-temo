@@ -177,7 +177,7 @@ function openLesson(lesson) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #6b6b6b;
+  color: #bdbdbd;
   font-weight: 800;
   text-transform: uppercase;
   font-size: 13px;
@@ -193,7 +193,7 @@ function openLesson(lesson) {
 .dl-unit-head {
   display: flex;
   gap: 22px;
-  background: #fffef6;
+  background: #1d1a0e;
   border: 2px solid $dl-gray;
   border-left: 10px solid var(--course-color);
   border-radius: 18px;
@@ -255,7 +255,7 @@ function openLesson(lesson) {
     margin-top: 6px;
     font-size: 13px;
     font-weight: 700;
-    color: #6b6b6b;
+    color: #bdbdbd;
   }
 }
 
@@ -267,13 +267,13 @@ function openLesson(lesson) {
 }
 
 .dl-pending-banner {
-  background: #fff8e6;
-  color: #6b5b00;
+  background: #211b0b;
+  color: #ffd88a;
 }
 
 .dl-notfound-banner {
-  background: #ffe9e9;
-  color: #c00015;
+  background: #3a1414;
+  color: #ff8a8a;
 }
 
 .dl-states {
@@ -294,7 +294,7 @@ function openLesson(lesson) {
   &__text {
     font-size: 14px;
     line-height: 1.55;
-    color: #6b6b6b;
+    color: #bdbdbd;
     margin: 0;
     max-width: 480px;
   }
