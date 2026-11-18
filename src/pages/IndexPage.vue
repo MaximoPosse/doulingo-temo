@@ -107,6 +107,12 @@
       </div>
     </section>
 
+    <!-- Lenguajes disponibles -->
+    <LanguagesSection />
+
+    <!-- Competencia de la expo -->
+    <ExpoTeaser />
+
     <!-- Camino de aprendizaje -->
     <section class="dl-path">
       <div class="dl-path__inner">
@@ -179,7 +185,9 @@
 <script setup>
 import usagiImg from '@/assets/amigos/usagi-ok.webp'
 import logoImg from '@/assets/logo.webp'
+import ExpoTeaser from '@/components/ExpoTeaser.vue'
 import FriendsRow from '@/components/FriendsRow.vue'
+import LanguagesSection from '@/components/LanguagesSection.vue'
 
 const pathNodes = [
   { label: 'Fundamentos', icon: 'code', current: false, locked: false },
