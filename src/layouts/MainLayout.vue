@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hh rr fff">
+  <q-layout view="hHh lpr fFf">
     <q-header>
       <q-toolbar class="dl-bar">
         <router-link to="/" class="dl-brand">
@@ -51,6 +51,22 @@
            la instancia y no vuelve a consultar los datos. -->
       <router-view :key="$route.fullPath" />
     </q-page-container>
+
+    <!-- Flecha para volver arriba: aparece al bajar -->
+    <q-page-scroller
+      position="bottom-right"
+      :scroll-offset="300"
+      :offset="[16, 16]"
+      :duration="350"
+    >
+      <q-btn
+        fab
+        color="primary"
+        icon="keyboard_arrow_up"
+        aria-label="Volver arriba"
+        class="dl-to-top"
+      />
+    </q-page-scroller>
   </q-layout>
 </template>
 
@@ -176,6 +192,12 @@ const hasSession = computed(() => !!session.value)
 
 .dl-nav__account {
   color: #58a700 !important;
+}
+
+.dl-to-top {
+  box-shadow: 0 4px 0 #58a700;
+  /* En el APK se evita la barra de gestos del celular. */
+  margin-bottom: env(safe-area-inset-bottom);
 }
 
 .dl-account-banner {
