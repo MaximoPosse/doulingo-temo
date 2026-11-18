@@ -3,7 +3,7 @@
     <div class="text-center q-pa-md">
       <img
         :src="usagiImg"
-        alt="Usagi perdida"
+        alt="Hachiware, perdido"
         style="width: 160px; height: 160px; object-fit: contain"
       />
       <h2
@@ -28,5 +28,5 @@
 </template>
 
 <script setup>
-import usagiImg from '@/assets/usagi.webp'
+import usagiImg from '@/assets/amigos/hachiware.svg?no-inline'
 </script>

@@ -27,7 +27,7 @@
 
       <template v-else-if="!event">
         <div class="dl-states">
-          <img :src="usagiImg" alt="Usagi" class="dl-expo__mascot" />
+          <img :src="chiikawaImg" alt="Chiikawa" class="dl-expo__mascot" />
           <h1 class="dl-states__title">La expo todavía no está abierta</h1>
           <p class="dl-states__text">
             Cuando se publique el evento vas a poder elegir un desafío y
@@ -187,6 +187,7 @@
 import { computed } from 'vue'
 
 import usagiImg from '@/assets/usagi.webp'
+import chiikawaImg from '@/assets/amigos/chiikawa.svg?no-inline'
 import { fetchExpo } from '@/data/challengeRepository'
 import { useRemoteData } from '@/composables/useRemoteData'
 

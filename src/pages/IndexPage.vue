@@ -152,6 +152,15 @@
       </div>
     </section>
 
+    <!-- Amigos de Usagi -->
+    <section class="dl-friends-section">
+      <h2 class="dl-section-title">Conocé a los amigos de Usagi</h2>
+      <p class="dl-path__lead">
+        Chiikawa, Usagi y Hachiware te acompañan en cada lección.
+      </p>
+      <FriendsRow />
+    </section>
+
     <!-- Footer -->
     <footer class="dl-footer">
       <div class="dl-footer__inner">
@@ -170,6 +179,7 @@
 <script setup>
 import usagiImg from '@/assets/usagi.webp'
 import logoImg from '@/assets/logo.webp'
+import FriendsRow from '@/components/FriendsRow.vue'
 
 const pathNodes = [
   { label: 'Fundamentos', icon: 'code', current: false, locked: false },
@@ -642,5 +652,9 @@ const pathNodes = [
   .dl-hero__cta {
     justify-content: center;
   }
+}
+.dl-friends-section {
+  padding: 32px 16px 40px;
+  text-align: center;
 }
 </style>

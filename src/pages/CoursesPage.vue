@@ -9,7 +9,7 @@
             ejercicios y construye tu racha con la guía de Usagi.
           </p>
         </div>
-        <img :src="usagiImg" alt="Usagi" class="dl-courses__mascot" />
+        <FriendsRow compact class="dl-courses__friends" />
       </div>
 
       <!-- Cargando -->
@@ -63,7 +63,7 @@ import { useRouter } from 'vue-router'
 import { getCourses } from '@/data/courseRepository'
 import { useRemoteData } from '@/composables/useRemoteData'
 import CourseCard from '@/components/CourseCard.vue'
-import usagiImg from '@/assets/usagi.webp'
+import FriendsRow from '@/components/FriendsRow.vue'
 
 const router = useRouter()
 
