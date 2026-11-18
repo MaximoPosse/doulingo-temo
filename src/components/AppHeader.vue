@@ -4,10 +4,10 @@
       <router-link to="/" class="dl-brand">
         <q-img
           :src="usagiImg"
-          alt="Usagi, la mascota de Doulingo"
+          alt="Usagi, la mascota de CodeLingua"
           class="dl-brand__mascot"
         />
-        <span class="dl-brand__name">Doulingo</span>
+        <span class="dl-brand__name">CodeLingua</span>
       </router-link>
 
       <nav class="dl-header__nav">

@@ -1,7 +1,7 @@
-# Doulingo · Base de datos Supabase
+# CodeLingua · Base de datos Supabase
 
 Registro y documentación operativa del proyecto de base de datos de la
-aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
+aplicación **CodeLingua** (proyecto escolar). El diccionario de datos está en
 `docs/05-modelo-datos.md`; el diagrama entidad-relación lo elabora el equipo.
 
 ## Registro del proyecto
@@ -15,19 +15,19 @@ aplicación **Doulingo** (proyecto escolar). El diccionario de datos está en
   (PostgREST) usando las credenciales anónimas del cliente.
 - **Organización de tablas (resumen):**
 
-  | Tabla        | Contenido                                                        | Relación                          |
-  | ------------ | ---------------------------------------------------------------- | --------------------------------- |
-  | `cursos`     | Catálogo de cursos (`estado`: disponible / proximamente)         | —                                 |
-  | `unidades`   | Unidades de cada curso (`disponible` indica contenido publicado) | `curso_id` FK a `cursos`          |
-  | `lecciones`  | Teoría + ejemplo de código de cada lección                       | `unidad_id` FK a `unidades`       |
-  | `preguntas`  | Enunciados (opción múltiple)                                     | `leccion_id` FK a `lecciones`     |
-  | `opciones`   | Opciones visibles de cada pregunta (**sin** marca de solución)   | `pregunta_id` FK a `preguntas`    |
-  | `soluciones` | Opción correcta + explicación de cada pregunta (**privada**)     | `pregunta_id` PK/FK a `preguntas` |
-  | `eventos`    | Evento de expo (`borrador`/`publicado`/`cerrado`, fechas)        | —                                 |
-  | `desafios`   | Desafío: dificultad, duración, puntos, intentos y tolerancia     | `evento_id` FK a `eventos`        |
-  | `desafio_preguntas` / `desafio_opciones` | Banco propio de la competencia (sin soluciones visibles) | `desafio_id` / `pregunta_id`      |
-  | `desafio_soluciones` | Solución privada de cada pregunta de desafío              | `pregunta_id` PK/FK               |
-  | `partidas` / `partida_preguntas` / `partida_respuestas` | Intentos, preguntas asignadas y respuestas de la competencia | `participante_id`, `partida_id` |
+  | Tabla                                                   | Contenido                                                        | Relación                          |
+  | ------------------------------------------------------- | ---------------------------------------------------------------- | --------------------------------- |
+  | `cursos`                                                | Catálogo de cursos (`estado`: disponible / proximamente)         | —                                 |
+  | `unidades`                                              | Unidades de cada curso (`disponible` indica contenido publicado) | `curso_id` FK a `cursos`          |
+  | `lecciones`                                             | Teoría + ejemplo de código de cada lección                       | `unidad_id` FK a `unidades`       |
+  | `preguntas`                                             | Enunciados (opción múltiple)                                     | `leccion_id` FK a `lecciones`     |
+  | `opciones`                                              | Opciones visibles de cada pregunta (**sin** marca de solución)   | `pregunta_id` FK a `preguntas`    |
+  | `soluciones`                                            | Opción correcta + explicación de cada pregunta (**privada**)     | `pregunta_id` PK/FK a `preguntas` |
+  | `eventos`                                               | Evento de expo (`borrador`/`publicado`/`cerrado`, fechas)        | —                                 |
+  | `desafios`                                              | Desafío: dificultad, duración, puntos, intentos y tolerancia     | `evento_id` FK a `eventos`        |
+  | `desafio_preguntas` / `desafio_opciones`                | Banco propio de la competencia (sin soluciones visibles)         | `desafio_id` / `pregunta_id`      |
+  | `desafio_soluciones`                                    | Solución privada de cada pregunta de desafío                     | `pregunta_id` PK/FK               |
+  | `partidas` / `partida_preguntas` / `partida_respuestas` | Intentos, preguntas asignadas y respuestas de la competencia     | `participante_id`, `partida_id`   |
   - Todas las secuencias (`orden` de unidades, lecciones, preguntas y
     opciones) se almacenan en una columna `orden int > 0`; la aplicación nunca
     depende del orden físico de inserción.
@@ -130,23 +130,23 @@ Detalle del diseño en [`docs/13-intentos.md`](../docs/13-intentos.md).
 inicial. Es un mundo **separado de la práctica**: usa su propio banco y
 `check_answer()` no lo consulta.
 
-| Tabla                                                | Contenido                                                              | Acceso                                          |
-| ---------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------- |
-| `eventos`                                            | Evento de expo con fechas, estado y `es_prueba`                        | Lectura pública si está `publicado` o `cerrado` |
-| `desafios`                                           | Dificultad, duración, puntos por acierto, intentos y tolerancia        | Lectura pública si el evento está visible       |
-| `desafio_preguntas` / `desafio_opciones`             | Banco de preguntas y opciones del desafío                              | Lectura pública si el desafío está visible      |
-| `desafio_soluciones`                                 | Opción correcta + explicación (**privada**)                            | Sin lectura: solo funciones del servidor        |
-| `partidas`                                           | Intento: foto de reglas, inicio/cierre y resultado                     | Solo el propio participante                     |
-| `partida_preguntas` / `partida_respuestas`           | Preguntas fijadas y una respuesta por partida/pregunta                 | Solo el propio participante                     |
+| Tabla                                      | Contenido                                                       | Acceso                                          |
+| ------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------- |
+| `eventos`                                  | Evento de expo con fechas, estado y `es_prueba`                 | Lectura pública si está `publicado` o `cerrado` |
+| `desafios`                                 | Dificultad, duración, puntos por acierto, intentos y tolerancia | Lectura pública si el evento está visible       |
+| `desafio_preguntas` / `desafio_opciones`   | Banco de preguntas y opciones del desafío                       | Lectura pública si el desafío está visible      |
+| `desafio_soluciones`                       | Opción correcta + explicación (**privada**)                     | Sin lectura: solo funciones del servidor        |
+| `partidas`                                 | Intento: foto de reglas, inicio/cierre y resultado              | Solo el propio participante                     |
+| `partida_preguntas` / `partida_respuestas` | Preguntas fijadas y una respuesta por partida/pregunta          | Solo el propio participante                     |
 
-| Función                                             | Qué hace                                                                                                                   |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `iniciar_partida(desafio, clave)`                   | Crea la partida, fija preguntas y reglas y consume un intento. La misma `clave` devuelve la MISMA partida (idempotencia).   |
-| `responder_partida(partida, pregunta, opcion)`      | Valida pertenencia, vigencia y opción; guarda la primera respuesta y calcula los puntos en el servidor.                     |
-| `finalizar_partida(partida)`                        | Cierra como `finalizada`, `incompleta` o `vencida`, calcula el resultado y es idempotente.                                  |
-| `resultado_partida(partida)`                        | Detalle de una partida cerrada; revela la solución solo cuando el desafío o el evento cerraron.                             |
-| `ranking_desafio(desafio, limite)`                  | Mejor intento válido por participante; desempata por puntos, duración del servidor y finalización más temprana.             |
-| `hora_servidor()`                                   | Hora oficial para el temporizador, sin depender del reloj del celular.                                                      |
+| Función                                        | Qué hace                                                                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `iniciar_partida(desafio, clave)`              | Crea la partida, fija preguntas y reglas y consume un intento. La misma `clave` devuelve la MISMA partida (idempotencia). |
+| `responder_partida(partida, pregunta, opcion)` | Valida pertenencia, vigencia y opción; guarda la primera respuesta y calcula los puntos en el servidor.                   |
+| `finalizar_partida(partida)`                   | Cierra como `finalizada`, `incompleta` o `vencida`, calcula el resultado y es idempotente.                                |
+| `resultado_partida(partida)`                   | Detalle de una partida cerrada; revela la solución solo cuando el desafío o el evento cerraron.                           |
+| `ranking_desafio(desafio, limite)`             | Mejor intento válido por participante; desempata por puntos, duración del servidor y finalización más temprana.           |
+| `hora_servidor()`                              | Hora oficial para el temporizador, sin depender del reloj del celular.                                                    |
 
 Reglas del modelo:
 
@@ -199,7 +199,7 @@ Detalle del diseño en [`docs/14-desafios.md`](../docs/14-desafios.md).
 
 - Los archivos `0001` a `0003` son idempotentes (re-ejecutables) gracias a
   `ON CONFLICT DO NOTHING` y `create ... if not exists` / `drop policy if
-  exists`. `0004` a `0007` también: usan `create ... if not exists`,
+exists`. `0004` a `0007` también: usan `create ... if not exists`,
   `create or replace function`, `drop policy if exists` y
   `ON CONFLICT DO UPDATE` en los datos iniciales.
 - Con la sesión iniciada, el avance por lección se guarda en la base
@@ -209,6 +209,7 @@ Detalle del diseño en [`docs/14-desafios.md`](../docs/14-desafios.md).
 - La competencia de la expo vive en sus propias tablas (`eventos`, `desafios`,
   `partidas`, etc.) y no modifica `participant_progress` ni el avance de los
   cursos. El ranking se consulta con `ranking_desafio()`.
+
 # Aplicación de cambios
 
 Después de `0007_seed_desafios.sql`, aplicar también

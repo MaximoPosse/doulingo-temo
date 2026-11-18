@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · 0007_seed_desafios.sql
+-- CodeLingua · 0007_seed_desafios.sql
 -- Datos iniciales de la etapa 6: evento de expo, desafíos y su banco.
 --
 -- Ejecutable varias veces: usa ON CONFLICT DO UPDATE con UUIDs fijos.
@@ -22,7 +22,7 @@ insert into public.eventos (
   (
     '40000000-0000-0000-0000-000000000001',
     'expo-doulingo-2026',
-    'Expo Doulingo 2026',
+    'Expo CodeLingua 2026',
     'Competencia de programación para visitantes de la expo. Elegí un desafío, respondé contra el reloj y compará tu mejor intento en el ranking.',
     '2026-11-01T00:00:00Z',
     '2027-12-31T23:59:59Z',

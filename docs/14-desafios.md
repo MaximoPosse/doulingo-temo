@@ -36,36 +36,36 @@ auth.users (id)
 
 ### `eventos`
 
-| Campo       | Tipo        | Nulo | Restricciones                                  |
-| ----------- | ----------- | ---- | ---------------------------------------------- |
-| id          | uuid        | no   | PK, default `gen_random_uuid()`                |
-| slug        | text        | no   | UNIQUE (identificador url-safe)                |
-| titulo      | text        | no   | –                                              |
-| descripcion | text        | no   | –                                              |
-| inicia_en   | timestamptz | no   | –                                              |
-| termina_en  | timestamptz | no   | CHECK: `termina_en > inicia_en`                |
-| estado      | text        | no   | CHECK: `borrador` \| `publicado` \| `cerrado`  |
-| es_prueba   | boolean     | no   | default `false` (evento interno de pruebas)    |
-| creado_en   | timestamptz | no   | default `now()`                                |
+| Campo       | Tipo        | Nulo | Restricciones                                 |
+| ----------- | ----------- | ---- | --------------------------------------------- |
+| id          | uuid        | no   | PK, default `gen_random_uuid()`               |
+| slug        | text        | no   | UNIQUE (identificador url-safe)               |
+| titulo      | text        | no   | –                                             |
+| descripcion | text        | no   | –                                             |
+| inicia_en   | timestamptz | no   | –                                             |
+| termina_en  | timestamptz | no   | CHECK: `termina_en > inicia_en`               |
+| estado      | text        | no   | CHECK: `borrador` \| `publicado` \| `cerrado` |
+| es_prueba   | boolean     | no   | default `false` (evento interno de pruebas)   |
+| creado_en   | timestamptz | no   | default `now()`                               |
 
 ### `desafios`
 
-| Campo               | Tipo    | Nulo | Restricciones                                     |
-| ------------------- | ------- | ---- | ------------------------------------------------- |
-| id                  | uuid    | no   | PK, default `gen_random_uuid()`                   |
-| evento_id           | uuid    | no   | FK `eventos(id)` on delete cascade                |
-| slug                | text    | no   | UNIQUE con `evento_id`                            |
-| titulo              | text    | no   | –                                                 |
-| descripcion         | text    | no   | –                                                 |
-| dificultad          | text    | no   | CHECK: `facil` \| `intermedio` \| `dificil`       |
-| duracion_segundos   | integer | no   | CHECK > 0                                         |
-| puntos_por_acierto  | integer | no   | CHECK > 0                                         |
-| intentos_permitidos | integer | no   | CHECK > 0                                         |
-| tolerancia_segundos | integer | no   | CHECK ≥ 0; default 30 (plazo de reconexión)       |
-| es_prueba           | boolean | no   | default `false` (desafío interno de pruebas)      |
-| estado              | text    | no   | CHECK: `borrador` \| `publicado` \| `cerrado`     |
-| orden               | integer | no   | CHECK > 0                                         |
-| creado_en           | timestamptz | no | default `now()`                                   |
+| Campo               | Tipo        | Nulo | Restricciones                                 |
+| ------------------- | ----------- | ---- | --------------------------------------------- |
+| id                  | uuid        | no   | PK, default `gen_random_uuid()`               |
+| evento_id           | uuid        | no   | FK `eventos(id)` on delete cascade            |
+| slug                | text        | no   | UNIQUE con `evento_id`                        |
+| titulo              | text        | no   | –                                             |
+| descripcion         | text        | no   | –                                             |
+| dificultad          | text        | no   | CHECK: `facil` \| `intermedio` \| `dificil`   |
+| duracion_segundos   | integer     | no   | CHECK > 0                                     |
+| puntos_por_acierto  | integer     | no   | CHECK > 0                                     |
+| intentos_permitidos | integer     | no   | CHECK > 0                                     |
+| tolerancia_segundos | integer     | no   | CHECK ≥ 0; default 30 (plazo de reconexión)   |
+| es_prueba           | boolean     | no   | default `false` (desafío interno de pruebas)  |
+| estado              | text        | no   | CHECK: `borrador` \| `publicado` \| `cerrado` |
+| orden               | integer     | no   | CHECK > 0                                     |
+| creado_en           | timestamptz | no   | default `now()`                               |
 
 `es_prueba` oculta el evento o el desafío en la interfaz de la expo, pero la
 API los sigue leyendo: así las pruebas automáticas usan sus propios datos sin
@@ -73,35 +73,35 @@ necesitar la clave `service_role`.
 
 ### Banco del desafío
 
-| Tabla                | Contenido                                              | Acceso                            |
-| -------------------- | ------------------------------------------------------ | --------------------------------- |
-| `desafio_preguntas`  | Enunciado, código opcional, dificultad y orden         | Lectura pública si el desafío está visible |
-| `desafio_opciones`   | Opciones visibles (**sin** marca de solución)          | Lectura pública si el desafío está visible |
-| `desafio_soluciones` | Opción correcta + explicación (**privada**)            | Sin lectura: solo funciones del servidor |
+| Tabla                | Contenido                                      | Acceso                                     |
+| -------------------- | ---------------------------------------------- | ------------------------------------------ |
+| `desafio_preguntas`  | Enunciado, código opcional, dificultad y orden | Lectura pública si el desafío está visible |
+| `desafio_opciones`   | Opciones visibles (**sin** marca de solución)  | Lectura pública si el desafío está visible |
+| `desafio_soluciones` | Opción correcta + explicación (**privada**)    | Sin lectura: solo funciones del servidor   |
 
 `desafio_opciones` no guarda cuál es la correcta: eso vive en
 `desafio_soluciones`, con `revoke all` y sin política de lectura.
 
 ### `partidas`
 
-| Campo               | Tipo        | Nulo | Restricciones                                        |
-| ------------------- | ----------- | ---- | ---------------------------------------------------- |
-| id                  | uuid        | no   | PK, default `gen_random_uuid()`                      |
-| participante_id     | uuid        | no   | FK `auth.users(id)` on delete cascade                |
-| desafio_id          | uuid        | no   | FK `desafios(id)` on delete cascade                  |
-| clave_idempotencia  | text        | no   | UNIQUE con `participante_id`                         |
+| Campo               | Tipo        | Nulo | Restricciones                                                  |
+| ------------------- | ----------- | ---- | -------------------------------------------------------------- |
+| id                  | uuid        | no   | PK, default `gen_random_uuid()`                                |
+| participante_id     | uuid        | no   | FK `auth.users(id)` on delete cascade                          |
+| desafio_id          | uuid        | no   | FK `desafios(id)` on delete cascade                            |
+| clave_idempotencia  | text        | no   | UNIQUE con `participante_id`                                   |
 | estado              | text        | no   | CHECK: `en_curso` \| `finalizada` \| `incompleta` \| `vencida` |
-| total_preguntas     | integer     | no   | CHECK ≥ 0                                            |
-| puntos              | integer     | no   | CHECK ≥ 0                                            |
-| aciertos            | integer     | no   | CHECK ≥ 0; `aciertos + errores ≤ total_preguntas`    |
-| errores             | integer     | no   | CHECK ≥ 0                                            |
-| puntos_por_acierto  | integer     | no   | CHECK > 0 (foto de la regla al iniciar)              |
-| duracion_segundos   | integer     | no   | CHECK > 0 (foto de la regla al iniciar)              |
-| tolerancia_segundos | integer     | no   | CHECK ≥ 0 (foto de la regla al iniciar)              |
-| iniciado_en         | timestamptz | no   | default `now()` (hora del servidor)                  |
-| expira_en           | timestamptz | no   | `iniciado_en + duracion_segundos`                    |
-| finalizado_en       | timestamptz | sí   | obligatorio si `estado <> 'en_curso'`                |
-| duracion_ms         | bigint      | sí   | CHECK ≥ 0; medida en el servidor                     |
+| total_preguntas     | integer     | no   | CHECK ≥ 0                                                      |
+| puntos              | integer     | no   | CHECK ≥ 0                                                      |
+| aciertos            | integer     | no   | CHECK ≥ 0; `aciertos + errores ≤ total_preguntas`              |
+| errores             | integer     | no   | CHECK ≥ 0                                                      |
+| puntos_por_acierto  | integer     | no   | CHECK > 0 (foto de la regla al iniciar)                        |
+| duracion_segundos   | integer     | no   | CHECK > 0 (foto de la regla al iniciar)                        |
+| tolerancia_segundos | integer     | no   | CHECK ≥ 0 (foto de la regla al iniciar)                        |
+| iniciado_en         | timestamptz | no   | default `now()` (hora del servidor)                            |
+| expira_en           | timestamptz | no   | `iniciado_en + duracion_segundos`                              |
+| finalizado_en       | timestamptz | sí   | obligatorio si `estado <> 'en_curso'`                          |
+| duracion_ms         | bigint      | sí   | CHECK ≥ 0; medida en el servidor                               |
 
 `partidas` guarda una **foto de las reglas** del desafío en el momento de
 iniciar. Si el equipo edita la duración o los puntos después, las partidas ya
@@ -109,10 +109,10 @@ iniciadas conservan las reglas con las que se jugaron.
 
 ### `partida_preguntas`
 
-| Campo               | Tipo    | Nulo | Restricciones                                   |
-| ------------------- | ------- | ---- | ----------------------------------------------- |
-| partida_id          | uuid    | no   | FK `partidas(id)` on delete cascade             |
-| desafio_pregunta_id | uuid    | no   | FK `desafio_preguntas(id)` on delete cascade    |
+| Campo               | Tipo    | Nulo | Restricciones                                     |
+| ------------------- | ------- | ---- | ------------------------------------------------- |
+| partida_id          | uuid    | no   | FK `partidas(id)` on delete cascade               |
+| desafio_pregunta_id | uuid    | no   | FK `desafio_preguntas(id)` on delete cascade      |
 | orden               | integer | no   | CHECK > 0; PK `(partida_id, desafio_pregunta_id)` |
 
 Fija qué preguntas aplican a esa partida. Aunque después se edite el banco del
@@ -120,16 +120,16 @@ desafío, la partida conserva sus preguntas.
 
 ### `partida_respuestas`
 
-| Campo               | Tipo        | Nulo | Restricciones                                   |
-| ------------------- | ----------- | ---- | ----------------------------------------------- |
-| id                  | uuid        | no   | PK, default `gen_random_uuid()`                 |
-| partida_id          | uuid        | no   | FK `partidas(id)` on delete cascade             |
-| desafio_pregunta_id | uuid        | no   | FK compuesta a `partida_preguntas`              |
-| desafio_opcion_id   | uuid        | no   | FK `desafio_opciones(id)` on delete cascade     |
-| correcto            | boolean     | no   | calculado por el servidor                       |
-| puntos_obtenidos    | integer     | no   | CHECK ≥ 0; calculado por el servidor            |
-| respondido_en       | timestamptz | no   | default `now()`                                 |
-| tiempo_ms           | bigint      | no   | CHECK ≥ 0; medido desde `iniciado_en`           |
+| Campo               | Tipo        | Nulo | Restricciones                               |
+| ------------------- | ----------- | ---- | ------------------------------------------- |
+| id                  | uuid        | no   | PK, default `gen_random_uuid()`             |
+| partida_id          | uuid        | no   | FK `partidas(id)` on delete cascade         |
+| desafio_pregunta_id | uuid        | no   | FK compuesta a `partida_preguntas`          |
+| desafio_opcion_id   | uuid        | no   | FK `desafio_opciones(id)` on delete cascade |
+| correcto            | boolean     | no   | calculado por el servidor                   |
+| puntos_obtenidos    | integer     | no   | CHECK ≥ 0; calculado por el servidor        |
+| respondido_en       | timestamptz | no   | default `now()`                             |
+| tiempo_ms           | bigint      | no   | CHECK ≥ 0; medido desde `iniciado_en`       |
 
 `UNIQUE (partida_id, desafio_pregunta_id)`: **una sola respuesta por partida y
 pregunta**. La primera queda firme; un envío repetido devuelve la existente sin
@@ -140,14 +140,14 @@ volver a sumar.
 Todas son `SECURITY DEFINER`, trabajan sobre `auth.uid()` y validan en el
 servidor. El cliente solo envía identificadores (partida, pregunta, opción).
 
-| Función                                     | Devuelve                                                                                                                          |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `iniciar_partida(p_desafio, p_clave)`       | `partida, desafio, estado, total_preguntas, puntos_por_acierto, duracion_segundos, tolerancia_segundos, iniciado_en, expira_en, intentos_usados, intentos_permitidos, reutilizado` |
-| `responder_partida(p_partida, p_pregunta, p_opcion)` | `correcto, puntos_obtenidos, puntos_totales, respondidas, total_preguntas, repetida, expira_en`                    |
-| `finalizar_partida(p_partida)`              | `partida, desafio, estado, total_preguntas, respondidas, aciertos, errores, puntos, duracion_ms, iniciado_en, expira_en, finalizado_en, reutilizado` |
-| `resultado_partida(p_partida)`              | Detalle por pregunta: enunciado, opción elegida, correcta, explicación, puntos, respondida, tiempo y `revelado`                    |
-| `ranking_desafio(p_desafio, p_limite)`      | `posicion, alias, alias_sufijo, puntos, aciertos, total_preguntas, duracion_ms, finalizado_en, es_yo, partida`                    |
-| `hora_servidor()`                           | `hora` (timestamptz del servidor)                                                                                                 |
+| Función                                              | Devuelve                                                                                                                                                                           |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iniciar_partida(p_desafio, p_clave)`                | `partida, desafio, estado, total_preguntas, puntos_por_acierto, duracion_segundos, tolerancia_segundos, iniciado_en, expira_en, intentos_usados, intentos_permitidos, reutilizado` |
+| `responder_partida(p_partida, p_pregunta, p_opcion)` | `correcto, puntos_obtenidos, puntos_totales, respondidas, total_preguntas, repetida, expira_en`                                                                                    |
+| `finalizar_partida(p_partida)`                       | `partida, desafio, estado, total_preguntas, respondidas, aciertos, errores, puntos, duracion_ms, iniciado_en, expira_en, finalizado_en, reutilizado`                               |
+| `resultado_partida(p_partida)`                       | Detalle por pregunta: enunciado, opción elegida, correcta, explicación, puntos, respondida, tiempo y `revelado`                                                                    |
+| `ranking_desafio(p_desafio, p_limite)`               | `posicion, alias, alias_sufijo, puntos, aciertos, total_preguntas, duracion_ms, finalizado_en, es_yo, partida`                                                                     |
+| `hora_servidor()`                                    | `hora` (timestamptz del servidor)                                                                                                                                                  |
 
 ### Inicio de partida
 
@@ -188,11 +188,11 @@ pregunta: solo uno inserta y suma.
 
 `finalizar_partida` bloquea la partida y clasifica:
 
-| Estado       | Condición                                                                 |
-| ------------ | ------------------------------------------------------------------------- |
+| Estado       | Condición                                                                    |
+| ------------ | ---------------------------------------------------------------------------- |
 | `finalizada` | Todas las preguntas respondidas y cierre dentro de `expira_en + tolerancia`. |
-| `incompleta` | Se cerró antes, con preguntas sin responder.                              |
-| `vencida`    | El cierre ocurrió después de `expira_en + tolerancia_segundos`.           |
+| `incompleta` | Se cerró antes, con preguntas sin responder.                                 |
+| `vencida`    | El cierre ocurrió después de `expira_en + tolerancia_segundos`.              |
 
 Es **idempotente**: si la partida ya no está `en_curso`, devuelve el mismo
 resultado con `reutilizado = true`. Calcula aciertos, errores, puntos y
@@ -241,37 +241,37 @@ resultado con `reutilizado = true`. Calcula aciertos, errores, puntos y
 
 ## Estados y casos de uso
 
-| Situación                                          | Efecto                                                                  |
-| -------------------------------------------------- | ----------------------------------------------------------------------- |
-| Se corta la conexión o se cierra la app            | La partida queda `en_curso`; se puede retomar dentro del plazo.         |
-| Se reabre el desafío con la misma clave            | Se devuelve la misma partida (`reutilizado = true`).                    |
-| Se responde dos veces la misma pregunta            | Se conserva la primera respuesta; el segundo envío no suma.             |
-| Se responde desde otra cuenta                      | `PR_PARTIDA_NOT_FOUND`: la partida no pertenece al participante.        |
-| Se intenta responder una pregunta de otro desafío  | `PR_PREGUNTA_NO_ASIGNADA`.                                              |
-| Se envía una opción de otra pregunta               | `PR_OPCION_INVALIDA`.                                                   |
-| Se responde después del plazo                      | `PR_PARTIDA_EXPIRADA`.                                                  |
-| Se finaliza dos veces                              | El segundo cierre devuelve el mismo resultado (`reutilizado = true`).   |
-| Se agotan los intentos                             | `PR_INTENTOS_AGOTADOS`; la misma clave sigue devolviendo su partida.    |
-| El desafío o el evento cierran                     | El detalle revela la opción correcta y la explicación.                  |
+| Situación                                         | Efecto                                                                |
+| ------------------------------------------------- | --------------------------------------------------------------------- |
+| Se corta la conexión o se cierra la app           | La partida queda `en_curso`; se puede retomar dentro del plazo.       |
+| Se reabre el desafío con la misma clave           | Se devuelve la misma partida (`reutilizado = true`).                  |
+| Se responde dos veces la misma pregunta           | Se conserva la primera respuesta; el segundo envío no suma.           |
+| Se responde desde otra cuenta                     | `PR_PARTIDA_NOT_FOUND`: la partida no pertenece al participante.      |
+| Se intenta responder una pregunta de otro desafío | `PR_PREGUNTA_NO_ASIGNADA`.                                            |
+| Se envía una opción de otra pregunta              | `PR_OPCION_INVALIDA`.                                                 |
+| Se responde después del plazo                     | `PR_PARTIDA_EXPIRADA`.                                                |
+| Se finaliza dos veces                             | El segundo cierre devuelve el mismo resultado (`reutilizado = true`). |
+| Se agotan los intentos                            | `PR_INTENTOS_AGOTADOS`; la misma clave sigue devolviendo su partida.  |
+| El desafío o el evento cierran                    | El detalle revela la opción correcta y la explicación.                |
 
 ## Códigos de error
 
-| Código                       | Cuándo aparece                                              |
-| ---------------------------- | ----------------------------------------------------------- |
-| `PR_AUTH_REQUIRED`           | No hay sesión.                                              |
-| `PR_INVALID_KEY`             | La clave de idempotencia no mide entre 8 y 100 caracteres.  |
-| `PR_DESAFIO_NOT_FOUND`       | El desafío no existe.                                       |
-| `PR_DESAFIO_CERRADO`         | El desafío o su evento no están publicados o están fuera de fecha. |
-| `PR_DESAFIO_SIN_PREGUNTAS`   | El desafío no tiene preguntas.                              |
-| `PR_DESAFIO_INCOMPLETO`      | Alguna pregunta no tiene solución válida.                   |
-| `PR_INTENTOS_AGOTADOS`       | Se alcanzó `intentos_permitidos`.                           |
-| `PR_PARTIDA_NOT_FOUND`       | La partida no existe o no es del participante.              |
-| `PR_PREGUNTA_NO_ASIGNADA`    | La pregunta no pertenece a la partida.                      |
-| `PR_OPCION_INVALIDA`         | La opción no pertenece a la pregunta.                       |
-| `PR_PARTIDA_CERRADA`         | La partida ya no está `en_curso`.                           |
-| `PR_PARTIDA_EXPIRADA`        | Pasó `expira_en` y no hay respuesta previa.                 |
-| `PR_SOLUCION_NO_DISPONIBLE`  | La pregunta no tiene solución cargada.                      |
-| `PR_PARTIDA_EN_CURSO`        | Se pidió el resultado de una partida abierta.               |
+| Código                      | Cuándo aparece                                                     |
+| --------------------------- | ------------------------------------------------------------------ |
+| `PR_AUTH_REQUIRED`          | No hay sesión.                                                     |
+| `PR_INVALID_KEY`            | La clave de idempotencia no mide entre 8 y 100 caracteres.         |
+| `PR_DESAFIO_NOT_FOUND`      | El desafío no existe.                                              |
+| `PR_DESAFIO_CERRADO`        | El desafío o su evento no están publicados o están fuera de fecha. |
+| `PR_DESAFIO_SIN_PREGUNTAS`  | El desafío no tiene preguntas.                                     |
+| `PR_DESAFIO_INCOMPLETO`     | Alguna pregunta no tiene solución válida.                          |
+| `PR_INTENTOS_AGOTADOS`      | Se alcanzó `intentos_permitidos`.                                  |
+| `PR_PARTIDA_NOT_FOUND`      | La partida no existe o no es del participante.                     |
+| `PR_PREGUNTA_NO_ASIGNADA`   | La pregunta no pertenece a la partida.                             |
+| `PR_OPCION_INVALIDA`        | La opción no pertenece a la pregunta.                              |
+| `PR_PARTIDA_CERRADA`        | La partida ya no está `en_curso`.                                  |
+| `PR_PARTIDA_EXPIRADA`       | Pasó `expira_en` y no hay respuesta previa.                        |
+| `PR_SOLUCION_NO_DISPONIBLE` | La pregunta no tiene solución cargada.                             |
+| `PR_PARTIDA_EN_CURSO`       | Se pidió el resultado de una partida abierta.                      |
 
 ## RLS
 
@@ -302,16 +302,16 @@ resultado con `reutilizado = true`. Calcula aciertos, errores, puntos y
 
 ## Datos iniciales (semilla)
 
-| Elemento              | ID                                     | Reglas                                        |
-| --------------------- | -------------------------------------- | --------------------------------------------- |
-| Evento público        | `40000000-…-000000000001`              | Expo Doulingo 2026, `publicado`               |
-| Evento interno        | `40000000-…-000000000002`              | `es_prueba = true` (oculto en la UI)          |
-| Fundamentos exprés    | `50000000-…-000000000001`              | fácil · 90 s · 10 pts · 2 intentos · tol. 20 s |
-| Lógica intermedia     | `50000000-…-000000000002`              | intermedio · 120 s · 15 pts · 1 intento · tol. 30 s |
-| Cierre difícil        | `50000000-…-000000000003`              | difícil · 150 s · 20 pts · 1 intento · tol. 30 s |
-| Prueba normal         | `50000000-…-000000000101`              | 4 preguntas · 300 s · 2 intentos · tol. 10 s  |
-| Prueba vencida        | `50000000-…-000000000102`              | 1 s · sin tolerancia                          |
-| Prueba de un intento  | `50000000-…-000000000103`              | 1 intento                                     |
+| Elemento             | ID                        | Reglas                                              |
+| -------------------- | ------------------------- | --------------------------------------------------- |
+| Evento público       | `40000000-…-000000000001` | Expo CodeLingua 2026, `publicado`                   |
+| Evento interno       | `40000000-…-000000000002` | `es_prueba = true` (oculto en la UI)                |
+| Fundamentos exprés   | `50000000-…-000000000001` | fácil · 90 s · 10 pts · 2 intentos · tol. 20 s      |
+| Lógica intermedia    | `50000000-…-000000000002` | intermedio · 120 s · 15 pts · 1 intento · tol. 30 s |
+| Cierre difícil       | `50000000-…-000000000003` | difícil · 150 s · 20 pts · 1 intento · tol. 30 s    |
+| Prueba normal        | `50000000-…-000000000101` | 4 preguntas · 300 s · 2 intentos · tol. 10 s        |
+| Prueba vencida       | `50000000-…-000000000102` | 1 s · sin tolerancia                                |
+| Prueba de un intento | `50000000-…-000000000103` | 1 intento                                           |
 
 ## Pruebas
 

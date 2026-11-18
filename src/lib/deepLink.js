@@ -11,6 +11,7 @@
 // página y lo resuelve detectSessionInUrl del cliente de Supabase.
 
 import { Capacitor } from '@capacitor/core'
+import { App } from '@capacitor/app'
 
 // ¿La app está corriendo dentro del APK (Capacitor) y no en un navegador?
 export function isNativeApp() {
@@ -41,7 +42,6 @@ export function extractAuthCode(url) {
 export async function registerDeepLinkHandler(onCode) {
   if (!isNativeApp()) return null
 
-  const { App } = await import('@capacitor/app')
   const listener = await App.addListener('appUrlOpen', async ({ url }) => {
     const code = extractAuthCode(url)
     if (code) await onCode(code)

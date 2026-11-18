@@ -1,4 +1,4 @@
-# Doulingo
+# CodeLingua
 
 Aplicación móvil educativa inspirada en la lógica de aprendizaje progresivo de
 **Duolingo**, pero orientada a la enseñanza de **lenguajes de programación**.
@@ -9,21 +9,26 @@ La mascota oficial es **Usagi**, del anime _Chiikawa_, en lugar del búho clási
 
 ## Documentación del proyecto
 
-| Documento                                                    | Contenido                                                       |
-| ------------------------------------------------------------ | --------------------------------------------------------------- |
-| [`docs/01-objetivo.md`](docs/01-objetivo.md)                 | Objetivo general, problema, usuario y funcionalidades.          |
-| [`docs/02-estructura.md`](docs/02-estructura.md)             | Mapas de pantallas, rutas y arquitectura de carpetas.           |
-| [`docs/03-wireframes.md`](docs/03-wireframes.md)             | Bocetos (wireframes) de las pantallas principales.              |
-| [`docs/04-identidad-visual.md`](docs/04-identidad-visual.md) | Paleta, tipografías, botones, tarjetas, íconos y justificación. |
-| [`docs/05-modelo-datos.md`](docs/05-modelo-datos.md)         | Diagrama entidad-relación y tablas (PK, FK, restricciones).     |
-| [`docs/06-reglas-avance.md`](docs/06-reglas-avance.md)       | Completada vs aprobada, umbral, desbloqueo y repetición.        |
-| [`docs/07-pruebas.md`](docs/07-pruebas.md)                   | Registro de pruebas (9 casos obligatorios + complementarios).   |
-| [`docs/08-aportes.md`](docs/08-aportes.md)                   | Aportes del equipo.                                             |
-| [`docs/09-pruebas-supabase.md`](docs/09-pruebas-supabase.md) | Pruebas de la etapa de base de datos (Supabase).                |
-| [`docs/10-auth.md`](docs/10-auth.md)                         | Acceso, identidad y sesión (Supabase Auth).                     |
-| [`docs/11-pruebas-auth.md`](docs/11-pruebas-auth.md)         | Pruebas de la etapa de autenticación.                           |
-| [`docs/12-apk.md`](docs/12-apk.md)                           | El APK (Android) y el esquema de URL propio.                    |
-| [`supabase/README.md`](supabase/README.md)                   | Proyecto Supabase: esquema, seed, RLS y seguridad.              |
+| Documento                                                        | Contenido                                                                       |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [`docs/01-objetivo.md`](docs/01-objetivo.md)                     | Objetivo general, problema, usuario y funcionalidades.                          |
+| [`docs/02-estructura.md`](docs/02-estructura.md)                 | Mapas de pantallas, rutas y arquitectura de carpetas.                           |
+| [`docs/03-wireframes.md`](docs/03-wireframes.md)                 | Bocetos (wireframes) de las pantallas principales.                              |
+| [`docs/04-identidad-visual.md`](docs/04-identidad-visual.md)     | Paleta, tipografías, botones, tarjetas, íconos y justificación.                 |
+| [`docs/05-modelo-datos.md`](docs/05-modelo-datos.md)             | Diagrama entidad-relación y tablas (PK, FK, restricciones).                     |
+| [`docs/06-reglas-avance.md`](docs/06-reglas-avance.md)           | Completada vs aprobada, umbral, desbloqueo y repetición.                        |
+| [`docs/07-pruebas.md`](docs/07-pruebas.md)                       | Registro de pruebas (9 casos obligatorios + complementarios).                   |
+| [`docs/08-aportes.md`](docs/08-aportes.md)                       | Aportes del equipo.                                                             |
+| [`docs/09-pruebas-supabase.md`](docs/09-pruebas-supabase.md)     | Pruebas de la etapa de base de datos (Supabase).                                |
+| [`docs/10-auth.md`](docs/10-auth.md)                             | Acceso, identidad y sesión (Supabase Auth).                                     |
+| [`docs/11-pruebas-auth.md`](docs/11-pruebas-auth.md)             | Pruebas de la etapa de autenticación.                                           |
+| [`docs/12-apk.md`](docs/12-apk.md)                               | El APK (Android) y el esquema de URL propio.                                    |
+| [`docs/13-intentos.md`](docs/13-intentos.md)                     | Intentos y progreso calculados/guardados por el servidor.                       |
+| [`docs/14-desafios.md`](docs/14-desafios.md)                     | Competencia de expo, partidas y ranking.                                        |
+| [`docs/15-ranking-admin-expo.md`](docs/15-ranking-admin-expo.md) | Ranking público y administración de contenidos/eventos.                         |
+| [`docs/16-manuales-y-cierre.md`](docs/16-manuales-y-cierre.md)   | Manuales breves, demostración e índice del informe final.                       |
+| [`docs/17-informe-final.md`](docs/17-informe-final.md)           | Informe final (PDF/DOCX), manuales PDF, diagramas y verificación de la etapa 8. |
+| [`supabase/README.md`](supabase/README.md)                       | Proyecto Supabase: esquema, seed, RLS y seguridad.                              |
 
 ## Estado actual
 
@@ -66,10 +71,17 @@ relacional Supabase**:
 - **Versión Android (APK)** con **Capacitor**: la misma SPA se empaqueta como
   aplicación nativa y declara el **esquema de URL propio**
   (`doulingo://auth/callback`) para que los enlaces de confirmación de correo
-  y de recuperación de contraseña abran la app. Ver
-  [`docs/12-apk.md`](docs/12-apk.md).
+  y de recuperación de contraseña abran la app. El APK debug/release se compila
+  desde terminal con JDK 21, Android SDK y Gradle Wrapper, sin Android Studio.
+  Ver [`docs/12-apk.md`](docs/12-apk.md).
 - Progreso persistente en `localStorage` por identificador de participante
   (`useProgress`) y sincronizado con la tabla `participant_progress`.
+- **Competencia de la expo** separada de la práctica: desafíos con reloj,
+  intentos limitados, puntaje calculado por el servidor, resultados e historial
+  y ranking público en tiempo real. Ver `docs/14` y `docs/15`.
+- **Panel de administración** (`/admin`) para gestionar contenido, eventos,
+  desafíos, preguntas, opciones y soluciones. Las operaciones sensibles se
+  validan en PostgreSQL/RLS.
 - Router con rutas nombradas y página 404.
 
 ## Tecnologías
@@ -92,17 +104,20 @@ relacional Supabase**:
 ├── .env.example              # Plantilla de credenciales públicas (Supabase)
 ├── supabase/                 # Base de datos: esquema, seed, RLS y auth (SQL)
 │   ├── README.md
-│   ├── setup.sql             # Los cuatro archivos SQL en un solo script
+│   ├── setup.sql             # Las siete migraciones concatenadas
 │   └── migrations/
 │       ├── 0001_schema.sql
 │       ├── 0002_seed.sql
 │       ├── 0003_rls.sql
-│       └── 0004_auth.sql     # perfiles, progreso y RLS ampliada
+│       ├── 0004_auth.sql     # perfiles, progreso y RLS ampliada
+│       ├── 0005_intentos.sql
+│       ├── 0006_desafios.sql
+│       └── 0007_seed_desafios.sql
 ├── src-capacitor/            # Versión Android (Capacitor)
 │   ├── capacitor.config.js   # appId, appName y esquema del WebView
 │   └── android/              # Proyecto Android (Manifest, Gradle, Activity)
 ├── public/
-├── docs/                     # Documentación de diseño y decisiones
+├── docs/                     # Diseño, decisiones, pruebas y manuales
 ├── tests/e2e/                # Pruebas automáticas (Puppeteer + Supabase real)
 └── src/
     ├── App.vue
@@ -167,11 +182,14 @@ Requiere **JDK 21** y el **SDK de Android** (ver
 [`docs/12-apk.md`](docs/12-apk.md)):
 
 ```bash
-npx quasar build -m capacitor   # arma la web en src-capacitor/www
-cd src-capacitor
-npx cap sync android            # copia la web al proyecto Android
-npx cap open android            # Android Studio → Build → APK
+npx quasar build -m capacitor -T android --skip-pkg
+cd src-capacitor/android
+./gradlew assembleDebug
 ```
+
+En Windows usar `gradlew.bat assembleDebug`. El APK debug queda en
+`src-capacitor/android/app/build/outputs/apk/debug/app-debug.apk`. Para release
+se necesita un keystore fuera del repositorio; ver `docs/12-apk.md`.
 
 El esquema de URL de la app es `doulingo://auth/callback` (declarado en el
 `AndroidManifest.xml` de `src-capacitor/android`) y tiene que estar en
@@ -196,16 +214,20 @@ npm run test:e2e:alias      # alias público, sufijo y aislamiento del perfil
 
 ## Navegación interna
 
-| Ruta                                             | Nombre          | Vista                                             |
-| ------------------------------------------------ | --------------- | ------------------------------------------------- |
-| `/`                                              | `inicio`        | Landing                                           |
-| `/cursos`                                        | `cursos`        | Catálogo                                          |
-| `/cursos/:slug`                                  | `curso`         | Detalle del curso + unidades                      |
-| `/cursos/:slug/unidad/:unitId`                   | `unidad`        | Lecciones de la unidad                            |
-| `/cursos/:slug/unidad/:unitId/leccion/:lessonId` | `leccion`       | Lección completa                                  |
-| `/acceso`                                        | `acceso`        | Acceso: invitado, registro, ingreso, recuperación |
-| `/perfil`                                        | `perfil`        | **Protegida**: identidad, historial y privacidad  |
-| cualquier otra                                   | `no-encontrada` | 404                                               |
+| Ruta                                             | Nombre            | Vista                                             |
+| ------------------------------------------------ | ----------------- | ------------------------------------------------- |
+| `/`                                              | `inicio`          | Landing                                           |
+| `/cursos`                                        | `cursos`          | Catálogo                                          |
+| `/cursos/:slug`                                  | `curso`           | Detalle del curso + unidades                      |
+| `/cursos/:slug/unidad/:unitId`                   | `unidad`          | Lecciones de la unidad                            |
+| `/cursos/:slug/unidad/:unitId/leccion/:lessonId` | `leccion`         | Lección completa                                  |
+| `/acceso`                                        | `acceso`          | Acceso: invitado, registro, ingreso, recuperación |
+| `/perfil`                                        | `perfil`          | **Protegida**: identidad, historial y privacidad  |
+| `/expo`                                          | `expo`            | Evento y desafíos de competencia                  |
+| `/expo/:challengeId`                             | `desafio`         | Partida, resultado y ranking                      |
+| `/ranking/:eventId?`                             | `ranking-publico` | Ranking público de la expo                        |
+| `/admin`                                         | `admin`           | Panel administrativo, protegido por `es_admin()`  |
+| cualquier otra                                   | `no-encontrada`   | 404                                               |
 
 ## Notas de estilo
 

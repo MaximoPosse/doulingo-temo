@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · 0002_seed.sql
+-- CodeLingua · 0002_seed.sql
 -- Datos iniciales: curso JavaScript desde cero.
 --   - 1 curso disponible con 5 unidades.
 --   - Unidad 1 (Fundamentos) disponible: 2 lecciones x 3 preguntas,

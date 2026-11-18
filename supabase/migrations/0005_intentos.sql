@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · 0005_intentos.sql
+-- CodeLingua · 0005_intentos.sql
 -- Intentos, respuestas y progreso calculado en el servidor.
 --
 -- Decisiones del modelo:

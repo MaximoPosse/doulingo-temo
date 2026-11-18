@@ -152,9 +152,7 @@ export async function fetchChallenge(challengeId) {
     .maybeSingle()
 
   if (result.error) {
-    throw new Error(
-      mensajeError(result.error, 'No se pudo cargar el desafío.')
-    )
+    throw new Error(mensajeError(result.error, 'No se pudo cargar el desafío.'))
   }
   return result.data ? mapChallenge(result.data) : null
 }

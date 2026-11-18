@@ -10,7 +10,7 @@ navegación.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│ [Usagi] Doulingo        Inicio   Cursos                [ EMPEZAR ]   │  ← header fijo
+│ [Usagi] CodeLingua        Inicio   Cursos                [ EMPEZAR ]   │  ← header fijo
 ├───────────────────────────────────────────────────────────────────────┤
 │                                                                       │
 │  La forma gratuita, divertida y                        ┌────────┐     │
@@ -24,7 +24,7 @@ navegación.
 ├───────────────────────────────────────────────────────────────────────┤
 │            Gratis para siempre · Cero conocimientos · A tu ritmo      │
 ├───────────────────────────────────────────────────────────────────────┤
-│                       ¿Por qué Doulingo?                              │
+│                       ¿Por qué CodeLingua?                              │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
 │  │ ⚡        │  │ ✓        │  │ ☝        │  │ 🏆        │              │
 │  │ Lecciones │  │ Retro-   │  │ Progreso │  │ Gamifi-  │              │
@@ -34,7 +34,7 @@ navegación.
 │                        Así funciona                                   │
 │  (Usagi)  ● ● ●(●)● 🔒   +  texto: de cero a dominar un lenguaje      │
 ├───────────────────────────────────────────────────────────────────────┤
-│                         [Doulingo]  © 2026                            │
+│                         [CodeLingua]  © 2026                            │
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -44,7 +44,7 @@ navegación.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│ [Usagi] Doulingo        Inicio   Cursos                [ EMPEZAR ]   │
+│ [Usagi] CodeLingua        Inicio   Cursos                [ EMPEZAR ]   │
 ├───────────────────────────────────────────────────────────────────────┤
 │  Elige tu curso                                    (Usagi, 120px)    │
 │  Todos empiezan desde cero...                                        │
@@ -71,7 +71,7 @@ navegación.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│ [Usagi] Doulingo        Inicio   Cursos                [ EMPEZAR ]   │
+│ [Usagi] CodeLingua        Inicio   Cursos                [ EMPEZAR ]   │
 ├───────────────────────────────────────────────────────────────────────┤
 │ ‹ VOLVER A CURSOS                                                      │
 │ ┌───────────────────────────────────────────────────────────────┐     │
@@ -109,7 +109,7 @@ navegación.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│ [Usagi] Doulingo        Inicio   Cursos                [ EMPEZAR ]   │
+│ [Usagi] CodeLingua        Inicio   Cursos                [ EMPEZAR ]   │
 ├───────────────────────────────────────────────────────────────────────┤
 │ ✕ ▓▓▓▓▓░░░░░░░░   (barra de progreso del ejercicio)                  │
 │                                                                       │

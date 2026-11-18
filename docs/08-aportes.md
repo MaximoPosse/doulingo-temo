@@ -30,7 +30,7 @@ Maximoposse:
 
 Durante el desarrollo, otra edición externa al repositorio rompió
 `MainLayout.vue` (etiqueta sin cerrar). Se detectó por el error de compilación
-("Element is missing end tag"), se reparó y se preservó la marca **Arabytes**
+("Element is missing end tag"), se reparó y se preservó la marca **Arabytes** (reemplazada luego por **CodeLingua**)
 que ese aporte introdujo junto a la mascota Usagi.
 
 ## Fecha

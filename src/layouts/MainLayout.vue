@@ -5,10 +5,10 @@
         <div class="dl-brand">
           <img
             :src="usagiImg"
-            alt="Usagi, la mascota de Doulingo"
+            alt="Usagi, la mascota de CodeLingua"
             class="dl-brand__mascot"
           />
-          <span class="dl-brand__name">Arabytes</span>
+          <span class="dl-brand__name">CodeLingua</span>
         </div>
 
         <nav class="dl-nav">

@@ -1,8 +1,28 @@
 apply plugin: 'com.android.application'
 
+def releaseSigningValues = [
+    keystoreFile: System.getenv('DOULINGO_KEYSTORE_FILE'),
+    keystorePassword: System.getenv('DOULINGO_KEYSTORE_PASSWORD'),
+    keyAlias: System.getenv('DOULINGO_KEY_ALIAS'),
+    keyPassword: System.getenv('DOULINGO_KEY_PASSWORD')
+]
+def hasReleaseSigning = releaseSigningValues.values().every {
+    it != null && !it.trim().isEmpty()
+}
+
 android {
     namespace = "com.doulingo.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseSigningValues.keystoreFile)
+                storePassword releaseSigningValues.keystorePassword
+                keyAlias releaseSigningValues.keyAlias
+                keyPassword releaseSigningValues.keyPassword
+            }
+        }
+    }
     defaultConfig {
         applicationId "com.doulingo.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -18,6 +38,9 @@ android {
     }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -43,6 +66,18 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+gradle.taskGraph.whenReady { taskGraph ->
+    def createsReleaseArtifact = taskGraph.allTasks.any {
+        it.name in ['assembleRelease', 'bundleRelease'] && it.project == project
+    }
+    if (createsReleaseArtifact && !hasReleaseSigning) {
+        throw new GradleException(
+            'Falta configurar la firma release. Definí DOULINGO_KEYSTORE_FILE, ' +
+            'DOULINGO_KEYSTORE_PASSWORD, DOULINGO_KEY_ALIAS y DOULINGO_KEY_PASSWORD.'
+        )
+    }
+}
 
 try {
     def servicesJSON = file('google-services.json')

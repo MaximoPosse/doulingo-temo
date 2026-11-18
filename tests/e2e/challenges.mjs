@@ -541,9 +541,7 @@ runner.check(
 )
 runner.check(
   'Ranking: A queda antes que B por tener más puntos',
-  !!filaA &&
-    !!filaB &&
-    Number(filaA.posicion) < Number(filaB.posicion),
+  !!filaA && !!filaB && Number(filaA.posicion) < Number(filaB.posicion),
   `A=${filaA?.posicion} B=${filaB?.posicion}`
 )
 

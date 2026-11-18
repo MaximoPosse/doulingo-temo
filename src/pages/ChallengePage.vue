@@ -89,9 +89,7 @@
                 <span class="dl-challenge__rule-label">Puntos por acierto</span>
               </div>
               <div class="dl-challenge__rule">
-                <span class="dl-challenge__rule-value">{{
-                  maxPoints
-                }}</span>
+                <span class="dl-challenge__rule-value">{{ maxPoints }}</span>
                 <span class="dl-challenge__rule-label">Puntaje máximo</span>
               </div>
               <div class="dl-challenge__rule">
@@ -123,7 +121,8 @@
                 cuenta permanente desde tu perfil.
               </p>
               <p v-else-if="session" class="dl-challenge__status-text">
-                Estás jugando como <strong>{{ publicName }}</strong>.
+                Estás jugando como <strong>{{ publicName }}</strong
+                >.
               </p>
               <p v-else class="dl-challenge__status-text">
                 Podés jugar sin cuenta: al empezar se crea un invitado para
@@ -266,7 +265,9 @@
                     {{ row.name }}
                     <span v-if="row.isMe" class="dl-ranking__tag">vos</span>
                   </td>
-                  <td><strong>{{ row.points }}</strong></td>
+                  <td
+                    ><strong>{{ row.points }}</strong></td
+                  >
                   <td>{{ row.correct }}/{{ row.total }}</td>
                   <td>{{ formatMs(row.durationMs) }}</td>
                 </tr>
@@ -281,7 +282,10 @@
         <!-- =========================== JUGANDO =========================== -->
         <template v-else-if="phase === 'playing'">
           <div class="dl-challenge__playbar">
-            <div class="dl-challenge__timer" :class="{ 'is-expired': timeExpired }">
+            <div
+              class="dl-challenge__timer"
+              :class="{ 'is-expired': timeExpired }"
+            >
               <q-icon name="timer" size="20px" />
               <span>{{ timerLabel }}</span>
             </div>
@@ -435,7 +439,9 @@
                 size="lg"
                 class="dl-btn-main dl-btn-main--big"
                 :label="submitting ? 'GUARDANDO…' : 'CONFIRMAR'"
-                :disable="selectedOptionId === null || submitting || timeExpired"
+                :disable="
+                  selectedOptionId === null || submitting || timeExpired
+                "
                 @click="confirmAnswer"
               />
               <q-btn
@@ -476,10 +482,7 @@
         <!-- =========================== RESULTADO ========================= -->
         <template v-else>
           <section class="dl-challenge__result">
-            <div
-              class="dl-challenge__result-banner"
-              :class="resultBannerClass"
-            >
+            <div class="dl-challenge__result-banner" :class="resultBannerClass">
               <span class="dl-badge" :class="resultStateClass">
                 <q-icon :name="resultStateIcon" />
                 {{ resultStateLabel }}
@@ -504,7 +507,9 @@
               </div>
 
               <div v-if="result" class="dl-challenge__score">
-                <span class="dl-challenge__score-value">{{ result.puntos }}</span>
+                <span class="dl-challenge__score-value">{{
+                  result.puntos
+                }}</span>
                 <span class="dl-challenge__score-label">puntos</span>
               </div>
               <p v-if="result" class="dl-challenge__result-message">
@@ -594,7 +599,10 @@
           <section class="dl-challenge__detail-card">
             <div class="dl-challenge__detail-head">
               <h2 class="dl-challenge__section-title">Tus respuestas</h2>
-              <span v-if="resultDetail.length" class="dl-challenge__detail-hint">
+              <span
+                v-if="resultDetail.length"
+                class="dl-challenge__detail-hint"
+              >
                 {{
                   resultRevealed
                     ? 'El desafío cerró: se muestran las soluciones.'
@@ -638,7 +646,10 @@
                   <span class="dl-challenge__answer-question">
                     {{ answer.order }}. {{ answer.prompt }}
                   </span>
-                  <span v-if="answer.answered" class="dl-challenge__answer-line">
+                  <span
+                    v-if="answer.answered"
+                    class="dl-challenge__answer-line"
+                  >
                     Elegiste:
                     <strong>{{ answer.chosenOptionText }}</strong>
                     <template v-if="answer.correct">
@@ -710,7 +721,9 @@
                     {{ row.name }}
                     <span v-if="row.isMe" class="dl-ranking__tag">vos</span>
                   </td>
-                  <td><strong>{{ row.points }}</strong></td>
+                  <td
+                    ><strong>{{ row.points }}</strong></td
+                  >
                   <td>{{ row.correct }}/{{ row.total }}</td>
                   <td>{{ formatMs(row.durationMs) }}</td>
                 </tr>
@@ -801,14 +814,10 @@ const isOpen = computed(() => {
 
 const attemptsUsed = computed(() => myPartidas.value.length)
 const attemptsLeft = computed(() =>
-  Math.max(
-    0,
-    (challenge.value?.intentosPermitidos ?? 0) - attemptsUsed.value
-  )
+  Math.max(0, (challenge.value?.intentosPermitidos ?? 0) - attemptsUsed.value)
 )
 const openPartida = computed(
-  () =>
-    myPartidas.value.find(partida => partida.estado === 'en_curso') ?? null
+  () => myPartidas.value.find(partida => partida.estado === 'en_curso') ?? null
 )
 const openPartidaExpired = computed(
   () =>

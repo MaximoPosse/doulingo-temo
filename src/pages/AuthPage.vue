@@ -2,11 +2,7 @@
   <q-page class="dl-page">
     <div class="dl-page__inner dl-auth">
       <div class="dl-auth__card">
-        <img
-          :src="usagiImg"
-          alt="Usagi, la mascota de Doulingo"
-          class="dl-auth__mascot"
-        />
+        <img :src="logoImg" alt="Logo de CodeLingua" class="dl-auth__mascot" />
         <h1 class="dl-auth__title">{{ title }}</h1>
         <p class="dl-auth__lead">{{ lead }}</p>
 
@@ -301,7 +297,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import usagiImg from '@/assets/usagi.webp'
+import logoImg from '@/assets/logo.webp'
 import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
@@ -339,7 +335,7 @@ const hasSession = computed(() => !!session.value && mode.value === '')
 const title = computed(() => {
   if (recoveryMode.value) return 'Definí tu nueva contraseña'
   if (mode.value === 'convertir') return 'Convertí tu cuenta'
-  return 'Accedé a Arabytes'
+  return 'Accedé a CodeLingua'
 })
 
 const lead = computed(() => {
@@ -439,8 +435,8 @@ async function submitConvert() {
 }
 
 .dl-auth__mascot {
-  width: 64px;
-  height: 64px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
 }
 

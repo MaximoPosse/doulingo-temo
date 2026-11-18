@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · 0006_desafios.sql
+-- CodeLingua · 0006_desafios.sql
 -- Etapa 6: competencia de expo (evento, desafíos, partidas).
 --
 -- Separación práctica / competencia:

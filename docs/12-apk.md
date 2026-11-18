@@ -24,7 +24,7 @@ Android con **Capacitor**. Esta nota explica:
 Datos de la app nativa:
 
 - `appId`: `com.doulingo.app`
-- `appName`: `Doulingo`
+- `appName`: `CodeLingua`
 - `server.androidScheme`: `https` → dentro del APK el WebView sirve la app en
   `https://localhost` (origen seguro, necesario para Supabase Auth con PKCE).
 
@@ -111,29 +111,22 @@ npx cap open android
 # Builds puntuales desde Gradle
 cd src-capacitor/android
 ./gradlew assembleDebug     # APK firmado (instalable): app/build/outputs/apk/debug/app-debug.apk
-./gradlew assembleRelease   # APK SIN firmar: app/build/outputs/apk/release/app-release-unsigned.apk
+./gradlew assembleRelease   # release firmado si están configuradas las variables DOULINGO_*
 ```
 
-Un APK firmado para distribuirlo se genera desde Android Studio:
-**Build → Build Bundle(s)/APK(s) → Generate Signed Bundle / APK**. Con
-Gradle, `assembleRelease` queda **sin firmar** porque el `build.gradle` del
-proyecto no define un `signingConfig` de release: el que sale firmado (con el
-keystore de debug) es `assembleDebug`, y es el que sirve para instalar en un
-dispositivo o emulador.
+`assembleRelease` se firma desde Gradle con variables de entorno y un keystore
+propio fuera del repositorio. La sección 7 incluye el procedimiento actualizado.
 
 ## 4. Requisitos para compilar
 
 - **JDK 21** (ya está en la máquina: Temurin 21.0.12).
 - **SDK de Android** con _platform-tools_, _platforms;android-36_ y
-  _build-tools;36.0.0_. En esta máquina quedó instalado en
-  `C:\Users\corre\AppData\Local\Temp\opencode\android-sdk` con los
-  _command-line tools_ de Google:
+  _build-tools;36.0.0_. En esta máquina está instalado en
+  `C:\Users\corre\AppData\Local\Android\Sdk`.
 
   ```powershell
-  # 1. Descargar y descomprimir los command-line tools en <sdk>\cmdline-tools\latest
-  # 2. Aceptar las licencias (responder "y" a todas)
-  cmd /c "sdkmanager.bat --sdk_root=<sdk> --licenses < yes.txt"
-  # 3. Instalar los paquetes
+  # Descargar y extraer en <sdk>\cmdline-tools\latest; después:
+  sdkmanager.bat --sdk_root=<sdk> --licenses
   sdkmanager.bat --sdk_root=<sdk> --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
   ```
 
@@ -175,7 +168,7 @@ El archivo `src-capacitor/android/local.properties` le dice a Gradle dónde est�
 el SDK:
 
 ```properties
-sdk.dir=C:/Users/corre/AppData/Local/Temp/opencode/android-sdk
+sdk.dir=C:/Users/corre/AppData/Local/Android/Sdk
 ```
 
 Tiene que llevar **barras normales**: en un archivo `.properties` la barra
@@ -194,19 +187,19 @@ suyo.
 
 ```powershell
 # Paquete, versión y actividad principal
-aapt2 dump badging dist\doulingo-0.0.1-debug.apk
+aapt2 dump badging src-capacitor\android\app\build\outputs\apk\debug\app-debug.apk
 
 # El intent-filter del esquema propio dentro del APK
-aapt2 dump xmltree --file AndroidManifest.xml dist\doulingo-0.0.1-debug.apk
+aapt2 dump xmltree src-capacitor\android\app\build\outputs\apk\debug\app-debug.apk --file AndroidManifest.xml
 
 # Firma
-apksigner verify --print-certs dist\doulingo-0.0.1-debug.apk
+apksigner verify --print-certs src-capacitor\android\app\build\outputs\apk\debug\app-debug.apk
 ```
 
 Resultado obtenido el 12 de octubre de 2026:
 
 - `package: name='com.doulingo.app' versionCode='1' versionName='1.0'`,
-  `application-label:'Doulingo'`, `minSdkVersion:'24'`, `targetSdkVersion:'36'`.
+  `application-label:'CodeLingua'`, `minSdkVersion:'24'`, `targetSdkVersion:'36'`.
 - `scheme="doulingo"`, `host="auth"`, `pathPrefix="/callback"` presentes en el
   manifiesto empaquetado.
 - Firmado con el certificado “Android Debug” (instalable en cualquier
@@ -246,3 +239,147 @@ Android puede notificar el mismo enlace más de una vez (por ejemplo al arrancar
 en frío). `completeDeepLink()` ignora el mismo código repetido dentro de 10
 segundos, para que un enlace de un solo uso no se intente canjear dos veces y
 termine mostrando un error sobre una sesión ya iniciada.
+
+## 7. Procedimiento reproducible desde terminal (Windows)
+
+### 7.1 Versiones y compatibilidad comprobadas
+
+Registro del equipo de compilación al **15 de noviembre de 2026**:
+
+| Componente                     | Versión comprobada        | Nota                                               |
+| ------------------------------ | ------------------------- | -------------------------------------------------- |
+| Node.js                        | 24.16.0                   | Cumple `engines` del proyecto                      |
+| Quasar                         | 2.32.0                    | CLI `@quasar/app-vite` 3.8.3                       |
+| Capacitor                      | 8.5.3                     | `@capacitor/android` y CLI 8.5.3; plugin App 8.1.2 |
+| JDK                            | Eclipse Temurin 21.0.12+8 | Build ejecutado con Java 21                        |
+| Android Gradle Plugin          | 8.13.0                    | Declarado en Gradle                                |
+| Gradle Wrapper                 | 8.14.3                    | Incluido en `src-capacitor/android`                |
+| Android SDK Command-line Tools | 22.0                      | Instalado en `cmdline-tools/latest`                |
+| Android Platform-Tools         | 37.0.0                    | Incluye `adb`                                      |
+| Android Platform               | API 36                    | `compileSdk`/`targetSdk` 36; `minSdk` 24           |
+| Android Build-Tools            | 36.0.0                    | Usado para inspeccionar y verificar el APK         |
+
+JDK 21, Gradle 8.14.3 y AGP 8.13.0 compilaron juntos correctamente. Android
+Studio no es necesario. El SDK está fuera del repositorio en
+`C:\Users\corre\AppData\Local\Android\Sdk`; adaptar esa ruta en otra máquina.
+
+Para una instalación nueva, descargar Command-line Tools desde
+[Android Developers](https://developer.android.com/studio#command-line-tools-only)
+y extraerlas como `<SDK>\cmdline-tools\latest`. Luego, en PowerShell:
+
+```powershell
+$env:JAVA_HOME = 'C:\ruta\al\jdk-21'
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+$env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
+$env:Path = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\cmdline-tools\latest\bin;$env:Path"
+
+sdkmanager --licenses
+sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+```
+
+En este equipo las licencias quedaron aceptadas y platform-tools, API 36 y
+build-tools 36.0.0 ya estaban instalados; se añadió Command-line Tools 22.0.
+El archivo `src-capacitor/android/local.properties`, ignorado por Git, apunta
+al SDK de esta computadora y usa barras `/`.
+
+### 7.2 Generar APK debug (sin Android Studio)
+
+Desde la raíz, en Windows/PowerShell:
+
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.8-hotspot'
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+$env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
+
+# Compila la SPA para Capacitor y sincroniza los archivos con Android.
+npx quasar build -m capacitor -T android --skip-pkg
+
+# Compila el APK usando el Gradle Wrapper incluido (no Gradle global).
+cd src-capacitor\android
+.\gradlew.bat assembleDebug --no-daemon
+```
+
+En Linux/macOS, con JDK 21 y `ANDROID_HOME` / `ANDROID_SDK_ROOT` definidos:
+
+```bash
+npx quasar build -m capacitor -T android --skip-pkg
+cd src-capacitor/android
+./gradlew assembleDebug
+```
+
+En ambos casos el APK queda en
+`src-capacitor/android/app/build/outputs/apk/debug/app-debug.apk`. Los recursos
+web se copian a `app/src/main/assets/public/`; el archivo Capacitor empacado no
+declara URL de servidor de desarrollo. El APK sirve esos archivos localmente y
+no depende de la computadora que lo compiló. `https://localhost` es el origen
+local del WebView, no un servidor remoto.
+
+### 7.3 Firma release desde terminal
+
+La clave release es distinta de la clave debug. Generarla una sola vez en una
+carpeta protegida **fuera del repositorio**, respaldarla de forma segura y no
+perderla: futuras actualizaciones requieren la misma clave. En PowerShell:
+
+```powershell
+$key = "$env:USERPROFILE\.android\doulingo-release.jks"
+New-Item -ItemType Directory -Force (Split-Path $key) | Out-Null
+keytool -genkeypair -v -keystore $key -alias doulingo -keyalg RSA -keysize 4096 -validity 10000
+$env:DOULINGO_KEYSTORE_FILE = $key
+$env:DOULINGO_KEY_ALIAS = 'doulingo'
+$env:DOULINGO_KEYSTORE_PASSWORD = Read-Host 'Contraseña del keystore' -AsSecureString | ConvertFrom-SecureString -AsPlainText
+$env:DOULINGO_KEY_PASSWORD = Read-Host 'Contraseña de la clave' -AsSecureString | ConvertFrom-SecureString -AsPlainText
+```
+
+Las contraseñas quedan solo en las variables de la terminal actual. No ponerlas
+en `.env`, `local.properties`, scripts ni Git. Para Linux/macOS se exportan las
+mismas cuatro variables en una terminal protegida. Después:
+
+```powershell
+cd src-capacitor\android
+.\gradlew.bat assembleRelease
+```
+
+```bash
+cd src-capacitor/android
+./gradlew assembleRelease
+```
+
+El archivo firmado queda en `app/build/outputs/apk/release/app-release.apk`.
+Gradle falla si se intenta generar release sin las cuatro variables
+`DOULINGO_KEYSTORE_FILE`, `DOULINGO_KEYSTORE_PASSWORD`, `DOULINGO_KEY_ALIAS` y
+`DOULINGO_KEY_PASSWORD`. Los patrones `*.jks`, `*.keystore` y
+`signing.properties` están ignorados por Git.
+
+### 7.4 Registro de esta ejecución
+
+El **15 de noviembre de 2026** se ejecutó la compilación desde terminal:
+
+- Quasar generó los recursos Capacitor y `cap sync android` terminó correctamente.
+- `gradlew.bat assembleDebug --no-daemon`: **BUILD SUCCESSFUL**.
+- APK debug: `src-capacitor/android/app/build/outputs/apk/debug/app-debug.apk`.
+- AAPT confirmó `com.doulingo.app`, `CodeLingua`, `versionCode=1`,
+  `versionName=1.0`, `minSdk=24`, `targetSdk=36`.
+- `apksigner verify --print-certs`: válido, certificado **Android Debug**.
+- Icono adaptativo y heredado: mascota Usagi en el verde de la marca.
+- La SPA quedó dentro de `assets/public` y el config empacado no tiene
+  `server.url` de desarrollo.
+- Se eliminó el warning de import dinámico del build web. Gradle conserva el
+  warning no fatal `Using flatDir...` del wiring de Capacitor/Cordova.
+- No había teléfonos físicos conectados por ADB. Las pruebas de flujo real en
+  dos celulares quedan pendientes de hacer en la expo; ver el checklist de
+  `docs/16-manuales-y-cierre.md`.
+
+### 7.5 Registro de la ejecución del 17 de noviembre de 2026
+
+- `gradlew.bat assembleDebug --no-daemon`: **BUILD SUCCESSFUL**
+  (`app-debug.apk`, 6,3 MB).
+- Clave release generada con `keytool` (RSA 4096, alias `doulingo`) en
+  `%USERPROFILE%\.android\`, fuera del repositorio; las variables
+  `DOULINGO_*` se cargaron en la terminal desde un archivo local.
+- `gradlew.bat assembleRelease`: **BUILD SUCCESSFUL**
+  (`app-release.apk`, 4,5 MB). `apksigner verify --print-certs` válido
+  (`CN=CodeLingua`, SHA-256 `4fa56639…d171f0`); `aapt2`: `com.doulingo.app`,
+  versionCode 1, versionName 1.0, minSdk 24, targetSdk 36.
+- `assets/public/index.html` y `capacitor.config.json` (sin `server.url`)
+  confirmados dentro del APK.
+- `adb devices`: sin dispositivos. Pendiente la instalación en celulares reales.

@@ -15,8 +15,7 @@ import { BASE_URL, createRunner, launchBrowser, sleep } from './helpers.mjs'
 const runner = createRunner('=== Etapa 6 · Desafíos (interfaz) ===')
 const browser = await launchBrowser()
 
-const CHALLENGE_PATH =
-  '#/expo/50000000-0000-0000-0000-000000000101'
+const CHALLENGE_PATH = '#/expo/50000000-0000-0000-0000-000000000101'
 const EXPIRED_PATH = '#/expo/50000000-0000-0000-0000-000000000102'
 
 async function openApp(page, path = '#/') {
@@ -29,9 +28,7 @@ async function startChallenge(page) {
   })
   await page.waitForFunction(
     () => {
-      const button = document.querySelector(
-        '.dl-challenge__start .dl-btn-main'
-      )
+      const button = document.querySelector('.dl-challenge__start .dl-btn-main')
       return button && !button.disabled
     },
     { timeout: 20000 }
@@ -115,9 +112,8 @@ try {
     timeout: 20000
   })
 
-  const expoTitle = await pageA.$eval(
-    '.dl-expo__hero .dl-page__title',
-    node => node.innerText.trim()
+  const expoTitle = await pageA.$eval('.dl-expo__hero .dl-page__title', node =>
+    node.innerText.trim()
   )
   runner.check(
     'Expo: muestra el evento publicado',
@@ -153,10 +149,9 @@ try {
   )
   runner.check(
     'Desafío: muestra preguntas, duración, puntos e intentos',
-    rules.includes('Preguntas') &&
-      rules.includes('Duración') &&
-      rules.includes('Puntos por acierto') &&
-      rules.includes('Intentos')
+    ['preguntas', 'duración', 'puntos por acierto', 'intentos'].every(t =>
+      rules.toLowerCase().includes(t)
+    )
   )
   runner.check(
     'Desafío: avisa que el tiempo lo controla el servidor',
@@ -177,11 +172,14 @@ try {
     timeout: 20000
   })
 
-  const scoreA = await pageA.$eval(
-    '.dl-challenge__score-value',
-    node => node.innerText.trim()
+  const scoreA = await pageA.$eval('.dl-challenge__score-value', node =>
+    node.innerText.trim()
   )
-  runner.check('Resultado: el invitado ve su puntaje final (40)', scoreA === '40', scoreA)
+  runner.check(
+    'Resultado: el invitado ve su puntaje final (40)',
+    scoreA === '40',
+    scoreA
+  )
 
   const stateA = await pageA.$eval(
     '.dl-challenge__result-banner .dl-badge',
@@ -189,13 +187,12 @@ try {
   )
   runner.check(
     'Resultado: la partida válida se marca como tal',
-    stateA.includes('Partida válida'),
+    stateA.toLowerCase().includes('partida válida'),
     stateA
   )
 
-  const saveA = await pageA.$eval(
-    '.dl-challenge__save--saved',
-    node => node.innerText.trim()
+  const saveA = await pageA.$eval('.dl-challenge__save--saved', node =>
+    node.innerText.trim()
   )
   runner.check(
     'Resultado: se confirma el guardado en el servidor',
@@ -211,29 +208,26 @@ try {
     String(answerRowsA.length)
   )
 
-  const detailHint = await pageA.$eval(
-    '.dl-challenge__detail-hint',
-    node => node.innerText.trim()
+  const detailHint = await pageA.$eval('.dl-challenge__detail-hint', node =>
+    node.innerText.trim()
   )
   runner.check(
     'Detalle: mientras el desafío sigue abierto no revela la solución',
     detailHint.includes('se muestran cuando el desafío cierre'),
     detailHint
   )
-  const revealedA = await pageA.$eval(
-    '.dl-challenge__answers',
-    node => node.innerText.includes('Correcta:')
+  const revealedA = await pageA.$eval('.dl-challenge__answers', node =>
+    node.innerText.includes('Correcta:')
   )
   runner.check('Detalle: no se muestra la opción correcta', !revealedA)
 
   await pageA.waitForSelector('.dl-ranking__me', { timeout: 20000 })
-  const meRow = await pageA.$eval(
-    '.dl-ranking__me',
-    node => node.innerText.trim()
+  const meRow = await pageA.$eval('.dl-ranking__me', node =>
+    node.innerText.trim()
   )
   runner.check(
     'Ranking: el invitado se reconoce en su mejor intento (40)',
-    meRow.includes('40') && meRow.includes('vos'),
+    meRow.includes('40') && meRow.toLowerCase().includes('vos'),
     meRow
   )
 
@@ -252,7 +246,10 @@ try {
     .catch(() => {})
   await sleep(700)
 
-  const profileText = await pageA.$eval('.dl-page__inner', node => node.innerText)
+  const profileText = await pageA.$eval(
+    '.dl-page__inner',
+    node => node.innerText
+  )
   runner.check(
     'Perfil: aparece la sección "Desafíos de la expo"',
     profileText.includes('Desafíos de la expo')
@@ -263,11 +260,11 @@ try {
   )
   runner.check(
     'Perfil: la partida figura como válida',
-    profileText.includes('Válida')
+    profileText.toLowerCase().includes('válida')
   )
   runner.check(
     'Perfil: la métrica de desafíos válidos está presente',
-    profileText.includes('Desafíos válidos')
+    profileText.toLowerCase().includes('desafíos válidos')
   )
   runner.check(
     'Perfil: no hay errores de página',
@@ -294,9 +291,8 @@ try {
   )
   // Deja pasar un instante para que el servidor también vea la partida vencida.
   await sleep(350)
-  const optionsDisabled = await pageB.$$eval(
-    '.dl-challenge__option',
-    nodes => nodes.every(node => node.disabled)
+  const optionsDisabled = await pageB.$$eval('.dl-challenge__option', nodes =>
+    nodes.every(node => node.disabled)
   )
   runner.check(
     'Vencida: no se pueden elegir respuestas fuera del plazo',
@@ -314,13 +310,13 @@ try {
     '.dl-challenge__result-banner .dl-badge',
     node => node.innerText.trim()
   )
-  const expiredScore = await pageB.$eval(
-    '.dl-challenge__score-value',
-    node => node.innerText.trim()
+  const expiredScore = await pageB.$eval('.dl-challenge__score-value', node =>
+    node.innerText.trim()
   )
   runner.check(
     'Vencida: el resultado queda como "Partida vencida" con 0 puntos',
-    expiredState.includes('Partida vencida') && expiredScore === '0',
+    expiredState.toLowerCase().includes('partida vencida') &&
+      expiredScore === '0',
     `${expiredState} / ${expiredScore}`
   )
 
@@ -347,10 +343,7 @@ try {
     buttons =>
       buttons.some(button => button.innerText.includes('REINTENTAR GUARDADO'))
   )
-  runner.check(
-    'Fallo al guardar: ofrece REINTENTAR GUARDADO',
-    retryButton
-  )
+  runner.check('Fallo al guardar: ofrece REINTENTAR GUARDADO', retryButton)
 
   await runC.resume()
   await clickByText(

@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Esquema propio de Doulingo: abre la app desde los enlaces de
+            <!-- Esquema propio de CodeLingua: abre la app desde los enlaces de
                  Supabase Auth (confirmación de correo y recuperación de
                  contraseña). La misma URL debe estar declarada en
                  Supabase -> Authentication -> URL Configuration -> Redirect URLs. -->

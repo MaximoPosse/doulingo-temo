@@ -24,20 +24,20 @@ Variables opcionales:
 
 ## Suites
 
-| Comando                          | Qué comprueba                                                                                                                               |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `node tests/e2e/buttons.mjs`     | Recorrido de la interfaz: botones, navegación, estados de la lección (26 casos).                                                            |
-| `node tests/e2e/dbtest.mjs`      | Contenido publicado, RLS, RPC `check_answer` y contexto limpio (25 casos).                                                                  |
-| `node tests/e2e/case7.mjs`       | Fallo de red al comprobar una respuesta: avisa, no marca mal y permite reintentar (5 casos).                                                |
-| `node tests/e2e/case3.mjs`       | Cambio de un título desde el panel de Supabase y su reflejo en la app.                                                                      |
-| `node tests/e2e/auth.mjs`        | API de Supabase Auth: invitado, registro, login, recuperación, RLS y conversión (8 casos).                                                  |
-| `node tests/e2e/auth.mjs ui`     | Lo anterior más el recorrido de la pantalla de acceso en el navegador.                                                                      |
-| `node tests/e2e/auth_ui.mjs`     | Pantalla de acceso sin depender de la configuración del proyecto (5 casos).                                                                 |
-| `node tests/e2e/alias.mjs`       | Alias público, sufijo y aislamiento del perfil entre participantes (11 casos).                                                              |
-| `node tests/e2e/attempts.mjs`    | Intentos, respuestas, idempotencia, progreso calculado en el servidor y aislamiento (35 casos).                                             |
-| `node tests/e2e/attempts_ui.mjs` | Guardado confirmado, perfil (último intento + historial + respuestas), aislamiento entre dispositivos y fallo de red al guardar (14 casos). |
-| `node tests/e2e/challenges.mjs`  | Competencia de expo: banco separado, partidas, validaciones, doble envío, dos jugadores, vencida, ranking y puntajes bloqueados.            |
-| `node tests/e2e/challenges_ui.mjs` | Expo, juego como invitado, resultado, detalle sin soluciones, ranking, perfil, vencida y reintento de guardado.                            |
+| Comando                            | Qué comprueba                                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `node tests/e2e/buttons.mjs`       | Recorrido de la interfaz: botones, navegación, estados de la lección (26 casos).                                                            |
+| `node tests/e2e/dbtest.mjs`        | Contenido publicado, RLS, RPC `check_answer` y contexto limpio (25 casos).                                                                  |
+| `node tests/e2e/case7.mjs`         | Fallo de red al comprobar una respuesta: avisa, no marca mal y permite reintentar (5 casos).                                                |
+| `node tests/e2e/case3.mjs`         | Cambio de un título desde el panel de Supabase y su reflejo en la app.                                                                      |
+| `node tests/e2e/auth.mjs`          | API de Supabase Auth: invitado, registro, login, recuperación, RLS y conversión (8 casos).                                                  |
+| `node tests/e2e/auth.mjs ui`       | Lo anterior más el recorrido de la pantalla de acceso en el navegador.                                                                      |
+| `node tests/e2e/auth_ui.mjs`       | Pantalla de acceso sin depender de la configuración del proyecto (5 casos).                                                                 |
+| `node tests/e2e/alias.mjs`         | Alias público, sufijo y aislamiento del perfil entre participantes (11 casos).                                                              |
+| `node tests/e2e/attempts.mjs`      | Intentos, respuestas, idempotencia, progreso calculado en el servidor y aislamiento (35 casos).                                             |
+| `node tests/e2e/attempts_ui.mjs`   | Guardado confirmado, perfil (último intento + historial + respuestas), aislamiento entre dispositivos y fallo de red al guardar (14 casos). |
+| `node tests/e2e/challenges.mjs`    | Competencia de expo: banco separado, partidas, validaciones, doble envío, dos jugadores, vencida, ranking y puntajes bloqueados.            |
+| `node tests/e2e/challenges_ui.mjs` | Expo, juego como invitado, resultado, detalle sin soluciones, ranking, perfil, vencida y reintento de guardado.                             |
 
 `auth.mjs` y `auth.mjs ui` necesitan que el proyecto tenga **habilitados los
 invitados anónimos** y aplicado `supabase/migrations/0004_auth.sql`; si no, los

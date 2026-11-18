@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · setup.sql
+-- CodeLingua · setup.sql
 -- Script combinado: creación del esquema, carga inicial,
 -- políticas RLS y las etapas de autenticación, intentos y competencia.
 --
@@ -15,7 +15,7 @@
 -- =============================================================
 
 -- =============================================================
--- Doulingo · 0001_schema.sql
+-- CodeLingua · 0001_schema.sql
 -- Esquema de la base de datos relacional del curso JavaScript.
 --
 -- Niveles de contenido (jerarquía):
@@ -133,7 +133,7 @@ comment on table public.soluciones is
    check_answer() del servidor.';
 
 -- =============================================================
--- Doulingo · 0002_seed.sql
+-- CodeLingua · 0002_seed.sql
 -- Datos iniciales: curso JavaScript desde cero.
 --   - 1 curso disponible con 5 unidades.
 --   - Unidad 1 (Fundamentos) disponible: 2 lecciones x 3 preguntas,
@@ -356,7 +356,7 @@ insert into public.soluciones (pregunta_id, opcion_correcta_id, explicacion) val
 on conflict (pregunta_id) do nothing;
 
 -- =============================================================
--- Doulingo · 0003_rls.sql
+-- CodeLingua · 0003_rls.sql
 -- Row Level Security + función de comprobación de respuestas.
 --
 -- Reglas:
@@ -536,7 +536,7 @@ revoke insert, update, delete on public.cursos,
   from anon, authenticated;
 
 -- =============================================================
--- Doulingo · 0004_auth.sql
+-- CodeLingua · 0004_auth.sql
 -- Identidad de los participantes: perfiles, progreso por participante
 -- y ampliación de las políticas RLS de la etapa 3.
 --
@@ -803,7 +803,7 @@ grant usage on schema public to anon, authenticated;
 
 
 -- =============================================================
--- Doulingo · 0005_intentos.sql
+-- CodeLingua · 0005_intentos.sql
 -- Intentos, respuestas y progreso calculado en el servidor.
 --
 -- Decisiones del modelo:
@@ -1284,7 +1284,7 @@ grant execute on function public.registrar_respuesta(uuid, uuid, uuid) to authen
 grant execute on function public.finalizar_intento(uuid) to authenticated;
 
 -- =============================================================
--- Doulingo · 0006_desafios.sql
+-- CodeLingua · 0006_desafios.sql
 -- Etapa 6: competencia de expo (evento, desafíos, partidas).
 --
 -- Separación práctica / competencia:
@@ -2321,7 +2321,7 @@ grant execute on function public.ranking_desafio(uuid, integer) to anon, authent
 grant execute on function public.hora_servidor() to anon, authenticated;
 
 -- =============================================================
--- Doulingo · 0007_seed_desafios.sql
+-- CodeLingua · 0007_seed_desafios.sql
 -- Datos iniciales de la etapa 6: evento de expo, desafíos y su banco.
 --
 -- Ejecutable varias veces: usa ON CONFLICT DO UPDATE con UUIDs fijos.
@@ -2344,7 +2344,7 @@ insert into public.eventos (
   (
     '40000000-0000-0000-0000-000000000001',
     'expo-doulingo-2026',
-    'Expo Doulingo 2026',
+    'Expo CodeLingua 2026',
     'Competencia de programación para visitantes de la expo. Elegí un desafío, respondé contra el reloj y compará tu mejor intento en el ranking.',
     '2026-11-01T00:00:00Z',
     '2027-12-31T23:59:59Z',
@@ -2755,9 +2755,9 @@ on conflict (pregunta_id) do update set
 
 
 -- =============================================================
--- Doulingo � 0008_ranking_admin.sql
+-- CodeLingua � 0008_ranking_admin.sql
 -- =============================================================
--- Doulingo · 0008_ranking_admin.sql
+-- CodeLingua · 0008_ranking_admin.sql
 -- Proyección pública para la pantalla de expo y permisos administrativos.
 -- No contiene correos, contraseñas, respuestas ni UUID de participantes.
 
@@ -2937,7 +2937,7 @@ comment on table public.admin_roles is 'Asignación de permisos controlada por s
 
 
 -- =============================================================
--- Doulingo � 0009_admin_content_guards.sql
+-- CodeLingua � 0009_admin_content_guards.sql
 -- =============================================================
 -- Corrección incremental para instalaciones que ya aplicaron 0008.
 grant select on public.soluciones, public.desafio_soluciones to authenticated;

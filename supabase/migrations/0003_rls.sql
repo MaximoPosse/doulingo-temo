@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · 0003_rls.sql
+-- CodeLingua · 0003_rls.sql
 -- Row Level Security + función de comprobación de respuestas.
 --
 -- Reglas:

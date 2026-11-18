@@ -1,4 +1,4 @@
-# 01 · Objetivo general de Doulingo
+# 01 · Objetivo general de CodeLingua
 
 ## Problema que busca resolver
 
@@ -10,7 +10,7 @@ Aprender a programar suele presentar dos barreras grandes:
 2. **Falta de motivación sostenida**: al no existir una sensación de avance
    concreta, la persona abandona a las pocas semanas.
 
-`Doulingo` traslada a la programación la lógica de aprendizaje progresivo de
+`CodeLingua` traslada a la programación la lógica de aprendizaje progresivo de
 Duolingo: **unidades y lecciones breves**, **retroalimentación inmediata**,
 **progreso guardado y visible** y **gamificación**. Así, una persona sin
 conocimientos previos puede dar sus primeros pasos en un lenguaje de

@@ -1,4 +1,4 @@
-# 04 · Identidad visual de Doulingo
+# 04 · Identidad visual de CodeLingua
 
 ## Paleta de colores
 
@@ -82,3 +82,12 @@ recorrido y el gris comunica bloqueo sin agredir al usuario.
 | Bloqueada  | Gris         | `lock`                         | Sin interacción hasta desbloquear.     |
 | Correcto   | Verde        | `check_circle`                 | Avanza con retroalimentación positiva. |
 | Incorrecto | Rojo         | `error`                        | Explica la respuesta correcta.         |
+
+## Nombre y logo (noviembre de 2026)
+
+La aplicación pasó a llamarse **CodeLingua**. El logo oficial (Usagi con birrete
+y laptop sobre un sello verde) está en `src/assets/logo.webp` y se usa en la
+página de inicio, el acceso, el favicon y el ícono de Android. Se conservan los
+identificadores técnicos (`com.doulingo.app`, `doulingo://auth/callback`) para no
+romper la firma del APK ni los enlaces configurados en Supabase. La portada del
+informe usa la ilustración de Usagi recostado sobre fondo amarillo.

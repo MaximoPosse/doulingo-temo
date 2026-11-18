@@ -1,4 +1,4 @@
--- Doulingo · 0008_ranking_admin.sql
+-- CodeLingua · 0008_ranking_admin.sql
 -- Proyección pública para la pantalla de expo y permisos administrativos.
 -- No contiene correos, contraseñas, respuestas ni UUID de participantes.
 

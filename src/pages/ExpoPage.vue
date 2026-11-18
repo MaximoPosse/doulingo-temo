@@ -55,9 +55,7 @@
               {{ formatRange(event.iniciaEn, event.terminaEn) }}
               <span
                 class="dl-badge"
-                :class="
-                  isOpen ? 'dl-badge--available' : 'dl-badge--locked'
-                "
+                :class="isOpen ? 'dl-badge--available' : 'dl-badge--locked'"
               >
                 <q-icon :name="isOpen ? 'play_circle' : 'lock_clock'" />
                 {{ isOpen ? 'Abierta' : 'Cerrada' }}
@@ -245,7 +243,6 @@ function difficultyClass(difficulty) {
     dificil: 'dl-badge--locked'
   }[difficulty]
 }
-
 </script>
 
 <style lang="scss" scoped>

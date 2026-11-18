@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · 0004_auth.sql
+-- CodeLingua · 0004_auth.sql
 -- Identidad de los participantes: perfiles, progreso por participante
 -- y ampliación de las políticas RLS de la etapa 3.
 --

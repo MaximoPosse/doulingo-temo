@@ -2,7 +2,7 @@
 
 ## Consideración previa
 
-Doulingo separa **dos mundos de datos**:
+CodeLingua separa **dos mundos de datos**:
 
 1. **Contenido educativo (publicación)**: lo que se enseña (cursos, unidades,
    lecciones, preguntas, opciones y soluciones). Es "el producto". En esta etapa
@@ -17,7 +17,12 @@ repositorio, que centraliza todas las consultas.
 
 ## Diagrama entidad-relación
 
-_(Pendiente: el diagrama se elabora manualmente por el equipo.)_
+Notación de Chen (entidades, atributos y relaciones con cardinalidad), en el
+mismo estilo que ColegioGest. Fuentes SVG editables en `docs/diagramas/`:
+
+![DER 1 · contenido, práctica y progreso](diagramas/07-der-contenido.png)
+
+![DER 2 · competencia de expo, ranking y administración](diagramas/08-der-competencia.png)
 
 ## Diccionario de datos
 
@@ -123,17 +128,17 @@ opción correcta. Errores de negocio: `PR_QUESTION_NOT_PUBLISHED` y
 
 ## Fuente de verdad (scripts)
 
-| Artefacto                          | Archivo                                 |
-| ---------------------------------- | --------------------------------------- |
-| Creación de tablas y restricciones | `supabase/migrations/0001_schema.sql`   |
-| Carga inicial (datos)              | `supabase/migrations/0002_seed.sql`     |
-| Políticas RLS y `check_answer`     | `supabase/migrations/0003_rls.sql`      |
-| Perfiles y progreso (etapa 4)      | `supabase/migrations/0004_auth.sql`     |
-| Intentos y respuestas (etapa 5)    | `supabase/migrations/0005_intentos.sql` |
-| Competencia de expo (etapa 6)      | `supabase/migrations/0006_desafios.sql` |
+| Artefacto                          | Archivo                                      |
+| ---------------------------------- | -------------------------------------------- |
+| Creación de tablas y restricciones | `supabase/migrations/0001_schema.sql`        |
+| Carga inicial (datos)              | `supabase/migrations/0002_seed.sql`          |
+| Políticas RLS y `check_answer`     | `supabase/migrations/0003_rls.sql`           |
+| Perfiles y progreso (etapa 4)      | `supabase/migrations/0004_auth.sql`          |
+| Intentos y respuestas (etapa 5)    | `supabase/migrations/0005_intentos.sql`      |
+| Competencia de expo (etapa 6)      | `supabase/migrations/0006_desafios.sql`      |
 | Datos de la expo (etapa 6)         | `supabase/migrations/0007_seed_desafios.sql` |
-| Script combinado                   | `supabase/setup.sql`                    |
-| Registro del proyecto y uso        | `supabase/README.md`                    |
+| Script combinado                   | `supabase/setup.sql`                         |
+| Registro del proyecto y uso        | `supabase/README.md`                         |
 
 No se incluyen contraseñas ni claves secretas: los scripts solo contienen
 estructura y contenido de ejemplo.
@@ -159,16 +164,16 @@ aprobadas habilitan la siguiente. El detalle está en `docs/13-intentos.md`.
 La competencia es un **mundo de datos separado de la práctica**. Usa su propio
 banco de preguntas y nunca pasa por `check_answer()`:
 
-| Tabla                 | Contenido                                                              |
-| --------------------- | ---------------------------------------------------------------------- |
-| `eventos`             | Evento de expo (`borrador`/`publicado`/`cerrado`, fechas y `es_prueba`) |
-| `desafios`            | Dificultad, duración, puntos por acierto, intentos y tolerancia        |
-| `desafio_preguntas`   | Preguntas del banco del desafío (independientes de `preguntas`)        |
-| `desafio_opciones`    | Opciones visibles del desafío (sin marca de solución)                  |
-| `desafio_soluciones`  | Opción correcta y explicación (**privada**, sin lectura por API)       |
-| `partidas`            | Intento del participante: foto de reglas, tiempos y resultado          |
-| `partida_preguntas`   | Preguntas fijadas para esa partida                                     |
-| `partida_respuestas`  | Una respuesta por partida/pregunta (corrección y puntos del servidor)  |
+| Tabla                | Contenido                                                               |
+| -------------------- | ----------------------------------------------------------------------- |
+| `eventos`            | Evento de expo (`borrador`/`publicado`/`cerrado`, fechas y `es_prueba`) |
+| `desafios`           | Dificultad, duración, puntos por acierto, intentos y tolerancia         |
+| `desafio_preguntas`  | Preguntas del banco del desafío (independientes de `preguntas`)         |
+| `desafio_opciones`   | Opciones visibles del desafío (sin marca de solución)                   |
+| `desafio_soluciones` | Opción correcta y explicación (**privada**, sin lectura por API)        |
+| `partidas`           | Intento del participante: foto de reglas, tiempos y resultado           |
+| `partida_preguntas`  | Preguntas fijadas para esa partida                                      |
+| `partida_respuestas` | Una respuesta por partida/pregunta (corrección y puntos del servidor)   |
 
 Reglas clave:
 

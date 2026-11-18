@@ -17,12 +17,18 @@ export async function fetchPublicRanking(eventId, limit = 100) {
 export function subscribeToPublicRanking(eventId, onChange, onStatus) {
   const channel = getSupabaseClient()
     .channel(`ranking-publico-${eventId}`)
-    .on('postgres_changes', {
-      // La tabla ya es una proyección pública mínima. La consulta RPC vuelve
-      // a filtrar por evento; así evitamos incompatibilidades del filtro UUID
-      // entre versiones/configuraciones de Realtime.
-      event: '*', schema: 'public', table: 'resultados_publicos'
-    }, onChange)
+    .on(
+      'postgres_changes',
+      {
+        // La tabla ya es una proyección pública mínima. La consulta RPC vuelve
+        // a filtrar por evento; así evitamos incompatibilidades del filtro UUID
+        // entre versiones/configuraciones de Realtime.
+        event: '*',
+        schema: 'public',
+        table: 'resultados_publicos'
+      },
+      onChange
+    )
     .subscribe(onStatus)
   return () => getSupabaseClient().removeChannel(channel)
 }

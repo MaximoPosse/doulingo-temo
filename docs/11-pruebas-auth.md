@@ -202,15 +202,15 @@ y cierre de sesión.
 
 ### Verificaciones del APK (12 de octubre de 2026)
 
-| Verificación                                          | Resultado                                                        |
-| ----------------------------------------------------- | ---------------------------------------------------------------- |
-| Build nativo (`quasar build -m capacitor -T android`) | BUILD SUCCESSFUL                                                 |
-| `assembleDebug` (APK firmado e instalable)            | `app-debug.apk` — 4,7 MB                                         |
-| Paquete y versión (`aapt2 dump badging`)              | `com.doulingo.app` · label “Doulingo” · minSdk 24 · targetSdk 36 |
-| `intent-filter` del esquema dentro del APK            | `scheme=doulingo`, `host=auth`, `pathPrefix=/callback`           |
-| Firma (`apksigner verify`)                            | firmante “Android Debug” (instalable; para producción, keystore) |
-| Código del deep link dentro de los assets del APK     | presente (`appUrlOpen`)                                          |
-| Regresión en la web (bundle con Capacitor)            | botones 26/26 · UI auth 5/5 · base de datos 25/25                |
+| Verificación                                          | Resultado                                                          |
+| ----------------------------------------------------- | ------------------------------------------------------------------ |
+| Build nativo (`quasar build -m capacitor -T android`) | BUILD SUCCESSFUL                                                   |
+| `assembleDebug` (APK firmado e instalable)            | `app-debug.apk` — 4,7 MB                                           |
+| Paquete y versión (`aapt2 dump badging`)              | `com.doulingo.app` · label “CodeLingua” · minSdk 24 · targetSdk 36 |
+| `intent-filter` del esquema dentro del APK            | `scheme=doulingo`, `host=auth`, `pathPrefix=/callback`             |
+| Firma (`apksigner verify`)                            | firmante “Android Debug” (instalable; para producción, keystore)   |
+| Código del deep link dentro de los assets del APK     | presente (`appUrlOpen`)                                            |
+| Regresión en la web (bundle con Capacitor)            | botones 26/26 · UI auth 5/5 · base de datos 25/25                  |
 
 ### Verificación en emulador Android (22 de octubre de 2026)
 
@@ -220,7 +220,7 @@ Emulador `doulingo` (Pixel 6, x86_64, Android 16 / SDK 36), APK instalado con
 | Verificación                                | Resultado                                                                                                                  |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | El sistema resuelve el esquema a la app     | `cmd package resolve-activity` → `com.doulingo.app/.MainActivity`                                                          |
-| La app carga dentro del WebView             | `https://localhost/#/`, título “Doulingo”, landing y cursos visibles                                                       |
+| La app carga dentro del WebView             | `https://localhost/#/`, título “CodeLingua”, landing y cursos visibles                                                     |
 | Deep link con la app abierta                | logcat: `START … cmp=com.doulingo.app/.MainActivity` + `Notifying listeners for event appUrlOpen` + la URL del enlace      |
 | Deep link en arranque en frío (app cerrada) | la app arranca y recibe el enlace (`appUrlOpen` con la URL); la sesión guardada se restaura antes de registrar el escucha  |
 | Enlace falso (código inválido)              | “El enlace de acceso no sirve o ya venció. Pedí un correo nuevo y abrilo en este mismo dispositivo.” (sin texto en inglés) |

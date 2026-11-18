@@ -34,7 +34,7 @@
         </div>
 
         <div class="dl-hero__mascot">
-          <img :src="usagiImg" alt="Usagi saludando" />
+          <img :src="logoImg" alt="Logo de CodeLingua" class="dl-hero__logo" />
           <span class="dl-hero__bubble">¡Vamos a aprender!</span>
         </div>
       </div>
@@ -61,7 +61,7 @@
     <!-- Características -->
     <section class="dl-features">
       <div class="dl-features__inner">
-        <h2 class="dl-section-title">¿Por qué Doulingo?</h2>
+        <h2 class="dl-section-title">¿Por qué CodeLingua?</h2>
 
         <div class="dl-features__grid">
           <div class="dl-card">
@@ -157,7 +157,7 @@
       <div class="dl-footer__inner">
         <div class="dl-brand">
           <img :src="usagiImg" alt="Usagi" class="dl-brand__mascot" />
-          <span class="dl-brand__name">Doulingo</span>
+          <span class="dl-brand__name">CodeLingua</span>
         </div>
         <p class="dl-footer__note">
           Proyecto educativo de código abierto. Hecho con Vue JS y Quasar.
@@ -169,6 +169,7 @@
 
 <script setup>
 import usagiImg from '@/assets/usagi.webp'
+import logoImg from '@/assets/logo.webp'
 
 const pathNodes = [
   { label: 'Fundamentos', icon: 'code', current: false, locked: false },

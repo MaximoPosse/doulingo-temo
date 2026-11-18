@@ -288,9 +288,7 @@
                     partida.challengeTitle
                   }}</span>
                   <span class="dl-attempt__meta">
-                    {{
-                      formatDate(partida.finalizadoEn || partida.iniciadoEn)
-                    }}
+                    {{ formatDate(partida.finalizadoEn || partida.iniciadoEn) }}
                     · {{ challengeDetail(partida) }}
                   </span>
                 </div>

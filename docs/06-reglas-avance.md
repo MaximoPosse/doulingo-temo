@@ -88,13 +88,13 @@ Unidad completada  ──► Unidad siguiente disponible (si está publicada)
 
 La competencia **no es una lección** y no afecta el avance de los cursos:
 
-| Aspecto            | Práctica (lecciones)                                | Competencia (expo)                                      |
-| ------------------ | --------------------------------------------------- | ------------------------------------------------------- |
-| Banco de preguntas | `preguntas` / `opciones` / `soluciones`             | `desafio_preguntas` / `desafio_opciones` / `desafio_soluciones` |
-| Corrección         | `registrar_respuesta()` / `check_answer()`          | `responder_partida()` (solo servidor)                   |
-| Repetición         | Cada intento se guarda; se conserva el mejor        | Intentos limitados por desafío; solo el mejor válido compite |
-| Efecto en el avance| Desbloquea la lección siguiente                     | Ninguno: no modifica `participant_progress`             |
-| Ranking            | No aplica                                           | `ranking_desafio()` por mejor intento válido            |
+| Aspecto             | Práctica (lecciones)                         | Competencia (expo)                                              |
+| ------------------- | -------------------------------------------- | --------------------------------------------------------------- |
+| Banco de preguntas  | `preguntas` / `opciones` / `soluciones`      | `desafio_preguntas` / `desafio_opciones` / `desafio_soluciones` |
+| Corrección          | `registrar_respuesta()` / `check_answer()`   | `responder_partida()` (solo servidor)                           |
+| Repetición          | Cada intento se guarda; se conserva el mejor | Intentos limitados por desafío; solo el mejor válido compite    |
+| Efecto en el avance | Desbloquea la lección siguiente              | Ninguno: no modifica `participant_progress`                     |
+| Ranking             | No aplica                                    | `ranking_desafio()` por mejor intento válido                    |
 
 Reglas de la competencia:
 

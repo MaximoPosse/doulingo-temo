@@ -12,7 +12,7 @@
     "vue",
     "vuejs"
   ],
-  "author": "Equipo Doulingo",
+  "author": "Equipo CodeLingua",
   "type": "module",
   "scripts": {
     "lint": "oxfmt && oxlint --fix",
@@ -52,5 +52,5 @@
   "engines": {
     "node": ">= 26 || ^24 || ^22.12"
   },
-  "productName": "Doulingo"
+  "productName": "CodeLingua"
 }

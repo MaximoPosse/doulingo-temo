@@ -1,5 +1,5 @@
 -- =============================================================
--- Doulingo · 0001_schema.sql
+-- CodeLingua · 0001_schema.sql
 -- Esquema de la base de datos relacional del curso JavaScript.
 --
 -- Niveles de contenido (jerarquía):
