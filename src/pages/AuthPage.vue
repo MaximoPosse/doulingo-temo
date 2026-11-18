@@ -133,7 +133,7 @@
             align="justify"
             class="dl-auth__tabs"
           >
-            <q-tab v-if="!native" name="invitado" label="Invitado" />
+            <q-tab name="invitado" label="Invitado" />
             <q-tab name="registro" label="Crear cuenta" />
             <q-tab name="entrar" label="Ingresar" />
           </q-tabs>
@@ -350,9 +350,7 @@ const lead = computed(() => {
   if (mode.value === 'convertir') {
     return 'Tu sesión de invitado se convierte en una cuenta permanente.'
   }
-  return native
-    ? 'Creá tu cuenta con un correo o ingresá con la que ya tenés.'
-    : 'Entrá como invitado, creá tu cuenta o ingresá con tu correo.'
+  return 'Creá tu cuenta con tu correo, entrá como invitado o ingresá con la que ya tenés.'
 })
 
 const passwordRule = value =>
