@@ -47,12 +47,12 @@ const inline = s => {
   const codes = []
   const withoutCode = esc(s).replace(/`([^`]+)`/g, (_, c) => {
     codes.push(c)
-    return `\u0000${codes.length - 1}\u0000`
+    return `@@CODE${codes.length - 1}@@`
   })
   return withoutCode
     .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
     .replace(/\*([^*]+)\*/g, '<i>$1</i>')
-    .replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`)
+    .replace(/@@CODE(\d+)@@/g, (_, i) => `<code>${codes[i]}</code>`)
 }
 const pngSize = f => {
   const b = fs.readFileSync(f)
