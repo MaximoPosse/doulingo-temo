@@ -154,3 +154,13 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
 }
+
+// Las ilustraciones de los personajes tienen fondo blanco: se mezclan con el fondo de la pantalla.
+.dl-demo__mascot,
+.dl-expo__mascot,
+.dl-expo__hero-mascot,
+.dl-lesson__result-mascot,
+.dl-lesson__notfound-mascot {
+  mix-blend-mode: multiply;
+  object-fit: contain;
+}

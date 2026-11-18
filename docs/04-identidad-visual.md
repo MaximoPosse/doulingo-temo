@@ -91,3 +91,22 @@ página de inicio, el acceso, el favicon y el ícono de Android. Se conservan lo
 identificadores técnicos (`com.doulingo.app`, `doulingo://auth/callback`) para no
 romper la firma del APK ni los enlaces configurados en Supabase. La portada del
 informe usa la ilustración de Usagi recostado sobre fondo amarillo.
+
+## Personajes (Usagi, Chiikawa y Hachiware)
+
+Las ilustraciones de `src/assets/amigos/` se tomaron de una búsqueda de imágenes
+de Google y se recortaron/optimizaron (WebP) para la página. Los personajes
+**Chiikawa, Usagi y Hachiware pertenecen a su autor (Nagami / Nagano) y a sus
+titulares de derechos**; se usan solo con fines educativos en este proyecto
+escolar y no se redistribuyen con fines comerciales. Tienen fondo blanco y se
+mezclan con el fondo de cada pantalla (`mix-blend-mode: multiply`).
+
+| Archivo                                                                                        | Dónde se usa                                               |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `usagi-de-pie`, `chiikawa-saludo`, `hachiware-de-pie`                                          | Fila de amigos (inicio y cursos)                           |
+| `usagi-ok`                                                                                     | Guía del camino de aprendizaje (inicio) y lección aprobada |
+| `usagi-cafe`                                                                                   | Resultado de lección pendiente de guardar                  |
+| `chiikawa-tumbado`                                                                             | Expo sin evento y lección no aprobada                      |
+| `chiikawa-fiesta`                                                                              | Cabecera de la expo                                        |
+| `hachiware-saludo`                                                                             | Página 404 y lección inexistente                           |
+| `usagi-tumbado`, `usagi-rodando`, `hachiware-sentado`, `hachiware-helado`, `hachiware-tumbado` | Reservadas para nuevas pantallas                           |

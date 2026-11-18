@@ -176,11 +176,15 @@ try {
   await pageB.click('.dl-lesson__intro-actions .dl-btn-main')
   await sleep(500)
   await openProfile(pageB)
-  const rowsB = await pageB.$$('.dl-attempt')
+  // B puede ver su propio intento recién iniciado (0 respondidas); lo que no
+  // debe ver es el historial terminado del primer invitado.
+  const rowsB = await pageB.$$eval('.dl-attempt', nodes =>
+    nodes.map(node => node.innerText.split('\n').join(' '))
+  )
   runner.check(
     'Aislamiento: otro invitado no ve el historial del primero',
-    rowsB.length === 0,
-    String(rowsB.length)
+    rowsB.every(text => text.includes('0 de ')),
+    rowsB.join(' || ')
   )
 
   // ----------------------------------------------------------------

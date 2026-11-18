@@ -9,9 +9,9 @@
 </template>
 
 <script setup>
-import usagiImg from '@/assets/usagi.webp'
-import chiikawaImg from '@/assets/amigos/chiikawa.svg?no-inline'
-import hachiwareImg from '@/assets/amigos/hachiware.svg?no-inline'
+import usagiImg from '@/assets/amigos/usagi-de-pie.webp'
+import chiikawaImg from '@/assets/amigos/chiikawa-saludo.webp'
+import hachiwareImg from '@/assets/amigos/hachiware-de-pie.webp'
 
 defineProps({
   compact: { type: Boolean, default: false }
@@ -67,6 +67,7 @@ const friends = [
   width: 130px;
   height: 130px;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .dl-friend__name {

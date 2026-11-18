@@ -165,7 +165,7 @@
     <footer class="dl-footer">
       <div class="dl-footer__inner">
         <div class="dl-brand">
-          <img :src="usagiImg" alt="Usagi" class="dl-brand__mascot" />
+          <img :src="logoImg" alt="CodeLingua" class="dl-brand__mascot" />
           <span class="dl-brand__name">CodeLingua</span>
         </div>
         <p class="dl-footer__note">
@@ -177,7 +177,7 @@
 </template>
 
 <script setup>
-import usagiImg from '@/assets/usagi.webp'
+import usagiImg from '@/assets/amigos/usagi-ok.webp'
 import logoImg from '@/assets/logo.webp'
 import FriendsRow from '@/components/FriendsRow.vue'
 

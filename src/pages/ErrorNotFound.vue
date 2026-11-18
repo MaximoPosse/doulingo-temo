@@ -4,7 +4,12 @@
       <img
         :src="usagiImg"
         alt="Hachiware, perdido"
-        style="width: 160px; height: 160px; object-fit: contain"
+        style="
+          width: 180px;
+          height: 180px;
+          object-fit: contain;
+          mix-blend-mode: multiply;
+        "
       />
       <h2
         class="q-mb-sm"
@@ -28,5 +33,5 @@
 </template>
 
 <script setup>
-import usagiImg from '@/assets/amigos/hachiware.svg?no-inline'
+import usagiImg from '@/assets/amigos/hachiware-saludo.webp'
 </script>

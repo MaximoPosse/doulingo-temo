@@ -286,8 +286,8 @@
           <div class="dl-lesson__result">
             <div class="dl-lesson__result-banner" :class="resultBannerClass">
               <img
-                :src="usagiImg"
-                alt="Usagi"
+                :src="resultMascot"
+                alt="Usagi y sus amigos"
                 class="dl-lesson__result-mascot"
               />
               <span class="dl-badge" :class="resultBadgeClass">
@@ -431,7 +431,10 @@ import {
 import { useAuth } from '@/composables/useAuth'
 import { useProgress } from '@/composables/useProgress'
 import { useRemoteData } from '@/composables/useRemoteData'
-import usagiImg from '@/assets/usagi.webp'
+import usagiImg from '@/assets/amigos/hachiware-saludo.webp'
+import usagiOkImg from '@/assets/amigos/usagi-ok.webp'
+import usagiCafeImg from '@/assets/amigos/usagi-cafe.webp'
+import chiikawaImg from '@/assets/amigos/chiikawa-tumbado.webp'
 
 const route = useRoute()
 const router = useRouter()
@@ -544,6 +547,11 @@ const resultBadgeClass = computed(() =>
     ? 'dl-badge--available'
     : 'dl-badge--locked'
 )
+
+const resultMascot = computed(() => {
+  if (saveState.value !== 'saved') return usagiCafeImg
+  return passed.value ? usagiOkImg : chiikawaImg
+})
 
 const resultBannerClass = computed(() => {
   if (saveState.value !== 'saved') return 'dl-lesson__result-banner--pending'

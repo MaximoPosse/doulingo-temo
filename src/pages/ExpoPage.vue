@@ -62,7 +62,11 @@
               </span>
             </div>
           </div>
-          <img :src="usagiImg" alt="Usagi" class="dl-expo__hero-mascot" />
+          <img
+            :src="usagiImg"
+            alt="Chiikawa, Usagi y Hachiware de fiesta"
+            class="dl-expo__hero-mascot"
+          />
         </header>
 
         <section class="dl-card q-mt-md dl-expo__explain">
@@ -186,8 +190,8 @@
 <script setup>
 import { computed } from 'vue'
 
-import usagiImg from '@/assets/usagi.webp'
-import chiikawaImg from '@/assets/amigos/chiikawa.svg?no-inline'
+import usagiImg from '@/assets/amigos/chiikawa-fiesta.webp'
+import chiikawaImg from '@/assets/amigos/chiikawa-tumbado.webp'
 import { fetchExpo } from '@/data/challengeRepository'
 import { useRemoteData } from '@/composables/useRemoteData'
 
