@@ -2,14 +2,14 @@
   <q-layout view="hh rr fff">
     <q-header>
       <q-toolbar class="dl-bar">
-        <div class="dl-brand">
+        <router-link to="/" class="dl-brand">
           <img
-            :src="usagiImg"
-            alt="Usagi, la mascota de CodeLingua"
+            :src="logoImg"
+            alt="Logo de CodeLingua"
             class="dl-brand__mascot"
           />
           <span class="dl-brand__name">CodeLingua</span>
-        </div>
+        </router-link>
 
         <nav class="dl-nav">
           <q-btn flat no-caps label="Inicio" to="/" />
@@ -57,7 +57,7 @@
 <script setup>
 import { computed } from 'vue'
 
-import usagiImg from '@/assets/usagi.webp'
+import logoImg from '@/assets/logo.webp'
 import { useAuth } from '@/composables/useAuth'
 
 const { session, publicName, accountChanged, dismissAccountChanged } = useAuth()
@@ -77,13 +77,14 @@ const hasSession = computed(() => !!session.value)
 
 .dl-brand {
   display: inline-flex;
+  text-decoration: none;
   align-items: center;
   gap: 8px;
 }
 
 .dl-brand__mascot {
-  width: 42px;
-  height: 42px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
 }
 

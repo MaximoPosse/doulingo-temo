@@ -3,8 +3,8 @@
     <div class="dl-header__inner">
       <router-link to="/" class="dl-brand">
         <q-img
-          :src="usagiImg"
-          alt="Usagi, la mascota de CodeLingua"
+          :src="logoImg"
+          alt="Logo de CodeLingua"
           class="dl-brand__mascot"
         />
         <span class="dl-brand__name">CodeLingua</span>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import usagiImg from '@/assets/usagi.webp'
+import logoImg from '@/assets/logo.webp'
 
 const navItems = [
   { label: 'Inicio', to: '/', exact: true },
