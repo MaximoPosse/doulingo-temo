@@ -76,6 +76,25 @@ function mapEvent(row) {
   }
 }
 
+function preguntasPorPartida(row) {
+  const banco = Array.isArray(row.desafio_preguntas)
+    ? row.desafio_preguntas
+    : []
+  const cupos = [row.cupo_facil, row.cupo_intermedio, row.cupo_dificil]
+  if (cupos.every(cupo => cupo === null || cupo === undefined)) {
+    return banco.length
+  }
+  const porNivel = { facil: 0, intermedio: 0, dificil: 0 }
+  for (const pregunta of banco) {
+    if (pregunta.dificultad in porNivel) porNivel[pregunta.dificultad] += 1
+  }
+  return (
+    Math.min(row.cupo_facil ?? 0, porNivel.facil) +
+    Math.min(row.cupo_intermedio ?? 0, porNivel.intermedio) +
+    Math.min(row.cupo_dificil ?? 0, porNivel.dificil)
+  )
+}
+
 function mapChallenge(row) {
   return {
     id: row.id,
@@ -90,9 +109,9 @@ function mapChallenge(row) {
     toleranciaSegundos: row.tolerancia_segundos,
     estado: row.estado,
     orden: row.orden,
-    totalPreguntas: Array.isArray(row.desafio_preguntas)
-      ? row.desafio_preguntas.length
-      : 0,
+    // Con cupos por dificultad cada partida sortea esa cantidad del banco:
+    // las preguntas por partida son la suma de los cupos, no el banco entero.
+    totalPreguntas: preguntasPorPartida(row),
     event: row.eventos ? mapEvent(row.eventos) : null
   }
 }
@@ -125,7 +144,9 @@ export async function fetchExpo() {
       .select(
         'id, evento_id, slug, titulo, descripcion, dificultad, ' +
           'duracion_segundos, puntos_por_acierto, intentos_permitidos, ' +
-          'tolerancia_segundos, estado, orden, desafio_preguntas(id)'
+          'tolerancia_segundos, estado, orden, ' +
+          'cupo_facil, cupo_intermedio, cupo_dificil, ' +
+          'desafio_preguntas(id, dificultad)'
       )
       .eq('evento_id', event.id)
       .eq('estado', 'publicado')
@@ -145,8 +166,9 @@ export async function fetchChallenge(challengeId) {
       'id, evento_id, slug, titulo, descripcion, dificultad, ' +
         'duracion_segundos, puntos_por_acierto, intentos_permitidos, ' +
         'tolerancia_segundos, estado, orden, ' +
+        'cupo_facil, cupo_intermedio, cupo_dificil, ' +
         'eventos(id, slug, titulo, descripcion, inicia_en, termina_en, estado), ' +
-        'desafio_preguntas(id)'
+        'desafio_preguntas(id, dificultad)'
     )
     .eq('id', challengeId)
     .maybeSingle()

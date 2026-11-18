@@ -302,16 +302,28 @@ resultado con `reutilizado = true`. Calcula aciertos, errores, puntos y
 
 ## Datos iniciales (semilla)
 
-| Elemento             | ID                        | Reglas                                              |
-| -------------------- | ------------------------- | --------------------------------------------------- |
-| Evento público       | `40000000-…-000000000001` | Expo CodeLingua 2026, `publicado`                   |
-| Evento interno       | `40000000-…-000000000002` | `es_prueba = true` (oculto en la UI)                |
-| Fundamentos exprés   | `50000000-…-000000000001` | fácil · 90 s · 10 pts · 2 intentos · tol. 20 s      |
-| Lógica intermedia    | `50000000-…-000000000002` | intermedio · 120 s · 15 pts · 1 intento · tol. 30 s |
-| Cierre difícil       | `50000000-…-000000000003` | difícil · 150 s · 20 pts · 1 intento · tol. 30 s    |
-| Prueba normal        | `50000000-…-000000000101` | 4 preguntas · 300 s · 2 intentos · tol. 10 s        |
-| Prueba vencida       | `50000000-…-000000000102` | 1 s · sin tolerancia                                |
-| Prueba de un intento | `50000000-…-000000000103` | 1 intento                                           |
+| Elemento             | ID                            | Reglas                                                              |
+| -------------------- | ----------------------------- | ------------------------------------------------------------------- |
+| Evento público       | `40000000-…-000000000001`     | Expo CodeLingua 2026, `publicado`                                   |
+| Evento interno       | `40000000-…-000000000002`     | `es_prueba = true` (oculto en la UI)                                |
+| Gran desafío         | `50000000-…-000000000010`     | progresivo · 20 preguntas · 600 s · 10 pts · 3 intentos · tol. 30 s |
+| Desafíos anteriores  | `50000000-…-00000000000[123]` | `cerrado`: sus preguntas pasaron al banco del Gran desafío          |
+| Prueba normal        | `50000000-…-000000000101`     | 4 preguntas · 300 s · 2 intentos · tol. 10 s                        |
+| Prueba vencida       | `50000000-…-000000000102`     | 1 s · sin tolerancia                                                |
+| Prueba de un intento | `50000000-…-000000000103`     | 1 intento                                                           |
+
+### Gran desafío: dificultad creciente y preguntas rotativas
+
+`0012_desafio_unico.sql` reúne los tres desafíos en uno. El banco tiene 38
+preguntas (10 fáciles, 14 intermedias y 14 difíciles) y cada partida sortea 20:
+**4 fáciles, 8 intermedias y 8 difíciles**, en ese orden. Los cupos son las
+columnas `cupo_facil`, `cupo_intermedio` y `cupo_dificil` de `desafios`; un
+desafío sin cupos (como los de prueba) usa todas sus preguntas.
+
+`iniciar_partida` hace el sorteo en el servidor: dentro de cada nivel prefiere
+las preguntas que el participante todavía no vio en intentos anteriores del
+mismo desafío, de modo que cada intento rota las preguntas. Con 3 intentos
+permitidos, los dos primeros no repiten casi nada.
 
 ## Pruebas
 

@@ -236,7 +236,8 @@ function difficultyLabel(difficulty) {
     {
       facil: 'Fácil',
       intermedio: 'Intermedio',
-      dificil: 'Difícil'
+      dificil: 'Difícil',
+      progresivo: 'Progresivo'
     }[difficulty] ?? difficulty
   )
 }
@@ -245,7 +246,8 @@ function difficultyClass(difficulty) {
   return {
     facil: 'dl-badge--available',
     intermedio: 'dl-badge--info',
-    dificil: 'dl-badge--locked'
+    dificil: 'dl-badge--locked',
+    progresivo: 'dl-badge--orange'
   }[difficulty]
 }
 </script>

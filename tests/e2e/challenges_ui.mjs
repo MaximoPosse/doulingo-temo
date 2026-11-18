@@ -122,8 +122,8 @@ try {
   )
   const publicCards = await pageA.$$('.dl-expo__card')
   runner.check(
-    'Expo: lista los desafíos públicos (3)',
-    publicCards.length === 3,
+    'Expo: lista el desafío público único (1)',
+    publicCards.length === 1,
     String(publicCards.length)
   )
   const expoSplit = await pageA.$eval(

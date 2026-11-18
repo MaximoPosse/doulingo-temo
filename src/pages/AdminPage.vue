@@ -452,7 +452,7 @@ function fieldOptions(field) {
             { label: 'Cerrado', value: 'cerrado' }
           ]
       : field.key === 'dificultad'
-        ? ['facil', 'intermedio', 'dificil'].map(value => ({
+        ? ['facil', 'intermedio', 'dificil', 'progresivo'].map(value => ({
             label: value,
             value
           }))

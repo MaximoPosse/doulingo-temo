@@ -106,6 +106,14 @@
                 <span class="dl-challenge__rule-label">Plazo de cierre</span>
               </div>
             </div>
+            <p
+              v-if="challenge.dificultad === 'progresivo'"
+              class="dl-challenge__rule-note"
+            >
+              Las preguntas suben de dificultad a medida que respondés: primero
+              las fáciles, después las intermedias y al final las difíciles. En
+              cada intento te tocan preguntas distintas del banco.
+            </p>
             <p class="dl-challenge__rule-note">
               El tiempo empieza y termina en el servidor. El plazo de cierre es
               la tolerancia para finalizar y guardar lo respondido cuando se
@@ -1206,7 +1214,8 @@ function difficultyLabel(difficulty) {
     {
       facil: 'Fácil',
       intermedio: 'Intermedio',
-      dificil: 'Difícil'
+      dificil: 'Difícil',
+      progresivo: 'Progresivo'
     }[difficulty] ?? difficulty
   )
 }
@@ -1215,7 +1224,8 @@ function difficultyClass(difficulty) {
   return {
     facil: 'dl-badge--available',
     intermedio: 'dl-badge--info',
-    dificil: 'dl-badge--locked'
+    dificil: 'dl-badge--locked',
+    progresivo: 'dl-badge--orange'
   }[difficulty]
 }
 
