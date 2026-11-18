@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
+import { PDFDocument } from 'pdf-lib'
 import {
   Document,
   Packer,
@@ -24,6 +25,10 @@ import {
   BorderStyle,
   LevelFormat,
   TableOfContents,
+  HorizontalPositionRelativeFrom,
+  HorizontalPositionAlign,
+  VerticalPositionRelativeFrom,
+  VerticalPositionAlign,
   SectionType
 } from 'docx'
 import { informe, manualParticipantes, manualAdmins } from './content.mjs'
@@ -37,11 +42,18 @@ fs.mkdirSync(OUT, { recursive: true })
 
 const esc = s =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-const inline = s =>
-  esc(s)
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
+const inline = s => {
+  // Los fragmentos de código se separan primero para que sus asteriscos no se lean como cursiva.
+  const codes = []
+  const withoutCode = esc(s).replace(/`([^`]+)`/g, (_, c) => {
+    codes.push(c)
+    return `\u0000${codes.length - 1}\u0000`
+  })
+  return withoutCode
     .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
     .replace(/\*([^*]+)\*/g, '<i>$1</i>')
+    .replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`)
+}
 const pngSize = f => {
   const b = fs.readFileSync(f)
   return [b.readUInt32BE(16), b.readUInt32BE(20)]
@@ -119,14 +131,14 @@ section.cover { page: cover; page-break-after: always; width: 210mm; height: 297
 section.cover img { width: 210mm; height: 297mm; display: block }
 section.toc { page-break-after: always; }
 .band { font-weight: bold; text-align: center; color: #58a700; font-size: 13pt; margin-bottom: 12pt; }
-h1 { font-size: 20pt; color: #1f4e79; margin: 22pt 0 8pt; padding-bottom: 3pt; border-bottom: 2px solid #58cc02; page-break-after: avoid; }
+h1 { font-size: 20pt; color: #1f4e79; margin: 22pt 0 8pt; page-break-after: avoid; }
 h1.toc-title { margin-top: 0 }
 h1:not(.first):not(.toc-title) { }
 h2 { font-size: 13pt; color: #2e5aa0; margin: 14pt 0 5pt; page-break-after: avoid; }
 p { margin: 5pt 0 7pt; text-align: justify; }
 ul, ol { margin: 4pt 0 8pt 0; padding-left: 20pt } li { margin: 2.5pt 0 }
 code { font-family: Consolas, monospace; font-size: 9pt; background: #eef3f8; padding: 0 2pt; border-radius: 2px }
-pre { font-family: Consolas, monospace; font-size: 8.4pt; background: #f4f7fa; border: 1px solid #d5dde6; border-left: 4px solid #58cc02; padding: 7pt 9pt; white-space: pre-wrap; page-break-inside: avoid }
+pre { font-family: Consolas, monospace; font-size: 8.4pt; background: #f4f7fa; border: 1px solid #d5dde6; border-left: 4px solid #9db6dd; padding: 7pt 9pt; white-space: pre-wrap; page-break-inside: avoid }
 table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 9pt; table-layout: fixed }
 th { background: #1f4e79; color: #fff; text-align: left; padding: 4pt 5pt; border: 1px solid #1f4e79 }
 td { padding: 3.5pt 5pt; border: 1px solid #c9d3de; vertical-align: top; word-wrap: break-word }
@@ -138,6 +150,29 @@ figcaption { font-size: 9pt; font-style: italic; color: #555; margin-top: 4pt }
 .toc-row { display: flex; align-items: baseline; font-size: 10.5pt; margin: 4pt 0 } .toc-row a { color: #1d1d1d; text-decoration: none }
 .dots { flex: 1; border-bottom: 1px dotted #888; margin: 0 5pt }
 </style></head><body>${coverImg}${tocHtml}${out.join('\n')}</body></html>`
+}
+
+// Estampa la marca de agua (PNG transparente) centrada en cada página menos la portada.
+async function stampWatermark(pdfPath, skipFirst) {
+  const doc = await PDFDocument.load(fs.readFileSync(pdfPath))
+  const img = await doc.embedPng(
+    fs.readFileSync(path.join(PNG, 'marca-de-agua.png'))
+  )
+  const pages = doc.getPages()
+  pages.forEach((page, i) => {
+    if (skipFirst && i === 0) return
+    const { width, height } = page.getSize()
+    const w = Math.min(width, height) * 0.72
+    const h = (w * img.height) / img.width
+    page.drawImage(img, {
+      x: (width - w) / 2,
+      y: (height - h) / 2,
+      width: w,
+      height: h,
+      opacity: 0.5
+    })
+  })
+  fs.writeFileSync(pdfPath, await doc.save())
 }
 
 function printPdf(htmlPath, pdfPath) {
@@ -162,7 +197,7 @@ function pageTexts(pdf) {
   return txt.split('\f')
 }
 
-function buildPdf(name, blocks, opts) {
+async function buildPdf(name, blocks, opts) {
   const html = path.join(OUT, name + '.html')
   fs.writeFileSync(html, toHtml(blocks, opts))
   const pdf = path.join(OUT, name + '.pdf')
@@ -189,6 +224,7 @@ function buildPdf(name, blocks, opts) {
     printPdf(html, pdf)
   }
   fs.unlinkSync(html)
+  await stampWatermark(pdf, !!opts.cover)
   return pdf
 }
 
@@ -313,7 +349,7 @@ function toDocx(blocks, { title, cover, toc }) {
               left: {
                 style: BorderStyle.SINGLE,
                 size: 18,
-                color: '58CC02',
+                color: '9DB6DD',
                 space: 6
               }
             }
@@ -410,6 +446,27 @@ function toDocx(blocks, { title, cover, toc }) {
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
+          new ImageRun({
+            type: 'png',
+            data: fs.readFileSync(path.join(PNG, 'marca-de-agua.png')),
+            transformation: { width: 520, height: 456 },
+            floating: {
+              horizontalPosition: {
+                relative: HorizontalPositionRelativeFrom.PAGE,
+                align: HorizontalPositionAlign.CENTER
+              },
+              verticalPosition: {
+                relative: VerticalPositionRelativeFrom.PAGE,
+                align: VerticalPositionAlign.CENTER
+              },
+              behindDocument: true
+            },
+            altText: {
+              title: 'Marca de agua',
+              description: 'Marca de agua',
+              name: 'marca-de-agua'
+            }
+          }),
           new TextRun({
             text: title,
             bold: true,
@@ -548,15 +605,7 @@ function toDocx(blocks, { title, cover, toc }) {
           run: { size: 40, bold: true, color: '1F4E79', font: FONT },
           paragraph: {
             spacing: { before: 280, after: 120 },
-            outlineLevel: 0,
-            border: {
-              bottom: {
-                style: BorderStyle.SINGLE,
-                size: 12,
-                color: '58CC02',
-                space: 4
-              }
-            }
+            outlineLevel: 0
           }
         },
         {
@@ -605,19 +654,19 @@ async function buildDocx(name, blocks, opts) {
 const which = process.argv[3] || 'all'
 if (which === 'all' || which === 'informe') {
   const o = { title: 'CodeLingua', cover: true, toc: true }
-  console.log(buildPdf('Etapa_Final_Informe', informe, o))
+  console.log(await buildPdf('Etapa_Final_Informe', informe, o))
   console.log(await buildDocx('Etapa_Final_Informe', informe, o))
 }
 if (which === 'all' || which === 'manuales') {
   console.log(
-    buildPdf('Manual_Participantes', manualParticipantes, {
+    await buildPdf('Manual_Participantes', manualParticipantes, {
       title: 'CodeLingua · Manual para participantes',
       cover: false,
       toc: false
     })
   )
   console.log(
-    buildPdf('Manual_Administradores', manualAdmins, {
+    await buildPdf('Manual_Administradores', manualAdmins, {
       title: 'CodeLingua · Manual para administradores',
       cover: false,
       toc: false
