@@ -107,6 +107,7 @@ function mapChallenge(row) {
     puntosPorAcierto: row.puntos_por_acierto,
     intentosPermitidos: row.intentos_permitidos,
     toleranciaSegundos: row.tolerancia_segundos,
+    vidas: row.vidas ?? null,
     estado: row.estado,
     orden: row.orden,
     // Con cupos por dificultad cada partida sortea esa cantidad del banco:
@@ -145,7 +146,7 @@ export async function fetchExpo() {
         'id, evento_id, slug, titulo, descripcion, dificultad, ' +
           'duracion_segundos, puntos_por_acierto, intentos_permitidos, ' +
           'tolerancia_segundos, estado, orden, ' +
-          'cupo_facil, cupo_intermedio, cupo_dificil, ' +
+          'cupo_facil, cupo_intermedio, cupo_dificil, vidas, ' +
           'desafio_preguntas(id, dificultad)'
       )
       .eq('evento_id', event.id)
@@ -166,7 +167,7 @@ export async function fetchChallenge(challengeId) {
       'id, evento_id, slug, titulo, descripcion, dificultad, ' +
         'duracion_segundos, puntos_por_acierto, intentos_permitidos, ' +
         'tolerancia_segundos, estado, orden, ' +
-        'cupo_facil, cupo_intermedio, cupo_dificil, ' +
+        'cupo_facil, cupo_intermedio, cupo_dificil, vidas, ' +
         'eventos(id, slug, titulo, descripcion, inicia_en, termina_en, estado), ' +
         'desafio_preguntas(id, dificultad)'
     )
@@ -190,6 +191,7 @@ function mapPartida(row) {
     puntos: row.puntos,
     aciertos: row.aciertos,
     errores: row.errores,
+    vidas: row.vidas ?? null,
     iniciadoEn: row.iniciado_en,
     expiraEn: row.expira_en,
     finalizadoEn: row.finalizado_en,
@@ -206,7 +208,7 @@ export async function fetchMyPartidas(challengeId) {
       .from('partidas')
       .select(
         'id, desafio_id, estado, total_preguntas, puntos, aciertos, errores, ' +
-          'iniciado_en, expira_en, finalizado_en, duracion_ms'
+          'vidas, iniciado_en, expira_en, finalizado_en, duracion_ms'
       )
       .eq('desafio_id', challengeId)
       .order('iniciado_en', { ascending: false })
@@ -282,7 +284,8 @@ export async function answerChallenge(partidaId, preguntaId, opcionId) {
     respondidas: row.respondidas,
     totalPreguntas: row.total_preguntas,
     repetida: row.repetida === true,
-    expiraEn: row.expira_en
+    expiraEn: row.expira_en,
+    vidasRestantes: row.vidas_restantes ?? null
   }
 }
 

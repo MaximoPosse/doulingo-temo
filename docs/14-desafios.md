@@ -322,8 +322,22 @@ desafío sin cupos (como los de prueba) usa todas sus preguntas.
 
 `iniciar_partida` hace el sorteo en el servidor: dentro de cada nivel prefiere
 las preguntas que el participante todavía no vio en intentos anteriores del
-mismo desafío, de modo que cada intento rota las preguntas. Con 3 intentos
-permitidos, los dos primeros no repiten casi nada.
+mismo desafío. Como el Gran desafío se juega una sola vez, el sorteo hace que
+cada persona reciba un conjunto distinto de preguntas.
+
+### Vidas
+
+`0013_vidas.sql` agrega la columna `vidas` a `desafios` y `partidas` (la partida
+guarda la regla con la que empezó). En el Gran desafío son **3 vidas** y **un
+solo intento**:
+
+- Cada respuesta **incorrecta** resta una vida (`responder_partida` devuelve
+  `vidas_restantes`); las correctas no restan.
+- Con 0 vidas el servidor rechaza más respuestas (`PR_SIN_VIDAS`) y la partida se
+  cierra como **finalizada** con los puntos logrados, de modo que cuenta para el
+  ranking.
+- Repetir el envío de una respuesta ya guardada no resta otra vida.
+- Un desafío con `vidas = null` (como los de prueba) no tiene límite de errores.
 
 ## Pruebas
 

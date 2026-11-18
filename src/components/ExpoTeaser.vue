@@ -6,9 +6,9 @@
         <h2 class="dl-teaser__title">Gran desafío CodeLingua</h2>
         <p class="dl-teaser__lead">
           Veinte preguntas que suben de dificultad a medida que respondés:
-          primero fáciles, después intermedias y al final difíciles. En cada
-          intento te tocan preguntas distintas y tu mejor puntaje entra al
-          ranking.
+          primero fáciles, después intermedias y al final difíciles. Tenés 3
+          vidas: cada error te resta una y con 0 vidas la partida termina. Se
+          juega una sola vez y tu puntaje entra al ranking.
         </p>
         <ul class="dl-teaser__facts">
           <li>
@@ -20,8 +20,8 @@
             Dificultad creciente
           </li>
           <li>
-            <q-icon name="shuffle" size="20px" />
-            Preguntas rotativas
+            <q-icon name="favorite" size="20px" />
+            3 vidas: cada error resta una
           </li>
           <li>
             <q-icon name="emoji_events" size="20px" />

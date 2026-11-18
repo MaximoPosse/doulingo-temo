@@ -132,6 +132,10 @@
                 <dt>Puntos por acierto</dt>
                 <dd>{{ challenge.puntosPorAcierto }}</dd>
               </div>
+              <div v-if="challenge.vidas">
+                <dt>Vidas</dt>
+                <dd>{{ challenge.vidas }}</dd>
+              </div>
               <div>
                 <dt>Intentos</dt>
                 <dd>{{ challenge.intentosPermitidos }}</dd>

@@ -99,6 +99,12 @@
                 }}</span>
                 <span class="dl-challenge__rule-label">Intentos</span>
               </div>
+              <div v-if="challenge.vidas" class="dl-challenge__rule">
+                <span class="dl-challenge__rule-value">{{
+                  challenge.vidas
+                }}</span>
+                <span class="dl-challenge__rule-label">Vidas</span>
+              </div>
               <div class="dl-challenge__rule">
                 <span class="dl-challenge__rule-value">{{
                   formatDuration(challenge.toleranciaSegundos)
@@ -111,8 +117,13 @@
               class="dl-challenge__rule-note"
             >
               Las preguntas suben de dificultad a medida que respondés: primero
-              las fáciles, después las intermedias y al final las difíciles. En
-              cada intento te tocan preguntas distintas del banco.
+              las fáciles, después las intermedias y al final las difíciles. Las
+              preguntas se sortean del banco, así que no siempre son las mismas.
+            </p>
+            <p v-if="challenge.vidas" class="dl-challenge__rule-note">
+              Tenés {{ challenge.vidas }} vidas: cada respuesta incorrecta te
+              resta una y con 0 vidas la partida termina con los puntos que
+              llevabas. Se juega una sola vez.
             </p>
             <p class="dl-challenge__rule-note">
               El tiempo empieza y termina en el servidor. El plazo de cierre es
@@ -298,6 +309,19 @@
               <q-icon name="timer" size="20px" />
               <span>{{ timerLabel }}</span>
             </div>
+            <div
+              v-if="livesTotal !== null"
+              class="dl-challenge__lives"
+              :aria-label="`Vidas: ${livesLeft} de ${livesTotal}`"
+            >
+              <q-icon
+                v-for="n in livesTotal"
+                :key="n"
+                :name="n <= livesLeft ? 'favorite' : 'heart_broken'"
+                :class="n <= livesLeft ? 'is-alive' : 'is-lost'"
+                size="22px"
+              />
+            </div>
             <div class="dl-challenge__playpoints">
               <span class="dl-challenge__playpoints-value">{{
                 partida?.puntos ?? 0
@@ -433,6 +457,15 @@
                 <p v-if="answerResult.correcto">
                   Sumaste {{ answerResult.puntosObtenidos }} puntos.
                 </p>
+                <p v-else-if="outOfLives">
+                  Te quedaste sin vidas: la partida terminó con
+                  {{ partida?.puntos ?? 0 }} puntos.
+                </p>
+                <p v-else-if="livesTotal !== null">
+                  Perdiste una vida: te quedan {{ livesLeft }}. La opción
+                  correcta y la explicación se muestran cuando el desafío
+                  cierre.
+                </p>
                 <p v-else>
                   No suma puntos. La opción correcta y la explicación se
                   muestran cuando el desafío cierre.
@@ -460,9 +493,11 @@
                 size="lg"
                 class="dl-btn-main dl-btn-main--big"
                 :label="
-                  currentIndex < questions.length - 1
-                    ? 'CONTINUAR'
-                    : 'FINALIZAR PARTIDA'
+                  outOfLives
+                    ? 'VER MI RESULTADO'
+                    : currentIndex < questions.length - 1
+                      ? 'CONTINUAR'
+                      : 'FINALIZAR PARTIDA'
                 "
                 :disable="finishing"
                 @click="nextQuestion"
@@ -850,6 +885,22 @@ const currentQuestion = computed(
   () => questions.value[currentIndex.value] ?? null
 )
 const answeredCount = computed(() => Object.keys(answers.value).length)
+
+// Vidas: cada respuesta incorrecta resta una; con cero la partida termina.
+const livesTotal = computed(
+  () => partida.value?.vidas ?? challenge.value?.vidas ?? null
+)
+const wrongCount = computed(
+  () => Object.values(answers.value).filter(answer => !answer.correct).length
+)
+const livesLeft = computed(() =>
+  livesTotal.value === null
+    ? null
+    : Math.max(livesTotal.value - wrongCount.value, 0)
+)
+const outOfLives = computed(
+  () => livesTotal.value !== null && livesLeft.value === 0
+)
 const progressPct = computed(() => {
   const total = questions.value.length
   if (!total) return 0
@@ -912,6 +963,9 @@ const resultBannerClass = computed(() => {
 const resultMessage = computed(() => {
   if (!result.value) return ''
   if (result.value.estado === 'finalizada') {
+    if (livesTotal.value !== null && result.value.errores >= livesTotal.value) {
+      return 'Te quedaste sin vidas: la partida terminó con los puntos que lograste. Este resultado compite en el ranking.'
+    }
     return 'Respondiste todo dentro del plazo. Este resultado compite en el ranking.'
   }
   if (result.value.estado === 'vencida') {
@@ -1025,6 +1079,8 @@ async function resumePartida(partidaRow) {
   resetQuestion()
   confirmFinish.value = false
   phase.value = 'playing'
+  // Si ya se había quedado sin vidas, se cierra la partida directamente.
+  if (outOfLives.value) await finishNow()
 }
 
 async function begin(forceNew) {
@@ -1134,7 +1190,7 @@ async function confirmAnswer() {
     }
   } catch (err) {
     answerError.value = err?.message ?? 'No se pudo registrar la respuesta.'
-    if (timeExpired.value) {
+    if (timeExpired.value || /sin vidas/i.test(answerError.value)) {
       await finishNow()
     }
   } finally {
@@ -1143,7 +1199,7 @@ async function confirmAnswer() {
 }
 
 async function nextQuestion() {
-  if (currentIndex.value < questions.value.length - 1) {
+  if (!outOfLives.value && currentIndex.value < questions.value.length - 1) {
     currentIndex.value += 1
     resetQuestion()
     return
@@ -1536,6 +1592,20 @@ onBeforeUnmount(() => {
 
     &.is-expired {
       color: $dl-red;
+    }
+  }
+
+  &__lives {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+
+    .is-alive {
+      color: $dl-red;
+    }
+
+    .is-lost {
+      color: #5a5a5a;
     }
   }
 
