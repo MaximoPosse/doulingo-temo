@@ -39,7 +39,7 @@ aplicación **CodeLingua** (proyecto escolar). El diccionario de datos está en
 ```
 supabase/
 ├── README.md                 ← este archivo
-├── setup.sql                 ← los siete archivos en un solo script
+├── setup.sql                 ← todas las migraciones en un solo script
 └── migrations/
     ├── 0001_schema.sql       ← tablas, PKs, FKs y restricciones
     ├── 0002_seed.sql         ← datos iniciales (curso JavaScript)
@@ -47,17 +47,22 @@ supabase/
     ├── 0004_auth.sql         ← perfiles, progreso del participante y RLS ampliada
     ├── 0005_intentos.sql     ← intentos, respuestas y resultado calculado en el servidor
     ├── 0006_desafios.sql     ← competencia de expo: evento, desafíos, partidas y ranking
-    └── 0007_seed_desafios.sql ← datos de la expo y desafíos internos de prueba
+    ├── 0007_seed_desafios.sql ← datos de la expo y desafíos internos de prueba
+    ├── 0008_ranking_admin.sql ← ranking público y permisos de administración
+    ├── 0009_admin_content_guards.sql ← validaciones del contenido
+    ├── 0010_cursos_lenguajes.sql ← cursos Python, PHP, Java, C# y C++
+    └── 0011_variar_respuestas.sql ← reparte la opción correcta entre A, B, C y D
 ```
 
 ## Cómo crear el proyecto y aplicar el esquema
 
 1. Crear un proyecto en [supabase.com](https://supabase.com) llamado
    **`doulingo`** (lanzar la base).
-2. Ir a **SQL Editor** y ejecutar, **en orden**, los siete archivos:
+2. Ir a **SQL Editor** y ejecutar, **en orden**, los archivos:
    `0001_schema.sql`, `0002_seed.sql`, `0003_rls.sql`, `0004_auth.sql`,
-   `0005_intentos.sql`, `0006_desafios.sql` y `0007_seed_desafios.sql` (o pegar
-   `setup.sql`, que es la concatenación de los siete).
+   `0005_intentos.sql`, `0006_desafios.sql`, `0007_seed_desafios.sql`, `0008_ranking_admin.sql`,
+   `0009_admin_content_guards.sql`, `0010_cursos_lenguajes.sql` y `0011_variar_respuestas.sql` (o pegar `setup.sql`, que
+   es la concatenación de todos).
 3. En **Settings → API** copiar la **Project URL** y la **publishable key**
    (o **anon public key** en proyectos antiguos) y guardarlas localmente en
    `.env` (nunca en el repositorio):
@@ -87,6 +92,10 @@ Configuración necesaria en el panel:
 3. **Correo**: el SMTP incluido solo entrega a miembros del equipo y tiene cupo
    de envíos por hora; para probar confirmaciones reales conviene usar un
    SMTP propio.
+4. **Registro libre sin confirmar el correo** (para la expo): en
+   **Authentication → Providers → Email** desactivar **Confirm email**. Así
+   cualquier persona crea su cuenta con un correo y una contraseña y entra
+   al instante, sin límite de usuarios y sin depender del envío de correos.
 
 Detalle completo del diseño en [`docs/10-auth.md`](../docs/10-auth.md).
 
