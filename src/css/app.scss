@@ -2,6 +2,41 @@
 // Botones, tarjetas, badges y utilidades para la página, compartidos por todas
 // las vistas. La paleta vive en src/css/quasar.variables.scss.
 
+// Márgenes seguros del APK (barra de estado arriba y botones del sistema
+// abajo): las alertas bajan de la barra de estado y el contenido deja lugar
+// abajo para los botones de navegación.
+.q-notifications__list--top {
+  padding-top: env(safe-area-inset-top);
+}
+
+// Celular / APK: sin zoom por doble toque, sin resplandor de "tirar para
+// refrescar" y sin el recuadro gris al tocar botones y enlaces.
+html,
+body {
+  overscroll-behavior: none;
+}
+
+button,
+a,
+.q-btn,
+.q-tab,
+[role='button'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Los botones y las partes del juego no se seleccionan como texto al mantener
+// el dedo apretado.
+button,
+.q-btn,
+.dl-challenge__option,
+.dl-lesson__option,
+.rr__tablero,
+.rr__paleta {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 html {
   // El encabezado queda fijo: al enfocar o saltar a un elemento no se tapa.
   scroll-padding-top: 110px;
@@ -73,7 +108,7 @@ video {
   &__inner {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 40px 20px 72px;
+    padding: 40px 20px calc(72px + env(safe-area-inset-bottom));
   }
 
   &__title {
@@ -104,7 +139,8 @@ video {
 // un poco más chicos para que entren bien en 320-430 px de ancho.
 @media (max-width: 600px) {
   .dl-page__inner {
-    padding: 24px max(16px, env(safe-area-inset-right)) 56px
+    padding: 24px max(16px, env(safe-area-inset-right))
+      calc(56px + env(safe-area-inset-bottom))
       max(16px, env(safe-area-inset-left));
   }
 
