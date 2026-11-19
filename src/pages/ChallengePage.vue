@@ -611,6 +611,15 @@
                 </template>
                 <template v-else-if="saveState === 'saved'">
                   <q-btn
+                    v-if="challenge.minijuego && !canPlayAgain"
+                    no-caps
+                    unelevated
+                    size="lg"
+                    class="dl-btn-main dl-btn-main--big"
+                    label="🤖 JUGAR EL MINIJUEGO Y SUMAR PUNTOS"
+                    :to="{ name: 'minijuego' }"
+                  />
+                  <q-btn
                     v-if="canPlayAgain"
                     no-caps
                     unelevated
@@ -636,6 +645,10 @@
               >
                 No te quedan intentos en este desafío. El ranking conserva tu
                 mejor intento válido.
+                <template v-if="challenge.minijuego">
+                  ¡Ahora podés sumar más puntos con el minijuego
+                  <strong>Ruta del robot</strong>!
+                </template>
               </p>
             </div>
           </section>

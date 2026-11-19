@@ -108,6 +108,7 @@ function mapChallenge(row) {
     intentosPermitidos: row.intentos_permitidos,
     toleranciaSegundos: row.tolerancia_segundos,
     vidas: row.vidas ?? null,
+    minijuego: row.minijuego === true,
     estado: row.estado,
     orden: row.orden,
     // Con cupos por dificultad cada partida sortea esa cantidad del banco:
@@ -146,7 +147,7 @@ export async function fetchExpo() {
         'id, evento_id, slug, titulo, descripcion, dificultad, ' +
           'duracion_segundos, puntos_por_acierto, intentos_permitidos, ' +
           'tolerancia_segundos, estado, orden, ' +
-          'cupo_facil, cupo_intermedio, cupo_dificil, vidas, ' +
+          'cupo_facil, cupo_intermedio, cupo_dificil, vidas, minijuego, ' +
           'desafio_preguntas(id, dificultad)'
       )
       .eq('evento_id', event.id)
@@ -167,7 +168,7 @@ export async function fetchChallenge(challengeId) {
       'id, evento_id, slug, titulo, descripcion, dificultad, ' +
         'duracion_segundos, puntos_por_acierto, intentos_permitidos, ' +
         'tolerancia_segundos, estado, orden, ' +
-        'cupo_facil, cupo_intermedio, cupo_dificil, vidas, ' +
+        'cupo_facil, cupo_intermedio, cupo_dificil, vidas, minijuego, ' +
         'eventos(id, slug, titulo, descripcion, inicia_en, termina_en, estado), ' +
         'desafio_preguntas(id, dificultad)'
     )

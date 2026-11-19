@@ -34,6 +34,11 @@ const routes = [
         component: () => import('@/pages/ExpoPage.vue')
       },
       {
+        path: 'expo/minijuego',
+        name: 'minijuego',
+        component: () => import('@/pages/RutaRobotPage.vue')
+      },
+      {
         path: 'expo/:challengeId',
         name: 'desafio',
         component: () => import('@/pages/ChallengePage.vue')

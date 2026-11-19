@@ -339,6 +339,37 @@ solo intento**:
 - Repetir el envío de una respuesta ya guardada no resta otra vida.
 - Un desafío con `vidas = null` (como los de prueba) no tiene límite de errores.
 
+## Minijuego "Ruta del robot" (suma puntos al ranking)
+
+`0014_minijuego.sql` agrega un minijuego que se **desbloquea al terminar el Gran
+desafío** (sin intentos ni partida en curso). La persona programa a un robot con
+bloques para que llegue a la meta, recoja estrellas y esquive obstáculos.
+
+- **Bloques:** avanzar, girar a la izquierda, girar a la derecha y **repetir**
+  (bucle de 1 a 9 veces, hasta dos bucles anidados). Un bucle cuenta como 1
+  bloque más lo que tiene adentro, por eso ahorra bloques.
+- **Niveles:** 6 niveles (tableros de 5x5 y 6x6) en `minijuego_niveles`, de menor
+  a mayor dificultad. Cada uno trae su **par**: el mínimo de bloques sin bucles
+  para llegar a la meta recogiendo todas las estrellas. También hay un nivel de
+  **práctica** que se juega solo en el navegador y no suma puntos.
+- **Puntos por nivel:** 5 por llegar + 3 por estrella + hasta 7 de bonificación
+  (7 menos 1 por cada bloque que supere el par). Máximo por nivel 15-21; el total
+  del minijuego es 114.
+- **El servidor decide:** `enviar_ruta(nivel, programa)` valida el programa
+  (1 a 40 bloques, máximo 200 pasos), **simula el recorrido** y calcula los
+  puntos. Guarda el mejor resultado de cada persona y nivel en
+  `minijuego_resultados` y se puede volver a jugar para mejorarlo.
+- **Ranking:** los puntos del minijuego se suman al ranking del Gran desafío
+  (\`ranking_desafio\`) y al ranking público de la expo (\`ranking_evento\`, que
+  ahora muestra el total por persona). Cada mejora publica una fila "Ruta del
+  robot" en \`resultados_publicos\`, así la pantalla de la expo se actualiza en
+  vivo.
+- **Cliente:** \`src/lib/rutaRobot.js\` tiene la misma simulación para animar el
+  recorrido (las pruebas comparan ambas), \`src/pages/RutaRobotPage.vue\` la
+  pantalla y \`src/data/minigameRepository.js\` el acceso a datos.
+- **Pruebas:** \`ruta_robot_logica.mjs\` (lógica, sin base), \`minijuego_ui.mjs\`
+  (pantalla; con \`MOCK=1\` no necesita la migración aplicada).
+
 ## Pruebas
 
 - `node tests/e2e/challenges.mjs` comprueba contra el proyecto real:

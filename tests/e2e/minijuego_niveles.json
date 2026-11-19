@@ -1,0 +1,80 @@
+[
+  {
+    "id": "a0000000-0000-0000-0000-000000000001",
+    "orden": 1,
+    "nombre": "Primer paso",
+    "consejo": "Avanzá en línea recta. ¿Probaste el bucle \"Repetir\"?",
+    "n": 5,
+    "inicio": 22,
+    "rumbo": 0,
+    "meta": 2,
+    "muros": [6, 8, 16, 18],
+    "estrellas": [12],
+    "par": 4
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000002",
+    "orden": 2,
+    "nombre": "La esquina",
+    "consejo": "Girá en la esquina y repetí los avances.",
+    "n": 5,
+    "inicio": 20,
+    "rumbo": 0,
+    "meta": 4,
+    "muros": [6, 7, 8, 16, 17, 18],
+    "estrellas": [9, 21],
+    "par": 10
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000003",
+    "orden": 3,
+    "nombre": "El laberinto",
+    "consejo": "Con más espacio hay más caminos: buscá el más corto.",
+    "n": 6,
+    "inicio": 30,
+    "rumbo": 0,
+    "meta": 5,
+    "muros": [1, 7, 9, 10, 13, 19, 20, 21, 23, 29, 32, 33, 34, 35],
+    "estrellas": [11, 24],
+    "par": 14
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000004",
+    "orden": 4,
+    "nombre": "Escalera",
+    "consejo": "Un patrón que se repite: avanzar, girar, avanzar, girar.",
+    "n": 5,
+    "inicio": 20,
+    "rumbo": 0,
+    "meta": 4,
+    "muros": [6, 7, 12, 16],
+    "estrellas": [8, 11, 23],
+    "par": 21
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000005",
+    "orden": 5,
+    "nombre": "Doble vuelta",
+    "consejo": "Recogé las estrellas antes de llegar a la meta.",
+    "n": 6,
+    "inicio": 30,
+    "rumbo": 1,
+    "meta": 5,
+    "muros": [3, 7, 9, 11, 13, 19, 20, 21, 22, 32],
+    "estrellas": [0, 14, 25],
+    "par": 24
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000006",
+    "orden": 6,
+    "nombre": "Gran final",
+    "consejo": "El nivel más largo: pensá en bucles dentro de bucles.",
+    "n": 6,
+    "inicio": 30,
+    "rumbo": 0,
+    "meta": 5,
+    "muros": [3, 7, 9, 13, 17, 19, 20, 21, 22, 32, 35],
+    "estrellas": [4, 14, 26],
+    "par": 27
+  }
+]

@@ -161,6 +161,42 @@
           </p>
         </div>
 
+        <!-- Minijuego: se desbloquea al terminar el Gran desafío -->
+        <section
+          v-if="hayMinijuego && minijuego"
+          class="dl-expo__mini"
+          :class="{ 'is-bloqueado': !minijuego.desbloqueado }"
+        >
+          <div class="dl-expo__mini-icono" aria-hidden="true">🤖</div>
+          <div class="dl-expo__mini-texto">
+            <span class="dl-expo__mini-etiqueta"
+              >Minijuego · suma al ranking</span
+            >
+            <h2 class="dl-expo__mini-titulo">Ruta del robot</h2>
+            <p>
+              Programá al robot con bloques para que llegue a la meta y recoja
+              estrellas. Son 6 niveles y cada uno suma puntos a tu total.
+            </p>
+            <p v-if="minijuego.desbloqueado" class="dl-expo__mini-estado">
+              {{ nivelesSuperados }} niveles superados ·
+              <strong>{{ puntosMinijuego }} puntos</strong> extra
+            </p>
+            <p v-else class="dl-expo__mini-estado">
+              <q-icon name="lock" size="16px" /> Se desbloquea cuando terminás
+              el Gran desafío.
+            </p>
+            <q-btn
+              no-caps
+              unelevated
+              class="dl-btn-main"
+              :label="
+                minijuego.desbloqueado ? 'JUGAR AHORA' : 'PROBAR LA PRÁCTICA'
+              "
+              :to="{ name: 'minijuego' }"
+            />
+          </div>
+        </section>
+
         <section class="dl-card q-mt-lg">
           <h2 class="dl-card__title">Cómo se decide el ranking</h2>
           <ul class="dl-expo__rules">
@@ -168,6 +204,11 @@
               <q-icon name="workspace_premium" size="18px" color="primary" />
               Cuenta el <strong>mejor intento válido</strong> de cada
               participante en cada desafío.
+            </li>
+            <li v-if="hayMinijuego">
+              <q-icon name="smart_toy" size="18px" color="primary" />
+              Los puntos del minijuego <strong>Ruta del robot</strong> se suman
+              a tu puntaje total.
             </li>
             <li>
               <q-icon name="timer" size="18px" color="primary" />
@@ -197,9 +238,38 @@ import { computed } from 'vue'
 import usagiImg from '@/assets/amigos/chiikawa-fiesta.webp'
 import chiikawaImg from '@/assets/amigos/chiikawa-tumbado.webp'
 import { fetchExpo } from '@/data/challengeRepository'
+import {
+  fetchDesbloqueado,
+  fetchMisResultados
+} from '@/data/minigameRepository'
 import { useRemoteData } from '@/composables/useRemoteData'
 
 const { data, loading, error, load } = useRemoteData(fetchExpo)
+
+// Estado del minijuego (si la base todavía no lo tiene, simplemente no se muestra).
+const { data: minijuego } = useRemoteData(async () => {
+  try {
+    const [desbloqueado, resultados] = await Promise.all([
+      fetchDesbloqueado(),
+      fetchMisResultados()
+    ])
+    return { desbloqueado, resultados }
+  } catch {
+    return null
+  }
+})
+const hayMinijuego = computed(() =>
+  (data.value?.challenges ?? []).some(challenge => challenge.minijuego)
+)
+const nivelesSuperados = computed(
+  () => Object.keys(minijuego.value?.resultados ?? {}).length
+)
+const puntosMinijuego = computed(() =>
+  Object.values(minijuego.value?.resultados ?? {}).reduce(
+    (suma, resultado) => suma + resultado.puntos,
+    0
+  )
+)
 
 const event = computed(() => data.value?.event ?? null)
 const challenges = computed(() => data.value?.challenges ?? [])
@@ -413,6 +483,64 @@ function difficultyClass(difficulty) {
     }
   }
 
+  &__mini {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+    padding: 20px;
+    background: #211b0b;
+    border: 2px solid $dl-yellow;
+    border-radius: 18px;
+
+    &.is-bloqueado {
+      border-color: #6b5a1c;
+    }
+  }
+
+  &__mini-icono {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 20px;
+    background: #2a2410;
+    font-size: 3rem;
+  }
+
+  &__mini-texto {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    p {
+      margin: 4px 0 10px;
+      color: $dl-ink;
+      line-height: 1.45;
+    }
+  }
+
+  &__mini-etiqueta {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $dl-green-dark;
+  }
+
+  &__mini-titulo {
+    margin: 2px 0 4px;
+    color: $dl-ink-dark;
+  }
+
+  &__mini-estado {
+    font-weight: 700;
+
+    strong {
+      color: $dl-green-dark;
+    }
+  }
+
   &__rules {
     list-style: none;
     margin: 0;
@@ -434,6 +562,13 @@ function difficultyClass(difficulty) {
         top: 3px;
       }
     }
+  }
+}
+
+@media (max-width: 600px) {
+  .dl-expo__mini {
+    flex-direction: column;
+    text-align: center;
   }
 }
 
