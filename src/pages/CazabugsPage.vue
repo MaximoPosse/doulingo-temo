@@ -104,18 +104,24 @@
               🔥 <strong>Racha</strong>: ×2 desde el 5.º bicho seguido, ×3 desde
               el 9.º y ×4 desde el 13.º.
             </li>
-            <li
-              >❌ Un fallo o tocar a <strong>Usagi</strong> corta la racha.</li
-            >
-            <li>🏆 Cada 40 puntos suman 1 de ranking (máx. 100).</li>
+            <li>
+              ❌ Un fallo o tocar a <strong>Usagi</strong> corta la racha.
+            </li>
+            <li>
+              💨 Cada bicho que se te escapa sin tocarlo resta
+              <strong>5 puntos</strong> y corta la racha.
+            </li>
+            <li>
+              🏆 Cada 40 puntos suman 1 de ranking (máx. 100).
+              <strong>Hay una sola ronda con puntos</strong>: ¡aprovechala!
+            </li>
           </ul>
 
           <div v-if="mejor" class="cb__mejor">
-            Tu mejor ronda: <strong>{{ mejor.puntaje }}</strong> puntos ({{
+            Tu ronda con puntos: <strong>{{ mejor.puntaje }}</strong> puntos ({{
               mejor.puntos
             }}
-            de ranking) · racha {{ mejor.mejorRacha }} · {{ mejor.rondas }}
-            rondas
+            de ranking) · racha {{ mejor.mejorRacha }}
           </div>
 
           <div class="cb__acciones">
@@ -123,8 +129,14 @@
               no-caps
               unelevated
               class="dl-btn-main dl-btn-main--big"
-              :label="iniciando ? 'Preparando…' : '🎮 Jugar con puntos'"
-              :disable="!desbloqueado || iniciando"
+              :label="
+                rondaUsada
+                  ? 'Ya usaste tu ronda con puntos'
+                  : iniciando
+                    ? 'Preparando…'
+                    : '🎮 Jugar con puntos (1 sola vez)'
+              "
+              :disable="!desbloqueado || iniciando || rondaUsada"
               :loading="iniciando"
               @click="empezar(true)"
             />
@@ -173,7 +185,7 @@
             </div>
             <div class="cb__lateral-pie">
               <span class="cb__pista">
-                {{ oficial ? 'Ronda con puntos' : 'Práctica (sin puntos)' }} ·
+                {{ oficial ? "Ronda con puntos" : "Práctica (sin puntos)" }} ·
                 ¡no toques a Usagi!
               </span>
               <button type="button" class="cb__salir" @click="salir">
@@ -195,7 +207,7 @@
                 :class="{
                   'is-amigo': celda.bicho?.tipo === 'amigo',
                   'is-dorado': celda.bicho?.tipo === 'dorado',
-                  'is-por-irse': celda.porIrse
+                  'is-por-irse': celda.porIrse,
                 }"
                 :aria-label="`Casilla ${i + 1}`"
                 @pointerdown.prevent="tocar(i)"
@@ -237,7 +249,7 @@
               >
 
               <div v-if="fase === 'cuenta'" class="cb__cuenta">
-                <span :key="cuenta">{{ cuenta > 0 ? cuenta : '¡YA!' }}</span>
+                <span :key="cuenta">{{ cuenta > 0 ? cuenta : "¡YA!" }}</span>
               </div>
             </div>
           </div>
@@ -262,6 +274,9 @@
               💨 En vacío: <strong>{{ resumen.fallos }}</strong>
             </li>
             <li>
+              🐌 Escapados: <strong>{{ resumen.escapados }}</strong>
+            </li>
+            <li>
               😿 Usagi: <strong>{{ resumen.amigos }}</strong>
             </li>
             <li>
@@ -284,17 +299,14 @@
             </p>
             <div v-else-if="oficialRes" class="cb__oficial">
               <strong>{{
-                oficialRes.mejoro ? '¡Nuevo récord personal!' : 'Ronda guardada'
+                oficialRes.mejoro ? "¡Ronda guardada!" : "Ronda guardada"
               }}</strong>
               <p>
                 Puntaje oficial: <strong>{{ oficialRes.puntaje }}</strong> → +{{
                   oficialRes.puntos
                 }}
-                pts de ranking. Tu mejor ronda:
-                <strong>{{ oficialRes.mejorPuntaje }}</strong> ({{
-                  oficialRes.mejorPuntos
-                }}
-                pts, ya suman a tu total).
+                pts de ranking, que ya suman a tu total. Esa fue tu única ronda
+                con puntos; podés seguir practicando.
               </p>
             </div>
           </template>
@@ -307,9 +319,11 @@
               no-caps
               unelevated
               class="dl-btn-main dl-btn-main--big"
-              label="🔄 Jugar otra vez"
+              :label="
+                rondaUsada ? '🔄 Practicar otra vez' : '🔄 Jugar otra vez'
+              "
               :disable="enviando"
-              @click="empezar(oficial && desbloqueado)"
+              @click="empezar(!rondaUsada && oficial && desbloqueado)"
             />
             <q-btn
               no-caps
@@ -327,64 +341,66 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
 
-import usagiImg from '@/assets/amigos/usagi-de-pie.webp'
-import { fetchExpo } from '@/data/challengeRepository'
+import usagiImg from "@/assets/amigos/usagi-de-pie.webp";
+import { fetchExpo } from "@/data/challengeRepository";
 import {
   enviarRonda,
   fetchDesbloqueado,
   fetchMiMejor,
-  iniciarRonda
-} from '@/data/minigameRepository'
+  iniciarRonda,
+} from "@/data/minigameRepository";
 import {
   CELDAS,
   DURACION_MS,
   INTERVALO_MIN_MS,
   cronograma,
   crearMotor,
-  multiplicador
-} from '@/lib/cazabugs'
+  multiplicador,
+} from "@/lib/cazabugs";
 
-const EMOJI = { bug: '🐛', rapido: '🦟', grande: '🪲', dorado: '🐞' }
+const EMOJI = { bug: "🐛", rapido: "🦟", grande: "🪲", dorado: "🐞" };
 
-const cargando = ref(true)
-const errorCarga = ref(null)
-const desbloqueado = ref(false)
-const desafioId = ref(null)
-const mejor = ref(null)
-const iniciando = ref(false)
-const sonido = ref(true)
+const cargando = ref(true);
+const errorCarga = ref(null);
+const desbloqueado = ref(false);
+const desafioId = ref(null);
+const mejor = ref(null);
+const iniciando = ref(false);
+const sonido = ref(true);
 
-const fase = ref('menu') // menu | cuenta | jugando | fin
-const oficial = ref(false)
-const cuenta = ref(3)
-const segundos = ref(45)
-const progreso = ref(100)
-const sacudir = ref(false)
-const hud = reactive({ puntaje: 0, racha: 0, mult: 1 })
-const celdas = ref(crearCeldas())
-const pops = ref([])
+const fase = ref("menu"); // menu | cuenta | jugando | fin
+const oficial = ref(false);
+const cuenta = ref(3);
+const segundos = ref(45);
+const progreso = ref(100);
+const sacudir = ref(false);
+const hud = reactive({ puntaje: 0, racha: 0, mult: 1 });
+const celdas = ref(crearCeldas());
+const pops = ref([]);
 const resumen = reactive({
   puntaje: 0,
   aciertos: 0,
   fallos: 0,
   amigos: 0,
-  mejorRacha: 0
-})
-const enviando = ref(false)
-const errorEnvio = ref(null)
-const oficialRes = ref(null)
+  escapados: 0,
+  mejorRacha: 0,
+});
+const rondaUsada = ref(false);
+const enviando = ref(false);
+const errorEnvio = ref(null);
+const oficialRes = ref(null);
 
-let motor = null
-let ronda = null
-let toques = []
-let t0 = 0
-let ultimoToque = -1000
-let raf = 0
-let popId = 0
-let audio = null
-let temporizadores = []
+let motor = null;
+let ronda = null;
+let toques = [];
+let t0 = 0;
+let ultimoToque = -1000;
+let raf = 0;
+let popId = 0;
+let audio = null;
+let temporizadores = [];
 
 function crearCeldas() {
   return Array.from({ length: CELDAS }, () => ({
@@ -392,344 +408,364 @@ function crearCeldas() {
     golpes: 0,
     porIrse: false,
     efecto: 0,
-    efectoEmoji: ''
-  }))
+    efectoEmoji: "",
+  }));
 }
 
 const jugando = computed(
-  () => fase.value === 'cuenta' || fase.value === 'jugando'
-)
+  () => fase.value === "cuenta" || fase.value === "jugando",
+);
 
 const medalla = computed(() => {
-  const p = resumen.puntaje
+  const p = resumen.puntaje;
   if (p >= 3200)
-    return { emoji: '💎', titulo: '¡Maestro de los bugs!', clase: 'diamante' }
+    return { emoji: "💎", titulo: "¡Maestro de los bugs!", clase: "diamante" };
   if (p >= 2000)
-    return { emoji: '🥇', titulo: '¡Cazador de oro!', clase: 'oro' }
-  if (p >= 1000) return { emoji: '🥈', titulo: '¡Gran ronda!', clase: 'plata' }
+    return { emoji: "🥇", titulo: "¡Cazador de oro!", clase: "oro" };
+  if (p >= 1000) return { emoji: "🥈", titulo: "¡Gran ronda!", clase: "plata" };
   if (p >= 400)
-    return { emoji: '🥉', titulo: '¡Buen comienzo!', clase: 'bronce' }
-  return { emoji: '🐛', titulo: '¡Los bugs ganaron esta vez!', clase: 'bug' }
-})
+    return { emoji: "🥉", titulo: "¡Buen comienzo!", clase: "bronce" };
+  return { emoji: "🐛", titulo: "¡Los bugs ganaron esta vez!", clase: "bug" };
+});
 
 // ---------- sonido y vibración ----------
 function iniciarAudio() {
-  if (audio || !sonido.value) return
+  if (audio || !sonido.value) return;
   try {
-    const Contexto = window.AudioContext ?? window.webkitAudioContext
-    if (Contexto) audio = new Contexto()
+    const Contexto = window.AudioContext ?? window.webkitAudioContext;
+    if (Contexto) audio = new Contexto();
   } catch {
-    audio = null
+    audio = null;
   }
 }
 
 function tono(
   frecuencia,
   duracion,
-  tipo = 'sine',
+  tipo = "sine",
   volumen = 0.12,
-  retraso = 0
+  retraso = 0,
 ) {
-  if (!sonido.value || !audio) return
+  if (!sonido.value || !audio) return;
   try {
-    const osc = audio.createOscillator()
-    const ganancia = audio.createGain()
-    osc.type = tipo
-    osc.frequency.value = frecuencia
-    const inicio = audio.currentTime + retraso
-    ganancia.gain.setValueAtTime(volumen, inicio)
-    ganancia.gain.exponentialRampToValueAtTime(0.0001, inicio + duracion)
-    osc.connect(ganancia).connect(audio.destination)
-    osc.start(inicio)
-    osc.stop(inicio + duracion)
+    const osc = audio.createOscillator();
+    const ganancia = audio.createGain();
+    osc.type = tipo;
+    osc.frequency.value = frecuencia;
+    const inicio = audio.currentTime + retraso;
+    ganancia.gain.setValueAtTime(volumen, inicio);
+    ganancia.gain.exponentialRampToValueAtTime(0.0001, inicio + duracion);
+    osc.connect(ganancia).connect(audio.destination);
+    osc.start(inicio);
+    osc.stop(inicio + duracion);
   } catch {
     /* sin sonido */
   }
 }
 
 function vibrar(patron) {
-  if (!sonido.value) return
+  if (!sonido.value) return;
   try {
-    navigator.vibrate?.(patron)
+    navigator.vibrate?.(patron);
   } catch {
     /* sin vibración */
   }
 }
 
 const SONIDOS = {
-  acierto: racha => tono(520 + Math.min(racha, 12) * 40, 0.12, 'triangle'),
+  acierto: (racha) => tono(520 + Math.min(racha, 12) * 40, 0.12, "triangle"),
   dorado: () => {
-    tono(880, 0.1, 'triangle')
-    tono(1175, 0.1, 'triangle', 0.12, 0.08)
-    tono(1568, 0.18, 'triangle', 0.12, 0.16)
+    tono(880, 0.1, "triangle");
+    tono(1175, 0.1, "triangle", 0.12, 0.08);
+    tono(1568, 0.18, "triangle", 0.12, 0.16);
   },
-  golpe: () => tono(300, 0.08, 'square', 0.08),
-  fallo: () => tono(180, 0.1, 'sine', 0.06),
+  golpe: () => tono(300, 0.08, "square", 0.08),
+  fallo: () => tono(180, 0.1, "sine", 0.06),
   amigo: () => {
-    tono(160, 0.25, 'sawtooth', 0.12)
-    tono(120, 0.3, 'sawtooth', 0.12, 0.1)
+    tono(160, 0.25, "sawtooth", 0.12);
+    tono(120, 0.3, "sawtooth", 0.12, 0.1);
   },
-  cuenta: () => tono(440, 0.12, 'square', 0.08),
-  ya: () => tono(880, 0.25, 'square', 0.1),
+  cuenta: () => tono(440, 0.12, "square", 0.08),
+  ya: () => tono(880, 0.25, "square", 0.1),
   fin: () => {
-    tono(660, 0.15, 'triangle')
-    tono(440, 0.3, 'triangle', 0.12, 0.15)
-  }
-}
+    tono(660, 0.15, "triangle");
+    tono(440, 0.3, "triangle", 0.12, 0.15);
+  },
+};
 
 // ---------- efectos visuales ----------
 function agregarPop(celda, texto, clase) {
-  const columna = celda % 3
-  const fila = Math.floor(celda / 3)
-  const id = ++popId
+  const columna = celda % 3;
+  const fila = Math.floor(celda / 3);
+  const id = ++popId;
   pops.value.push({
     id,
     texto,
     clase,
     x: columna * 33.33 + 16.66,
-    y: fila * 25 + 8
-  })
+    y: fila * 25 + 8,
+  });
   temporizadores.push(
     setTimeout(() => {
-      pops.value = pops.value.filter(p => p.id !== id)
-    }, 800)
-  )
+      pops.value = pops.value.filter((p) => p.id !== id);
+    }, 800),
+  );
 }
 
 function efectoEnCelda(celda, emoji) {
-  const c = celdas.value[celda]
-  c.efecto++
-  c.efectoEmoji = emoji
+  const c = celdas.value[celda];
+  c.efecto++;
+  c.efectoEmoji = emoji;
   temporizadores.push(
     setTimeout(() => {
-      c.efecto = 0
-      c.efectoEmoji = ''
-    }, 350)
-  )
+      c.efecto = 0;
+      c.efectoEmoji = "";
+    }, 350),
+  );
 }
 
 function sacudirTablero() {
-  sacudir.value = true
+  sacudir.value = true;
   temporizadores.push(
     setTimeout(() => {
-      sacudir.value = false
-    }, 350)
-  )
+      sacudir.value = false;
+    }, 350),
+  );
 }
 
 // ---------- juego ----------
 function sincronizarHud() {
-  const e = motor.estado
-  hud.puntaje = e.puntaje
-  hud.racha = e.racha
-  hud.mult = e.racha > 0 ? multiplicador(e.racha) : 1
+  const e = motor.estado;
+  hud.puntaje = e.puntaje;
+  hud.racha = e.racha;
+  hud.mult = e.racha > 0 ? multiplicador(e.racha) : 1;
+}
+
+function avisarEscapados(lista) {
+  if (!lista?.length) return;
+  for (const b of lista) {
+    agregarPop(b.celda, "−5", "is-mal");
+    efectoEnCelda(b.celda, "💨");
+  }
+  SONIDOS.fallo();
+  vibrar(10);
+  sincronizarHud();
 }
 
 function tocar(celda) {
-  if (fase.value !== 'jugando') return
-  const t = Math.round(performance.now() - t0)
-  if (t < 0 || t >= DURACION_MS || t - ultimoToque < INTERVALO_MIN_MS) return
-  ultimoToque = t
-  toques.push([t, celda])
-  const r = motor.tocar(t, celda)
-  sincronizarHud()
-  if (r.resultado === 'acierto') {
-    const dorado = r.bicho.tipo === 'dorado'
+  if (fase.value !== "jugando") return;
+  const t = Math.round(performance.now() - t0);
+  if (t < 0 || t >= DURACION_MS || t - ultimoToque < INTERVALO_MIN_MS) return;
+  ultimoToque = t;
+  toques.push([t, celda]);
+  const r = motor.tocar(t, celda);
+  sincronizarHud();
+  avisarEscapados(r.escapados);
+  if (r.resultado === "acierto") {
+    const dorado = r.bicho.tipo === "dorado";
     agregarPop(
       celda,
-      `+${r.delta}${r.mult > 1 ? ` ×${r.mult}` : ''}`,
-      dorado ? 'is-oro' : 'is-bien'
-    )
-    efectoEnCelda(celda, dorado ? '✨' : '💥')
-    if (dorado) SONIDOS.dorado()
-    else SONIDOS.acierto(motor.estado.racha)
-    vibrar(12)
-  } else if (r.resultado === 'golpe') {
-    efectoEnCelda(celda, '💢')
-    SONIDOS.golpe()
-    vibrar(8)
-  } else if (r.resultado === 'amigo') {
-    agregarPop(celda, r.delta === 0 ? '¡Usagi!' : `${r.delta}`, 'is-mal')
-    efectoEnCelda(celda, '😿')
-    sacudirTablero()
-    SONIDOS.amigo()
-    vibrar([40, 40, 60])
+      `+${r.delta}${r.mult > 1 ? ` ×${r.mult}` : ""}`,
+      dorado ? "is-oro" : "is-bien",
+    );
+    efectoEnCelda(celda, dorado ? "✨" : "💥");
+    if (dorado) SONIDOS.dorado();
+    else SONIDOS.acierto(motor.estado.racha);
+    vibrar(12);
+  } else if (r.resultado === "golpe") {
+    efectoEnCelda(celda, "💢");
+    SONIDOS.golpe();
+    vibrar(8);
+  } else if (r.resultado === "amigo") {
+    agregarPop(celda, r.delta === 0 ? "¡Usagi!" : `${r.delta}`, "is-mal");
+    efectoEnCelda(celda, "😿");
+    sacudirTablero();
+    SONIDOS.amigo();
+    vibrar([40, 40, 60]);
   } else {
-    efectoEnCelda(celda, '💨')
-    SONIDOS.fallo()
+    efectoEnCelda(celda, "💨");
+    SONIDOS.fallo();
   }
   // Se actualiza al instante lo que se ve en esa casilla.
-  pintar(t)
+  pintar(t);
 }
 
 function pintar(t) {
-  const visibles = motor.activosEn(t)
-  const porCelda = new Map(visibles.map(b => [b.celda, b]))
+  const visibles = motor.activosEn(t);
+  const porCelda = new Map(visibles.map((b) => [b.celda, b]));
   for (let i = 0; i < CELDAS; i++) {
-    const c = celdas.value[i]
-    const b = porCelda.get(i) ?? null
+    const c = celdas.value[i];
+    const b = porCelda.get(i) ?? null;
     if ((c.bicho?.i ?? null) !== (b?.i ?? null)) {
-      c.bicho = b
-      c.golpes = 0
+      c.bicho = b;
+      c.golpes = 0;
     }
-    c.golpes = b ? motor.golpesDe(b.i) : 0
-    c.porIrse = !!b && t > b.t + b.vida - 350
+    c.golpes = b ? motor.golpesDe(b.i) : 0;
+    c.porIrse = !!b && t > b.t + b.vida - 350;
   }
 }
 
 function cuadro() {
-  const t = performance.now() - t0
+  const t = performance.now() - t0;
   if (t >= DURACION_MS) {
-    terminar()
-    return
+    terminar();
+    return;
   }
-  pintar(t)
-  segundos.value = Math.max(0, Math.ceil((DURACION_MS - t) / 1000))
-  progreso.value = Math.max(0, 100 - (t / DURACION_MS) * 100)
-  raf = requestAnimationFrame(cuadro)
+  avisarEscapados(motor.avanzar(t));
+  pintar(t);
+  segundos.value = Math.max(0, Math.ceil((DURACION_MS - t) / 1000));
+  progreso.value = Math.max(0, 100 - (t / DURACION_MS) * 100);
+  raf = requestAnimationFrame(cuadro);
 }
 
 function limpiarTemporizadores() {
-  temporizadores.forEach(clearTimeout)
-  temporizadores = []
+  temporizadores.forEach(clearTimeout);
+  temporizadores = [];
 }
 
 async function empezar(conPuntos) {
-  window.scrollTo(0, 0)
-  limpiarTemporizadores()
-  cancelAnimationFrame(raf)
-  iniciarAudio()
-  audio?.resume?.()
-  errorEnvio.value = null
-  oficialRes.value = null
-  let semilla
+  window.scrollTo(0, 0);
+  limpiarTemporizadores();
+  cancelAnimationFrame(raf);
+  iniciarAudio();
+  audio?.resume?.();
+  errorEnvio.value = null;
+  oficialRes.value = null;
+  let semilla;
   if (conPuntos) {
-    iniciando.value = true
+    iniciando.value = true;
     try {
-      ronda = await iniciarRonda()
-      semilla = ronda.semilla
+      ronda = await iniciarRonda();
+      semilla = ronda.semilla;
     } catch (err) {
-      errorCarga.value = err?.message ?? 'No se pudo empezar la ronda.'
-      iniciando.value = false
-      return
+      errorCarga.value = err?.message ?? "No se pudo empezar la ronda.";
+      if (/única ronda/i.test(errorCarga.value)) rondaUsada.value = true;
+      iniciando.value = false;
+      return;
     } finally {
-      iniciando.value = false
+      iniciando.value = false;
     }
-    errorCarga.value = null
+    errorCarga.value = null;
   } else {
-    ronda = null
-    semilla = 1 + Math.floor(Math.random() * 2147483000)
+    ronda = null;
+    semilla = 1 + Math.floor(Math.random() * 2147483000);
   }
-  oficial.value = conPuntos
-  motor = crearMotor(cronograma(semilla))
-  toques = []
-  ultimoToque = -1000
-  celdas.value = crearCeldas()
-  pops.value = []
-  segundos.value = 45
-  progreso.value = 100
-  sincronizarHud()
-  fase.value = 'cuenta'
-  cuenta.value = 3
-  SONIDOS.cuenta()
+  oficial.value = conPuntos;
+  motor = crearMotor(cronograma(semilla));
+  toques = [];
+  ultimoToque = -1000;
+  celdas.value = crearCeldas();
+  pops.value = [];
+  segundos.value = 45;
+  progreso.value = 100;
+  sincronizarHud();
+  fase.value = "cuenta";
+  cuenta.value = 3;
+  SONIDOS.cuenta();
   const paso = () => {
-    cuenta.value--
+    cuenta.value--;
     if (cuenta.value > 0) {
-      SONIDOS.cuenta()
-      temporizadores.push(setTimeout(paso, 800))
+      SONIDOS.cuenta();
+      temporizadores.push(setTimeout(paso, 800));
     } else {
-      SONIDOS.ya()
+      SONIDOS.ya();
       temporizadores.push(
         setTimeout(() => {
-          fase.value = 'jugando'
-          t0 = performance.now()
-          raf = requestAnimationFrame(cuadro)
-        }, 450)
-      )
+          fase.value = "jugando";
+          t0 = performance.now();
+          raf = requestAnimationFrame(cuadro);
+        }, 450),
+      );
     }
-  }
-  temporizadores.push(setTimeout(paso, 800))
+  };
+  temporizadores.push(setTimeout(paso, 800));
 }
 
 function salir() {
-  cancelAnimationFrame(raf)
-  limpiarTemporizadores()
-  celdas.value = crearCeldas()
-  pops.value = []
-  fase.value = 'menu'
+  if (oficial.value && ronda) rondaUsada.value = true;
+  cancelAnimationFrame(raf);
+  limpiarTemporizadores();
+  celdas.value = crearCeldas();
+  pops.value = [];
+  fase.value = "menu";
 }
 
 async function terminar() {
-  cancelAnimationFrame(raf)
-  limpiarTemporizadores()
+  cancelAnimationFrame(raf);
+  limpiarTemporizadores();
+  motor.cerrar();
+  sincronizarHud();
   Object.assign(resumen, {
     puntaje: motor.estado.puntaje,
     aciertos: motor.estado.aciertos,
     fallos: motor.estado.fallos,
     amigos: motor.estado.amigos,
-    mejorRacha: motor.estado.mejorRacha
-  })
-  celdas.value = crearCeldas()
-  fase.value = 'fin'
-  SONIDOS.fin()
-  if (oficial.value && ronda) await enviar()
+    escapados: motor.estado.escapados,
+    mejorRacha: motor.estado.mejorRacha,
+  });
+  celdas.value = crearCeldas();
+  fase.value = "fin";
+  SONIDOS.fin();
+  if (oficial.value && ronda) await enviar();
 }
 
 async function enviar() {
-  if (enviando.value || !ronda) return
-  enviando.value = true
-  errorEnvio.value = null
+  if (enviando.value || !ronda) return;
+  enviando.value = true;
+  errorEnvio.value = null;
   try {
     // El servidor exige que haya pasado casi todo el tiempo de la ronda.
-    oficialRes.value = await enviarRonda(ronda.id, toques)
+    oficialRes.value = await enviarRonda(ronda.id, toques);
+    rondaUsada.value = true;
     mejor.value = {
       puntaje: oficialRes.value.mejorPuntaje,
       puntos: oficialRes.value.mejorPuntos,
       aciertos: Math.max(mejor.value?.aciertos ?? 0, oficialRes.value.aciertos),
       mejorRacha: Math.max(
         mejor.value?.mejorRacha ?? 0,
-        oficialRes.value.mejorRacha
+        oficialRes.value.mejorRacha,
       ),
-      rondas: (mejor.value?.rondas ?? 0) + 1
-    }
+      rondas: (mejor.value?.rondas ?? 0) + 1,
+    };
   } catch (err) {
-    errorEnvio.value = err?.message ?? 'No se pudo guardar la ronda.'
+    errorEnvio.value = err?.message ?? "No se pudo guardar la ronda.";
   } finally {
-    enviando.value = false
+    enviando.value = false;
   }
 }
 
 async function cargar() {
-  cargando.value = true
+  cargando.value = true;
   try {
     const [abierto, propio, expo] = await Promise.all([
       fetchDesbloqueado().catch(() => false),
       fetchMiMejor().catch(() => null),
-      fetchExpo().catch(() => ({ challenges: [] }))
-    ])
-    desbloqueado.value = abierto
-    mejor.value = propio
+      fetchExpo().catch(() => ({ challenges: [] })),
+    ]);
+    desbloqueado.value = abierto;
+    mejor.value = propio;
+    rondaUsada.value = !!propio;
     desafioId.value =
-      expo.challenges?.find(c => c.minijuego)?.id ??
+      expo.challenges?.find((c) => c.minijuego)?.id ??
       expo.challenges?.[0]?.id ??
-      null
+      null;
   } catch (err) {
-    errorCarga.value = err?.message ?? 'No se pudo cargar el minijuego.'
+    errorCarga.value = err?.message ?? "No se pudo cargar el minijuego.";
   } finally {
-    cargando.value = false
+    cargando.value = false;
   }
 }
 
-onMounted(cargar)
+onMounted(cargar);
 onUnmounted(() => {
-  cancelAnimationFrame(raf)
-  limpiarTemporizadores()
+  cancelAnimationFrame(raf);
+  limpiarTemporizadores();
   try {
-    audio?.close?.()
+    audio?.close?.();
   } catch {
     /* nada */
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

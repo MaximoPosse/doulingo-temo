@@ -350,7 +350,13 @@ de que se escondan; hay que evitar tocar a Usagi.
   tocarlo 2 veces), dorado (60, dura muy poco) y Usagi (tocarlo resta 25 y corta
   la racha). Cada bicho seguido sin fallar sube la **racha**: x2 desde el 5.º, x3
   desde el 9.º y x4 desde el 13.º. Un toque en vacío corta la racha.
-- **Ronda:** dura 45 segundos y los bichos duran cada vez menos. Hay cuenta
+- **Bichos escapados:** cada bicho (menos Usagi) que se esconde sin que lo
+  toques resta 5 puntos y corta la racha (`0016_cazabugs_reglas.sql`).
+- **Una sola ronda con puntos** por persona: `cazabugs_iniciar()` devuelve
+  `PR_RONDA_YA_JUGADA` si ya hay una ronda (aunque no se haya enviado). La
+  práctica sigue siendo libre.
+- **Ronda:** dura 45 segundos, con un bicho nuevo cada 250 ms y vidas de 1250 a
+  650 ms (cada vez menos). Hay cuenta
   regresiva, sonidos, vibración y efectos. También hay una **práctica** sin
   puntos que se puede jugar siempre, sin servidor.
 - **Puntos de ranking:** cada 40 puntos de juego valen 1 punto de ranking

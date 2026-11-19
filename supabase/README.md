@@ -55,7 +55,8 @@ supabase/
     ├── 0012_desafio_unico.sql ← un solo desafío de 20 preguntas con dificultad creciente
     ├── 0013_vidas.sql ← 3 vidas por partida en el Gran desafío (un solo intento)
     ├── 0014_minijuego.sql ← minijuego Ruta del robot (reemplazado por 0015)
-    └── 0015_cazabugs.sql ← minijuego Cazabugs que suma puntos al ranking
+    ├── 0015_cazabugs.sql ← minijuego Cazabugs que suma puntos al ranking
+    └── 0016_cazabugs_reglas.sql ← Cazabugs: 1 sola ronda, escapados restan, más rápido
 ```
 
 ## Cómo crear el proyecto y aplicar el esquema
@@ -65,7 +66,7 @@ supabase/
 2. Ir a **SQL Editor** y ejecutar, **en orden**, los archivos:
    `0001_schema.sql`, `0002_seed.sql`, `0003_rls.sql`, `0004_auth.sql`,
    `0005_intentos.sql`, `0006_desafios.sql`, `0007_seed_desafios.sql`, `0008_ranking_admin.sql`,
-   `0009_admin_content_guards.sql`, `0010_cursos_lenguajes.sql`, `0011_variar_respuestas.sql`, `0012_desafio_unico.sql`, `0013_vidas.sql`, `0014_minijuego.sql` y `0015_cazabugs.sql` (o pegar `setup.sql`, que
+   `0009_admin_content_guards.sql`, `0010_cursos_lenguajes.sql`, `0011_variar_respuestas.sql`, `0012_desafio_unico.sql`, `0013_vidas.sql`, `0014_minijuego.sql`, `0015_cazabugs.sql` y `0016_cazabugs_reglas.sql` (o pegar `setup.sql`, que
    es la concatenación de todos).
 3. En **Settings → API** copiar la **Project URL** y la **publishable key**
    (o **anon public key** en proyectos antiguos) y guardarlas localmente en
