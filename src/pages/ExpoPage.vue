@@ -181,7 +181,10 @@
             <p v-if="minijuego.desbloqueado" class="dl-expo__mini-estado">
               Tu mejor ronda:
               <strong>{{ puntosMinijuego }} puntos</strong> extra para el
-              ranking
+              ranking<template v-if="minijuego.total">
+                · tu total: <strong>{{ minijuego.total.points }} pts</strong>
+                (puesto {{ minijuego.total.position }})</template
+              >
             </p>
             <p v-else class="dl-expo__mini-estado">
               <q-icon name="lock" size="16px" /> Se desbloquea cuando terminás
@@ -239,7 +242,7 @@ import { computed } from 'vue'
 
 import usagiImg from '@/assets/amigos/chiikawa-fiesta.webp'
 import chiikawaImg from '@/assets/amigos/chiikawa-tumbado.webp'
-import { fetchExpo } from '@/data/challengeRepository'
+import { fetchExpo, fetchRanking } from '@/data/challengeRepository'
 import { fetchDesbloqueado, fetchMiMejor } from '@/data/minigameRepository'
 import { useRemoteData } from '@/composables/useRemoteData'
 
@@ -252,7 +255,11 @@ const { data: minijuego } = useRemoteData(async () => {
       fetchDesbloqueado(),
       fetchMiMejor()
     ])
-    return { desbloqueado, mejor }
+    // Total real del ranking (Gran desafío + Cazabugs) de esta persona.
+    const expo = await fetchExpo()
+    const gran = (expo.challenges ?? []).find(c => c.minijuego)
+    const filas = gran ? await fetchRanking(gran.id, 1000).catch(() => []) : []
+    return { desbloqueado, mejor, total: filas.find(f => f.isMe) ?? null }
   } catch {
     return null
   }
