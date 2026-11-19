@@ -9,6 +9,13 @@
   padding-top: env(safe-area-inset-top);
 }
 
+// Los botones con fondo amarillo siempre llevan texto oscuro (Quasar les
+// pone texto blanco por defecto, que casi no se lee sobre el amarillo).
+.q-btn.bg-primary,
+.q-btn.dl-btn-main {
+  color: #1a1a1a !important;
+}
+
 // Celular / APK: sin zoom por doble toque, sin resplandor de "tirar para
 // refrescar" y sin el recuadro gris al tocar botones y enlaces.
 html,

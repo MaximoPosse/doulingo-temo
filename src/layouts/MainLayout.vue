@@ -54,6 +54,7 @@
 
     <!-- Flecha para volver arriba: aparece al bajar -->
     <q-page-scroller
+      v-if="mostrarFlecha"
       position="bottom-right"
       :scroll-offset="300"
       :offset="[16, 16]"
@@ -72,12 +73,19 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 import logoImg from '@/assets/logo.webp'
 import { useAuth } from '@/composables/useAuth'
 
 const { session, publicName, accountChanged, dismissAccountChanged } = useAuth()
 const hasSession = computed(() => !!session.value)
+
+// En el minijuego y en las preguntas la flecha taparía botones: no se muestra.
+const route = useRoute()
+const mostrarFlecha = computed(
+  () => !['minijuego', 'leccion', 'desafio'].includes(route.name)
+)
 </script>
 
 <style scoped>

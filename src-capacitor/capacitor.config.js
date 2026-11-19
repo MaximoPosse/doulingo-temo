@@ -15,6 +15,10 @@ module.exports = defineCapacitorConfig({
       initialViewportFitValueHint: 'cover'
     }
   },
+  android: {
+    // La app publicada no se puede inspeccionar con las herramientas de depuración.
+    webContentsDebuggingEnabled: false
+  },
   server: {
     // El WebView nativo sirve la app en https://localhost (origen seguro),
     // necesario para que Supabase Auth (PKCE) funcione dentro del APK.

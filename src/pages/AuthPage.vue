@@ -377,14 +377,14 @@ async function run(action, redirect = true) {
   const result = await action()
   busy.value = false
   if (result.ok && redirect) {
-    router.push(nextPath.value || '/cursos')
+    router.replace(nextPath.value || '/cursos')
   }
   return result
 }
 
 async function submitGuest() {
   const result = await run(() => startGuest(), false)
-  if (result.ok) router.push(nextPath.value || '/cursos')
+  if (result.ok) router.replace(nextPath.value || '/cursos')
 }
 
 async function submitRegister() {
@@ -399,7 +399,7 @@ async function submitRegister() {
   )
   if (result.ok) {
     pendingEmail.value = email.value
-    if (result.confirmed) router.push(nextPath.value || '/cursos')
+    if (result.confirmed) router.replace(nextPath.value || '/cursos')
   }
 }
 
