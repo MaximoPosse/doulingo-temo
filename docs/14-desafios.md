@@ -360,15 +360,15 @@ bloques para que llegue a la meta, recoja estrellas y esquive obstáculos.
   puntos. Guarda el mejor resultado de cada persona y nivel en
   `minijuego_resultados` y se puede volver a jugar para mejorarlo.
 - **Ranking:** los puntos del minijuego se suman al ranking del Gran desafío
-  (\`ranking_desafio\`) y al ranking público de la expo (\`ranking_evento\`, que
+  (`ranking_desafio`) y al ranking público de la expo (`ranking_evento`, que
   ahora muestra el total por persona). Cada mejora publica una fila "Ruta del
-  robot" en \`resultados_publicos\`, así la pantalla de la expo se actualiza en
+  robot" en `resultados_publicos`, así la pantalla de la expo se actualiza en
   vivo.
-- **Cliente:** \`src/lib/rutaRobot.js\` tiene la misma simulación para animar el
-  recorrido (las pruebas comparan ambas), \`src/pages/RutaRobotPage.vue\` la
-  pantalla y \`src/data/minigameRepository.js\` el acceso a datos.
-- **Pruebas:** \`ruta_robot_logica.mjs\` (lógica, sin base), \`minijuego_ui.mjs\`
-  (pantalla; con \`MOCK=1\` no necesita la migración aplicada).
+- **Cliente:** `src/lib/rutaRobot.js` tiene la misma simulación para animar el
+  recorrido (las pruebas comparan ambas), `src/pages/RutaRobotPage.vue` la
+  pantalla y `src/data/minigameRepository.js` el acceso a datos.
+- **Pruebas:** `ruta_robot_logica.mjs` (lógica, sin base), `minijuego_ui.mjs`
+  (pantalla; con `MOCK=1` no necesita la migración aplicada).
 
 ## Pruebas
 
