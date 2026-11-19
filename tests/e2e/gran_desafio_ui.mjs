@@ -55,15 +55,36 @@ try {
     intentos++
     await page.waitForSelector('.dl-challenge__option', { timeout: 15000 })
     const opciones = await page.$$('.dl-challenge__option')
-    await opciones[0].click()
+    await opciones[0].evaluate(el => el.click())
     await sleep(150)
     const confirmar = await page.$('.dl-challenge__actions .dl-btn-main')
-    await confirmar.click()
+    await confirmar.evaluate(el => el.click())
     await page
       .waitForSelector('.dl-challenge__feedback', { timeout: 15000 })
       .catch(async error => {
         const texto = await page.evaluate(() => document.body.innerText)
-        console.log('DEBUG pantalla:', texto.slice(0, 600))
+        console.log('DEBUG pantalla:', texto.slice(0, 300))
+        console.log(
+          'DEBUG estado:',
+          JSON.stringify(
+            await page.evaluate(() => ({
+              seleccionadas: document.querySelectorAll(
+                '.dl-challenge__option--selected'
+              ).length,
+              deshabilitadas: [
+                ...document.querySelectorAll('.dl-challenge__option')
+              ].map(o => o.disabled),
+              boton: document
+                .querySelector('.dl-challenge__actions .dl-btn-main')
+                ?.textContent.trim(),
+              botonDeshabilitado: document.querySelector(
+                '.dl-challenge__actions .dl-btn-main'
+              )?.disabled,
+              error: document.querySelector('.dl-challenge__inline-error')
+                ?.textContent
+            }))
+          )
+        )
         throw error
       })
     await sleep(250)
@@ -91,16 +112,27 @@ try {
         /ver mi resultado/i.test(etiqueta),
         etiqueta
       )
-      await page.click('.dl-challenge__actions .dl-btn-main')
+      await page.$eval('.dl-challenge__actions .dl-btn-main', el => el.click())
       terminoPorVidas = true
       break
     }
-    await page.click('.dl-challenge__actions .dl-btn-main')
+    await page.$eval('.dl-challenge__actions .dl-btn-main', el => el.click())
+    // Espera a que la pregunta siguiente reemplace a la anterior.
+    await page.waitForFunction(
+      () => !document.querySelector('.dl-challenge__feedback'),
+      { timeout: 15000 }
+    )
     await sleep(250)
   }
   runner.check('la partida termina al quedarse sin vidas', terminoPorVidas)
 
-  await page.waitForSelector('.dl-challenge__result-banner', { timeout: 30000 })
+  await page
+    .waitForSelector('.dl-challenge__result-banner', { timeout: 30000 })
+    .catch(async error => {
+      const texto = await page.evaluate(() => document.body.innerText)
+      console.log('DEBUG resultado:', texto.slice(0, 700))
+      throw error
+    })
   await sleep(1500)
   const resultado = await page.evaluate(() => document.body.innerText)
   runner.check(
