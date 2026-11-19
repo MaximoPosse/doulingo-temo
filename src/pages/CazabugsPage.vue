@@ -1,13 +1,13 @@
 <template>
-  <q-page class="dl-page cb">
+  <q-page class="dl-page cb" :class="{ 'cb--juego': jugando }">
     <div class="dl-page__inner cb__inner">
-      <router-link :to="{ name: 'expo' }" class="cb__back">
-        <q-icon name="arrow_back" size="20px" />
+      <router-link v-if="!jugando" :to="{ name: 'expo' }" class="cb__back">
+        <q-icon name="arrow_back" size="18px" />
         Volver a la expo
       </router-link>
 
-      <header v-if="fase === 'menu' || fase === 'fin'" class="cb__head">
-        <div>
+      <header v-if="!jugando && fase !== 'fin'" class="cb__head">
+        <div class="cb__head-texto">
           <span class="cb__eyebrow">Minijuego de la expo</span>
           <h1 class="cb__title">Cazabugs 🐛</h1>
           <p class="cb__lead">
@@ -18,7 +18,7 @@
         </div>
         <div class="cb__score" aria-live="polite">
           <span class="cb__score-value">{{ mejor?.puntos ?? 0 }}</span>
-          <span class="cb__score-label">puntos de ranking</span>
+          <span class="cb__score-label">pts de ranking</span>
         </div>
       </header>
 
@@ -36,20 +36,18 @@
         <!-- ============ MENÚ ============ -->
         <section v-if="fase === 'menu'" class="cb__menu">
           <div v-if="!desbloqueado" class="cb__bloqueo">
-            <q-icon name="lock" size="28px" />
+            <q-icon name="lock" size="24px" />
             <div>
               <strong
                 >Las rondas con puntos se desbloquean al terminar el Gran
-                desafío</strong
+                desafío.</strong
               >
-              <p>
-                Mientras tanto podés <strong>practicar</strong> todo lo que
-                quieras: la práctica no suma puntos.
-              </p>
+              Mientras tanto, practicá todo lo que quieras (sin puntos).
               <q-btn
                 v-if="desafioId"
                 no-caps
                 flat
+                dense
                 color="primary"
                 label="Ir al desafío"
                 :to="{ name: 'desafio', params: { challengeId: desafioId } }"
@@ -58,43 +56,66 @@
           </div>
 
           <div class="cb__tarjetas">
-            <article class="cb__bicho">
+            <article class="cb__bicho" title="Bug: 10 puntos">
               <span class="cb__bicho-cara">🐛</span>
               <strong>Bug</strong>
               <span>+10</span>
             </article>
-            <article class="cb__bicho">
+            <article
+              class="cb__bicho"
+              title="Veloz: 20 puntos, se esconde rápido"
+            >
               <span class="cb__bicho-cara">🦟</span>
               <strong>Veloz</strong>
-              <span>+20 · se esconde rápido</span>
+              <span>+20</span>
             </article>
-            <article class="cb__bicho">
+            <article
+              class="cb__bicho"
+              title="Gordo: 30 puntos, hay que tocarlo 2 veces"
+            >
               <span class="cb__bicho-cara">🪲</span>
               <strong>Gordo</strong>
-              <span>+30 · 2 toques</span>
+              <span>+30</span>
             </article>
-            <article class="cb__bicho cb__bicho--oro">
+            <article
+              class="cb__bicho cb__bicho--oro"
+              title="Dorado: 60 puntos, dura muy poco"
+            >
               <span class="cb__bicho-cara">🐞</span>
               <strong>Dorado</strong>
-              <span>+60 · ¡dura muy poco!</span>
+              <span>+60</span>
             </article>
-            <article class="cb__bicho cb__bicho--amigo">
+            <article
+              class="cb__bicho cb__bicho--amigo"
+              title="Usagi: no tocar, resta 25 puntos"
+            >
               <img :src="usagiImg" alt="Usagi" class="cb__amigo-img" />
               <strong>Usagi</strong>
-              <span>¡No tocar! −25</span>
+              <span>−25</span>
             </article>
           </div>
 
-          <p class="cb__reglas">
-            ⏱ 45 segundos · 🔥 Racha: ×2 desde el 5.º bug seguido, ×3 desde el
-            9.º y ×4 desde el 13.º · ❌ Un fallo o tocar a Usagi corta la racha
-            · 🏆 Cada 40 puntos de juego suman 1 punto al ranking (máx. 100).
-          </p>
+          <ul class="cb__reglas">
+            <li>
+              ⏱ <strong>45 segundos</strong>. El gordo 🪲 necesita 2 toques y el
+              veloz 🦟 se esconde rápido.
+            </li>
+            <li>
+              🔥 <strong>Racha</strong>: ×2 desde el 5.º bicho seguido, ×3 desde
+              el 9.º y ×4 desde el 13.º.
+            </li>
+            <li
+              >❌ Un fallo o tocar a <strong>Usagi</strong> corta la racha.</li
+            >
+            <li>🏆 Cada 40 puntos suman 1 de ranking (máx. 100).</li>
+          </ul>
 
           <div v-if="mejor" class="cb__mejor">
-            Tu mejor ronda: <strong>{{ mejor.puntaje }}</strong> puntos de juego
-            ({{ mejor.puntos }} de ranking) · racha máxima
-            {{ mejor.mejorRacha }} · {{ mejor.rondas }} rondas jugadas
+            Tu mejor ronda: <strong>{{ mejor.puntaje }}</strong> puntos ({{
+              mejor.puntos
+            }}
+            de ranking) · racha {{ mejor.mejorRacha }} · {{ mejor.rondas }}
+            rondas
           </div>
 
           <div class="cb__acciones">
@@ -102,7 +123,7 @@
               no-caps
               unelevated
               class="dl-btn-main dl-btn-main--big"
-              :label="iniciando ? 'Preparando…' : '🎮 Jugar ronda con puntos'"
+              :label="iniciando ? 'Preparando…' : '🎮 Jugar con puntos'"
               :disable="!desbloqueado || iniciando"
               :loading="iniciando"
               @click="empezar(true)"
@@ -123,116 +144,129 @@
         </section>
 
         <!-- ============ JUEGO ============ -->
-        <section v-else-if="fase !== 'fin'" class="cb__juego">
-          <div class="cb__hud">
-            <div class="cb__hud-item">
-              <span class="cb__hud-label">Puntos</span>
-              <span class="cb__hud-valor">{{ hud.puntaje }}</span>
+        <section v-else-if="jugando" class="cb__juego">
+          <div class="cb__lateral">
+            <div class="cb__hud">
+              <div class="cb__hud-item">
+                <span class="cb__hud-label">Puntos</span>
+                <span class="cb__hud-valor">{{ hud.puntaje }}</span>
+              </div>
+              <div class="cb__racha" :class="{ 'is-fuego': hud.racha >= 5 }">
+                <span class="cb__racha-mult">×{{ hud.mult }}</span>
+                <span class="cb__racha-n">🔥 {{ hud.racha }}</span>
+              </div>
+              <div class="cb__hud-item">
+                <span class="cb__hud-label">Tiempo</span>
+                <span
+                  class="cb__hud-valor"
+                  :class="{ 'is-poco': segundos <= 10 }"
+                  >{{ segundos }}</span
+                >
+              </div>
             </div>
-            <div class="cb__racha" :class="{ 'is-fuego': hud.racha >= 5 }">
-              <span class="cb__racha-mult">×{{ hud.mult }}</span>
-              <span class="cb__racha-n">🔥 {{ hud.racha }}</span>
-            </div>
-            <div class="cb__hud-item">
-              <span class="cb__hud-label">Tiempo</span>
-              <span
-                class="cb__hud-valor"
+            <div class="cb__barra">
+              <div
+                class="cb__barra-fill"
                 :class="{ 'is-poco': segundos <= 10 }"
-                >{{ segundos }}</span
-              >
+                :style="{ width: `${progreso}%` }"
+              />
             </div>
-          </div>
-          <div class="cb__barra">
-            <div
-              class="cb__barra-fill"
-              :class="{ 'is-poco': segundos <= 10 }"
-              :style="{ width: `${progreso}%` }"
-            />
-          </div>
-
-          <div
-            class="cb__tablero"
-            :class="{ 'is-golpe': sacudir, 'is-fuego': hud.racha >= 9 }"
-          >
-            <button
-              v-for="(celda, i) in celdas"
-              :key="i"
-              type="button"
-              class="cb__agujero"
-              :class="{
-                'is-amigo': celda.bicho?.tipo === 'amigo',
-                'is-dorado': celda.bicho?.tipo === 'dorado',
-                'is-por-irse': celda.porIrse
-              }"
-              :aria-label="`Casilla ${i + 1}`"
-              @pointerdown.prevent="tocar(i)"
-            >
-              <span class="cb__hoyo" />
-              <span
-                v-if="celda.bicho"
-                :key="celda.bicho.i"
-                class="cb__criatura"
-                :class="`cb__criatura--${celda.bicho.tipo}`"
-              >
-                <img
-                  v-if="celda.bicho.tipo === 'amigo'"
-                  :src="usagiImg"
-                  alt="Usagi"
-                  class="cb__amigo-img"
-                />
-                <template v-else>{{ EMOJI[celda.bicho.tipo] }}</template>
-                <span v-if="celda.bicho.tipo === 'grande'" class="cb__vida">
-                  <i :class="{ 'is-roto': celda.golpes >= 1 }" />
-                  <i />
-                </span>
+            <div class="cb__lateral-pie">
+              <span class="cb__pista">
+                {{ oficial ? 'Ronda con puntos' : 'Práctica (sin puntos)' }} ·
+                ¡no toques a Usagi!
               </span>
-              <span
-                v-if="celda.efecto"
-                :key="celda.efecto"
-                class="cb__efecto"
-                >{{ celda.efectoEmoji }}</span
-              >
-            </button>
-
-            <span
-              v-for="p in pops"
-              :key="p.id"
-              class="cb__pop"
-              :class="p.clase"
-              :style="{ left: p.x + '%', top: p.y + '%' }"
-              >{{ p.texto }}</span
-            >
-
-            <div v-if="fase === 'cuenta'" class="cb__cuenta">
-              <span :key="cuenta">{{ cuenta > 0 ? cuenta : '¡YA!' }}</span>
+              <button type="button" class="cb__salir" @click="salir">
+                ✕ Salir
+              </button>
             </div>
           </div>
-          <p class="cb__pista">
-            {{ oficial ? 'Ronda con puntos' : 'Práctica (sin puntos)' }} · tocá
-            los bichos, ¡no a Usagi!
-          </p>
+
+          <div class="cb__cuerpo">
+            <div
+              class="cb__tablero"
+              :class="{ 'is-golpe': sacudir, 'is-fuego': hud.racha >= 9 }"
+            >
+              <button
+                v-for="(celda, i) in celdas"
+                :key="i"
+                type="button"
+                class="cb__agujero"
+                :class="{
+                  'is-amigo': celda.bicho?.tipo === 'amigo',
+                  'is-dorado': celda.bicho?.tipo === 'dorado',
+                  'is-por-irse': celda.porIrse
+                }"
+                :aria-label="`Casilla ${i + 1}`"
+                @pointerdown.prevent="tocar(i)"
+              >
+                <span class="cb__hoyo" />
+                <span
+                  v-if="celda.bicho"
+                  :key="celda.bicho.i"
+                  class="cb__criatura"
+                  :class="`cb__criatura--${celda.bicho.tipo}`"
+                >
+                  <img
+                    v-if="celda.bicho.tipo === 'amigo'"
+                    :src="usagiImg"
+                    alt="Usagi"
+                    class="cb__amigo-img"
+                  />
+                  <template v-else>{{ EMOJI[celda.bicho.tipo] }}</template>
+                  <span v-if="celda.bicho.tipo === 'grande'" class="cb__vida">
+                    <i :class="{ 'is-roto': celda.golpes >= 1 }" />
+                    <i />
+                  </span>
+                </span>
+                <span
+                  v-if="celda.efecto"
+                  :key="celda.efecto"
+                  class="cb__efecto"
+                  >{{ celda.efectoEmoji }}</span
+                >
+              </button>
+
+              <span
+                v-for="p in pops"
+                :key="p.id"
+                class="cb__pop"
+                :class="p.clase"
+                :style="{ left: p.x + '%', top: p.y + '%' }"
+                >{{ p.texto }}</span
+              >
+
+              <div v-if="fase === 'cuenta'" class="cb__cuenta">
+                <span :key="cuenta">{{ cuenta > 0 ? cuenta : '¡YA!' }}</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- ============ FIN ============ -->
         <section v-else class="cb__fin" :class="`is-${medalla.clase}`">
-          <div class="cb__medalla">{{ medalla.emoji }}</div>
-          <h2 class="cb__fin-titulo">{{ medalla.titulo }}</h2>
-          <p class="cb__fin-puntaje">
-            <strong>{{ resumen.puntaje }}</strong> puntos
-          </p>
+          <div class="cb__fin-cabeza">
+            <div class="cb__medalla">{{ medalla.emoji }}</div>
+            <div>
+              <h2 class="cb__fin-titulo">{{ medalla.titulo }}</h2>
+              <p class="cb__fin-puntaje">
+                <strong>{{ resumen.puntaje }}</strong> puntos
+              </p>
+            </div>
+          </div>
           <ul class="cb__fin-datos">
-            <li
-              >🎯 Bichos cazados: <strong>{{ resumen.aciertos }}</strong></li
-            >
-            <li
-              >💨 Toques en vacío: <strong>{{ resumen.fallos }}</strong></li
-            >
-            <li
-              >😿 Usagi tocado: <strong>{{ resumen.amigos }}</strong> veces</li
-            >
-            <li
-              >🔥 Mejor racha: <strong>{{ resumen.mejorRacha }}</strong></li
-            >
+            <li>
+              🎯 Cazados: <strong>{{ resumen.aciertos }}</strong>
+            </li>
+            <li>
+              💨 En vacío: <strong>{{ resumen.fallos }}</strong>
+            </li>
+            <li>
+              😿 Usagi: <strong>{{ resumen.amigos }}</strong>
+            </li>
+            <li>
+              🔥 Racha: <strong>{{ resumen.mejorRacha }}</strong>
+            </li>
           </ul>
 
           <template v-if="oficial">
@@ -241,6 +275,7 @@
               {{ errorEnvio }}
               <q-btn
                 flat
+                dense
                 no-caps
                 color="primary"
                 label="Reintentar"
@@ -248,25 +283,18 @@
               />
             </p>
             <div v-else-if="oficialRes" class="cb__oficial">
-              <strong>
-                {{
-                  oficialRes.mejoro
-                    ? '¡Nuevo récord personal!'
-                    : 'Ronda guardada'
-                }}
-              </strong>
+              <strong>{{
+                oficialRes.mejoro ? '¡Nuevo récord personal!' : 'Ronda guardada'
+              }}</strong>
               <p>
                 Puntaje oficial: <strong>{{ oficialRes.puntaje }}</strong> → +{{
                   oficialRes.puntos
                 }}
-                pts de ranking.
-              </p>
-              <p>
-                Tu mejor ronda:
+                pts de ranking. Tu mejor ronda:
                 <strong>{{ oficialRes.mejorPuntaje }}</strong> ({{
                   oficialRes.mejorPuntos
                 }}
-                pts de ranking, ya suman a tu total).
+                pts, ya suman a tu total).
               </p>
             </div>
           </template>
@@ -367,6 +395,10 @@ function crearCeldas() {
     efectoEmoji: ''
   }))
 }
+
+const jugando = computed(
+  () => fase.value === 'cuenta' || fase.value === 'jugando'
+)
 
 const medalla = computed(() => {
   const p = resumen.puntaje
@@ -563,6 +595,7 @@ function limpiarTemporizadores() {
 }
 
 async function empezar(conPuntos) {
+  window.scrollTo(0, 0)
   limpiarTemporizadores()
   cancelAnimationFrame(raf)
   iniciarAudio()
@@ -616,6 +649,14 @@ async function empezar(conPuntos) {
     }
   }
   temporizadores.push(setTimeout(paso, 800))
+}
+
+function salir() {
+  cancelAnimationFrame(raf)
+  limpiarTemporizadores()
+  celdas.value = crearCeldas()
+  pops.value = []
+  fase.value = 'menu'
 }
 
 async function terminar() {
@@ -694,7 +735,9 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .cb {
   &__inner {
-    max-width: 640px;
+    max-width: 720px;
+    padding-top: 16px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
   }
 
   &__back {
@@ -704,23 +747,26 @@ onUnmounted(() => {
     font-weight: 800;
     text-decoration: none;
     text-transform: uppercase;
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: 0.4px;
     color: $dl-ink;
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
 
   &__head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 18px;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  &__head-texto {
+    min-width: 0;
   }
 
   &__eyebrow {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.6px;
@@ -728,37 +774,38 @@ onUnmounted(() => {
   }
 
   &__title {
-    margin: 4px 0 8px;
+    margin: 2px 0 4px;
     color: $dl-ink-dark;
   }
 
   &__lead {
     margin: 0;
     max-width: 440px;
-    line-height: 1.5;
+    line-height: 1.4;
+    font-size: 14px;
     color: $dl-ink;
   }
 
   &__score {
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     background: $dl-surface;
     border: 2px solid $dl-gray;
-    border-radius: 16px;
-    padding: 10px 18px;
-    min-width: 120px;
+    border-radius: 14px;
+    padding: 6px 14px;
   }
 
   &__score-value {
-    font-size: 34px;
+    font-size: 28px;
     font-weight: 900;
     color: $dl-green-dark;
     line-height: 1;
   }
 
   &__score-label {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     color: #a3a3a3;
@@ -773,45 +820,51 @@ onUnmounted(() => {
   /* ---- menú ---- */
   &__bloqueo {
     display: flex;
-    gap: 14px;
+    gap: 10px;
     align-items: flex-start;
     background: #211b0b;
     border: 2px solid #6b5a1c;
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-    color: $dl-ink-dark;
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: $dl-ink;
 
-    p {
-      margin: 4px 0 6px;
-      color: $dl-ink;
-      line-height: 1.45;
+    strong {
+      color: $dl-ink-dark;
+    }
+
+    .q-icon {
+      flex: 0 0 auto;
+      margin-top: 2px;
     }
   }
 
   &__tarjetas {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-    margin-bottom: 14px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
   }
 
   &__bicho {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 12px 8px;
+    gap: 0;
+    padding: 8px 2px;
     background: $dl-surface;
     border: 2px solid $dl-gray;
-    border-radius: 14px;
+    border-radius: 12px;
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 700;
     color: $dl-ink;
 
     strong {
       color: $dl-ink-dark;
-      font-size: 15px;
+      font-size: 13px;
     }
 
     &--oro {
@@ -826,37 +879,42 @@ onUnmounted(() => {
   }
 
   &__bicho-cara {
-    font-size: 34px;
-    line-height: 1.1;
+    font-size: clamp(1.6rem, 7vw, 2.2rem);
+    line-height: 1.15;
   }
 
   &__amigo-img {
-    width: 52px;
-    height: 52px;
+    width: clamp(1.8rem, 8vw, 2.5rem);
+    height: clamp(1.8rem, 8vw, 2.5rem);
     object-fit: contain;
   }
 
   &__reglas {
-    margin: 0 0 14px;
-    line-height: 1.6;
-    font-size: 14px;
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+    line-height: 1.35;
     color: $dl-ink;
   }
 
   &__mejor {
-    margin-bottom: 14px;
-    padding: 10px 14px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
     border-radius: 12px;
     background: #10240a;
     color: #9be36b;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   &__acciones {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
   &__sonido {
@@ -867,10 +925,40 @@ onUnmounted(() => {
     color: #a3a3a3;
   }
 
-  /* ---- juego ---- */
+  /* ---- juego: ocupa justo la pantalla, sin scroll ---- */
+  &--juego &__inner {
+    padding: 6px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  &--juego {
+    min-height: 0;
+  }
+
   &__juego {
+    height: calc(100vh - var(--hdr, 0px) - 16px - env(safe-area-inset-bottom));
+    height: calc(100dvh - var(--hdr, 0px) - 16px - env(safe-area-inset-bottom));
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  &__lateral {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__cuerpo {
+    flex: 1 1 0;
+    min-height: 0;
+    min-width: 0;
+    container-type: size;
+    display: grid;
+    place-items: center;
   }
 
   &__hud {
@@ -878,7 +966,6 @@ onUnmounted(() => {
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
   }
 
   &__hud-item {
@@ -891,14 +978,14 @@ onUnmounted(() => {
   }
 
   &__hud-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
     color: #a3a3a3;
   }
 
   &__hud-valor {
-    font-size: 30px;
+    font-size: clamp(22px, 6vw, 30px);
     font-weight: 900;
     color: $dl-ink-dark;
     line-height: 1;
@@ -914,8 +1001,8 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 4px 14px;
-    border-radius: 14px;
+    padding: 2px 12px;
+    border-radius: 12px;
     background: #1d1d1d;
     transition: background 0.2s ease;
 
@@ -926,24 +1013,23 @@ onUnmounted(() => {
   }
 
   &__racha-mult {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 900;
     color: $dl-green-dark;
     line-height: 1;
   }
 
   &__racha-n {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     color: $dl-ink;
   }
 
   &__barra {
-    height: 10px;
+    height: 8px;
     border-radius: 6px;
     background: #1d1d1d;
     overflow: hidden;
-    margin-bottom: 12px;
   }
 
   &__barra-fill {
@@ -956,15 +1042,45 @@ onUnmounted(() => {
     }
   }
 
+  &__lateral-pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__pista {
+    font-size: 12px;
+    color: #a3a3a3;
+  }
+
+  &__salir {
+    flex: 0 0 auto;
+    padding: 2px 10px;
+    border: 1px solid $dl-gray;
+    border-radius: 10px;
+    background: transparent;
+    color: #a3a3a3;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
   &__tablero {
+    --gap: 2.2cqw;
     position: relative;
+    width: min(100cqw, 75cqh, 680px);
+    aspect-ratio: 3 / 4;
+    container-type: inline-size;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding: 12px;
+    grid-template-rows: repeat(4, 1fr);
+    gap: var(--gap);
+    padding: var(--gap);
     background: $dl-surface;
     border: 2px solid $dl-gray;
-    border-radius: 20px;
+    border-radius: 18px;
     touch-action: manipulation;
 
     &.is-golpe {
@@ -982,10 +1098,13 @@ onUnmounted(() => {
     position: relative;
     display: grid;
     place-items: center;
-    aspect-ratio: 1;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
     padding: 0;
     border: none;
-    border-radius: 16px;
+    border-radius: 14px;
     background: #181818;
     cursor: pointer;
     overflow: hidden;
@@ -1007,9 +1126,9 @@ onUnmounted(() => {
 
   &__hoyo {
     position: absolute;
-    bottom: 12%;
+    bottom: 10%;
     width: 70%;
-    height: 24%;
+    height: 22%;
     border-radius: 50%;
     background: #050505;
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.9);
@@ -1018,13 +1137,13 @@ onUnmounted(() => {
   &__criatura {
     position: relative;
     z-index: 1;
-    font-size: clamp(2.4rem, 13vw, 4rem);
+    font-size: 17cqw;
     line-height: 1;
     animation: cb-aparecer 0.14s ease-out;
     filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.6));
 
     &--rapido {
-      font-size: clamp(1.9rem, 10vw, 3.2rem);
+      font-size: 13cqw;
     }
 
     &--dorado {
@@ -1035,8 +1154,8 @@ onUnmounted(() => {
     }
 
     &--amigo .cb__amigo-img {
-      width: clamp(3rem, 15vw, 4.6rem);
-      height: clamp(3rem, 15vw, 4.6rem);
+      width: 20cqw;
+      height: 20cqw;
     }
   }
 
@@ -1047,15 +1166,15 @@ onUnmounted(() => {
 
   &__vida {
     position: absolute;
-    bottom: -6px;
+    bottom: -4px;
     left: 50%;
     display: flex;
     gap: 3px;
     transform: translateX(-50%);
 
     i {
-      width: 14px;
-      height: 6px;
+      width: 3.4cqw;
+      height: 1.6cqw;
       border-radius: 3px;
       background: #7cc7f2;
 
@@ -1069,7 +1188,7 @@ onUnmounted(() => {
   &__efecto {
     position: absolute;
     z-index: 2;
-    font-size: clamp(2rem, 11vw, 3.4rem);
+    font-size: 17cqw;
     pointer-events: none;
     animation: cb-explota 0.35s ease-out forwards;
   }
@@ -1078,7 +1197,7 @@ onUnmounted(() => {
     position: absolute;
     z-index: 4;
     transform: translateX(-50%);
-    font-size: 20px;
+    font-size: clamp(14px, 5.5cqw, 26px);
     font-weight: 900;
     pointer-events: none;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
@@ -1091,7 +1210,6 @@ onUnmounted(() => {
 
     &.is-oro {
       color: #ffd24d;
-      font-size: 26px;
     }
 
     &.is-mal {
@@ -1105,31 +1223,24 @@ onUnmounted(() => {
     z-index: 6;
     display: grid;
     place-items: center;
-    border-radius: 20px;
+    border-radius: 16px;
     background: rgba(0, 0, 0, 0.72);
 
     span {
-      font-size: 5rem;
+      font-size: 22cqw;
       font-weight: 900;
       color: $dl-yellow;
       animation: cb-cuenta 0.8s ease-out;
     }
   }
 
-  &__pista {
-    margin: 10px 0 0;
-    text-align: center;
-    font-size: 13px;
-    color: #a3a3a3;
-  }
-
   /* ---- fin ---- */
   &__fin {
     text-align: center;
-    padding: 22px 16px;
+    padding: 14px 14px 16px;
     background: $dl-surface;
     border: 2px solid $dl-gray;
-    border-radius: 20px;
+    border-radius: 18px;
 
     &.is-oro,
     &.is-diamante {
@@ -1138,42 +1249,50 @@ onUnmounted(() => {
     }
   }
 
+  &__fin-cabeza {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: left;
+  }
+
   &__medalla {
-    font-size: 4.5rem;
+    font-size: clamp(3rem, 14vw, 4.2rem);
     line-height: 1;
     animation: cb-rebote 0.7s ease;
   }
 
   &__fin-titulo {
-    margin: 8px 0 4px;
+    margin: 0;
     color: $dl-ink-dark;
   }
 
   &__fin-puntaje {
-    margin: 0 0 12px;
-    font-size: 20px;
+    margin: 0;
+    font-size: 18px;
     color: $dl-ink;
 
     strong {
-      font-size: 40px;
+      font-size: 36px;
       color: $dl-green-dark;
     }
   }
 
   &__fin-datos {
     list-style: none;
-    margin: 0 0 14px;
+    margin: 10px 0;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px 12px;
+    gap: 4px 12px;
     text-align: left;
     font-size: 14px;
     color: $dl-ink;
   }
 
   &__fin-aviso {
-    margin: 0 0 12px;
+    margin: 0 0 10px;
     color: #a3a3a3;
 
     &.is-error {
@@ -1182,16 +1301,16 @@ onUnmounted(() => {
   }
 
   &__oficial {
-    margin: 0 0 14px;
-    padding: 12px;
-    border-radius: 14px;
+    margin: 0 0 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
     background: #211b0b;
     border: 2px solid #6b5a1c;
     color: $dl-ink;
+    font-size: 14px;
 
     p {
-      margin: 4px 0;
-      font-size: 14px;
+      margin: 4px 0 0;
     }
 
     strong {
@@ -1201,6 +1320,7 @@ onUnmounted(() => {
 
   &__fin &__acciones {
     justify-content: center;
+    margin-bottom: 0;
   }
 }
 
@@ -1303,16 +1423,54 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 420px) {
-  .cb__score {
-    width: 100%;
+/* Pantallas bajas (celular de lado): HUD a la izquierda y tablero a la derecha. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .cb__juego {
     flex-direction: row;
+    gap: 12px;
+  }
+
+  .cb__lateral {
+    flex: 0 0 min(34vw, 230px);
     justify-content: center;
-    gap: 10px;
+  }
+
+  .cb__lateral-pie {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cb__hud {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cb__racha {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .cb__fin-cabeza {
+    gap: 8px;
+  }
+
+  .cb__lead {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .cb__bicho strong {
+    font-size: 11px;
   }
 
   .cb__fin-datos {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .cb__inner {
+    max-width: 900px;
   }
 }
 

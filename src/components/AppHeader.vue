@@ -51,7 +51,7 @@ const navItems = [
   border-bottom: 2px solid $dl-gray;
 
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 10px 20px;
     display: flex;

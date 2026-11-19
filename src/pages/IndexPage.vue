@@ -217,7 +217,7 @@ const pathNodes = [
   border-bottom: 2px solid $dl-gray;
 
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 10px 20px;
     display: flex;
@@ -285,7 +285,7 @@ const pathNodes = [
 
 .dl-hero {
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 72px 20px 48px;
     display: flex;
@@ -340,7 +340,7 @@ const pathNodes = [
     top: -14px;
     right: -10px;
     background: $dl-gold;
-    color: #f5f5f5;
+    color: #1a1a1a;
     font-weight: 800;
     padding: 8px 16px;
     border-radius: 18px;
@@ -371,7 +371,7 @@ const pathNodes = [
   color: #1a1a1a;
 
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 20px;
     display: flex;
@@ -393,7 +393,7 @@ const pathNodes = [
 
 .dl-features {
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 64px 20px;
   }
@@ -478,7 +478,7 @@ const pathNodes = [
   background: #0f0f08;
 
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 64px 20px;
   }
@@ -617,7 +617,7 @@ const pathNodes = [
   border-top: 2px solid $dl-gray;
 
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 28px 20px;
     display: flex;
@@ -664,5 +664,50 @@ const pathNodes = [
 .dl-friends-section {
   padding: 32px 16px 40px;
   text-align: center;
+}
+
+/* Celular de lado: la portada se compacta para que se vea más de una vez. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .dl-hero__inner {
+    padding: 20px 20px 24px;
+    gap: 20px;
+  }
+
+  .dl-hero__mascot {
+    width: min(300px, 38vw);
+
+    img {
+      max-height: 62vh;
+    }
+  }
+
+  .dl-hero__title {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  .dl-hero__subtitle {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+}
+
+/* Pantallas grandes: texto y botones un poco más grandes. */
+@media (min-width: 1500px) {
+  .dl-hero__title {
+    font-size: 56px;
+  }
+
+  .dl-hero__subtitle {
+    font-size: 22px;
+  }
+
+  .dl-hero__mascot {
+    width: min(480px, 36vw);
+
+    img {
+      max-height: 500px;
+    }
+  }
 }
 </style>

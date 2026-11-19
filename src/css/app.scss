@@ -16,6 +16,30 @@
   color: #1a1a1a !important;
 }
 
+// Anchos máximos del contenido: crecen en pantallas grandes (PC, TV o
+// proyector de la expo) para no dejar enormes márgenes vacíos.
+:root {
+  --ancho: 1100px;
+  --ancho-texto: 760px;
+  --ancho-ranking: 1240px;
+}
+
+@media (min-width: 1500px) {
+  :root {
+    --ancho: 1280px;
+    --ancho-texto: 860px;
+    --ancho-ranking: 1440px;
+  }
+}
+
+@media (min-width: 1900px) {
+  :root {
+    --ancho: 1440px;
+    --ancho-texto: 980px;
+    --ancho-ranking: 1680px;
+  }
+}
+
 // Celular / APK: sin zoom por doble toque, sin resplandor de "tirar para
 // refrescar" y sin el recuadro gris al tocar botones y enlaces.
 html,
@@ -113,7 +137,7 @@ video {
   min-height: 100vh;
 
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 40px 20px calc(72px + env(safe-area-inset-bottom));
   }

@@ -214,7 +214,7 @@ try {
   )
 
   // ---- ronda con puntos ----
-  await tocarBoton(/Jugar ronda con puntos/i)
+  await tocarBoton(/Jugar con puntos/i)
   runner.check(
     'aparece la cuenta regresiva',
     !!(await page
@@ -303,7 +303,7 @@ try {
   await foto('fin')
   runner.check(
     'al terminar se muestra la medalla y los datos',
-    /Bichos cazados/.test(await texto())
+    /Cazados/.test(await texto())
   )
   const puntajePantalla = Number(
     await page.$eval('.cb__fin-puntaje strong', e => e.textContent.trim())

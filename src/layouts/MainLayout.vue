@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 import logoImg from '@/assets/logo.webp'
@@ -86,6 +86,32 @@ const route = useRoute()
 const mostrarFlecha = computed(
   () => !['minijuego', 'leccion', 'desafio'].includes(route.name)
 )
+
+// Alto real del encabezado fijo (cambia según el ancho y si hay avisos):
+// las pantallas que ocupan justo el alto disponible, como el juego, lo usan
+// para calcular su tamaño (--hdr).
+let observador = null
+function medirEncabezado() {
+  const encabezado = document.querySelector('.q-header')
+  if (!encabezado) return
+  document.documentElement.style.setProperty(
+    '--hdr',
+    `${Math.ceil(encabezado.getBoundingClientRect().height)}px`
+  )
+}
+onMounted(() => {
+  medirEncabezado()
+  const encabezado = document.querySelector('.q-header')
+  if (encabezado && typeof ResizeObserver !== 'undefined') {
+    observador = new ResizeObserver(medirEncabezado)
+    observador.observe(encabezado)
+  }
+  window.addEventListener('resize', medirEncabezado)
+})
+onUnmounted(() => {
+  observador?.disconnect()
+  window.removeEventListener('resize', medirEncabezado)
+})
 </script>
 
 <style scoped>
@@ -185,6 +211,40 @@ const mostrarFlecha = computed(
   .dl-nav__account {
     flex: 2.6 1 0;
     max-width: none;
+  }
+}
+
+/* Celular de lado: pantalla muy baja, el encabezado pasa a una sola fila. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .dl-bar {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding-top: calc(2px + env(safe-area-inset-top));
+    padding-bottom: 2px;
+  }
+
+  .dl-brand__mascot {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dl-brand__name {
+    display: none;
+  }
+
+  .dl-nav {
+    width: auto;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .dl-nav .q-btn {
+    flex: 0 1 auto;
+    min-height: 34px;
+  }
+
+  .dl-nav__account {
+    max-width: 200px;
   }
 }
 

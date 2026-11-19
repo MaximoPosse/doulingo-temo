@@ -33,8 +33,17 @@ const src = computed(
 
 @media (max-width: 600px) {
   .dl-mascot-corner {
-    width: 72px;
-    height: 72px;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 2px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .dl-mascot-corner {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0;
   }
 }
 </style>

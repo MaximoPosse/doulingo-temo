@@ -263,7 +263,7 @@ function openLesson(lesson) {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 720px;
+  max-width: var(--ancho-texto, 720px);
 }
 
 .dl-pending-banner {

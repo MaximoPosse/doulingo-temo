@@ -750,7 +750,7 @@ function goToNextLesson() {
   min-height: 100vh;
 
   &__inner {
-    max-width: 720px;
+    max-width: var(--ancho-texto, 720px);
     margin: 0 auto;
     padding: 28px 20px 72px;
   }

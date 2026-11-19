@@ -64,7 +64,7 @@ import partyImg from '@/assets/amigos/chiikawa-fiesta.webp'
   padding: 56px 0;
 
   &__inner {
-    max-width: 1100px;
+    max-width: var(--ancho, 1100px);
     margin: 0 auto;
     padding: 0 20px;
     display: flex;

@@ -28,7 +28,12 @@ const ANCHOS = [
   { w: 390, h: 844, nombre: 'iPhone 390' },
   { w: 412, h: 915, nombre: 'Android 412' },
   { w: 430, h: 932, nombre: 'iPhone Max 430' },
-  { w: 600, h: 960, nombre: 'Tablet chica 600' }
+  { w: 600, h: 960, nombre: 'Tablet chica 600' },
+  { w: 768, h: 1024, nombre: 'Tablet 768' },
+  { w: 844, h: 390, nombre: 'Celular de lado 844x390' },
+  { w: 1024, h: 768, nombre: 'PC 1024' },
+  { w: 1366, h: 768, nombre: 'PC 1366' },
+  { w: 1920, h: 1080, nombre: 'PC 1920' }
 ]
 
 const RUTAS = [
@@ -64,8 +69,8 @@ try {
       width: ancho.w,
       height: ancho.h,
       deviceScaleFactor: 2,
-      isMobile: true,
-      hasTouch: true
+      isMobile: ancho.w < 1000,
+      hasTouch: ancho.w < 1000
     })
     for (const ruta of RUTAS) {
       await page.goto(`${BASE_URL}/#${ruta}`, { waitUntil: 'networkidle0' })

@@ -166,7 +166,7 @@ onUnmounted(() => {
     linear-gradient(135deg, #1c1809 0%, #211b0b 52%, #171717 100%);
 }
 .public-ranking__shell {
-  max-width: 1240px;
+  max-width: var(--ancho-ranking, 1240px);
   margin: auto;
   padding: clamp(28px, 6vh, 76px) 4vw;
 }

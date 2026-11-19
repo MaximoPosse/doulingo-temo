@@ -1334,7 +1334,7 @@ onBeforeUnmount(() => {
   min-height: 100vh;
 
   &__inner {
-    max-width: 820px;
+    max-width: var(--ancho-texto, 820px);
     margin: 0 auto;
     padding: 28px 20px 72px;
   }
