@@ -58,9 +58,9 @@ export function cronograma(semilla) {
     const rAparece = azar(100)
     const rCelda = azar(CELDAS)
     const rTipo = azar(100)
-    const prob = 60 + Math.floor((Math.min(k, 120) * 30) / 120)
+    const prob = 50 + Math.floor((Math.min(k, 120) * 25) / 120)
     if (rAparece < prob && libre[rCelda] <= t) {
-      const base = Math.max(650, 1250 - k * 5)
+      const base = Math.max(750, 1400 - k * 5)
       let tipo
       let vida
       if (rTipo < 58) {

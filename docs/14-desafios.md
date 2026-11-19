@@ -355,8 +355,8 @@ de que se escondan; hay que evitar tocar a Usagi.
 - **Una sola ronda con puntos** por persona: `cazabugs_iniciar()` devuelve
   `PR_RONDA_YA_JUGADA` si ya hay una ronda (aunque no se haya enviado). La
   práctica sigue siendo libre.
-- **Ronda:** dura 45 segundos, con un bicho nuevo cada 250 ms y vidas de 1250 a
-  650 ms (cada vez menos). Hay cuenta
+- **Ronda:** dura 45 segundos, con un bicho nuevo cada 250 ms y vidas de 1400 a
+  750 ms (cada vez menos). Hay cuenta
   regresiva, sonidos, vibración y efectos. También hay una **práctica** sin
   puntos que se puede jugar siempre, sin servidor.
 - **Puntos de ranking:** cada 40 puntos de juego valen 1 punto de ranking

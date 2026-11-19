@@ -6,8 +6,8 @@
 --     oficial no se puede iniciar otra (la práctica sigue siendo libre).
 --   - Los bichos que se te escapan (se esconden sin que los toques) restan
 --     5 puntos y cortan la racha. Los amigos (Usagi) no cuentan.
---   - Todo aparece y desaparece un poco más rápido: un bicho nuevo cada
---     250 ms (antes 300) y duran de 1250 a 650 ms (antes de 1500 a 800).
+--   - Todo aparece un poco más rápido (suavizado después): un bicho nuevo cada
+--     250 ms (antes 300) y duran de 1400 a 750 ms (antes de 1500 a 800).
 --
 -- El servidor sigue repitiendo la partida a partir de la semilla y los toques;
 -- el cliente (src/lib/cazabugs.js) usa exactamente las mismas reglas.
@@ -45,9 +45,9 @@ begin
     v_estado := (v_estado * 1103515245 + 12345) % 2147483648;
     v_tipo := ((v_estado / 65536) % 100)::integer;
 
-    v_prob := 60 + (least(v_k, 120) * 30) / 120;
+    v_prob := 50 + (least(v_k, 120) * 25) / 120;
     if v_aparece < v_prob and v_libre[v_celda + 1] <= v_t then
-      v_base := greatest(650, 1250 - v_k * 5);
+      v_base := greatest(750, 1400 - v_k * 5);
       if v_tipo < 58 then
         v_nombre := 'bug';    v_vida := v_base;
       elsif v_tipo < 76 then
