@@ -9,6 +9,16 @@
   padding-top: env(safe-area-inset-top);
 }
 
+// Las alertas salen arriba, justo sobre el menú: no tienen que tapar los
+// botones (Inicio, Cursos, Expo...). Los toques las atraviesan; solo su botón
+// de cerrar recibe toques.
+.q-notification {
+  pointer-events: none;
+}
+.q-notification .q-btn {
+  pointer-events: auto;
+}
+
 // Los botones con fondo amarillo siempre llevan texto oscuro (Quasar les
 // pone texto blanco por defecto, que casi no se lee sobre el amarillo).
 .q-btn.bg-primary,

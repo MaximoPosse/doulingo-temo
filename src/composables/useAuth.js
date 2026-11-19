@@ -292,11 +292,7 @@ export async function signOut() {
   try {
     await signOutSession()
     await applySession(null)
-    avisoOk(
-      'Cerraste sesión. Tu historial de invitado queda guardado en este ' +
-        'dispositivo, pero si lo borrás o cambiás de dispositivo no vas a ' +
-        'poder recuperarlo.'
-    )
+    avisoOk('Cerraste sesión. Tu historial queda guardado en este dispositivo.')
     return { ok: true }
   } catch (err) {
     avisoError(err?.message ?? 'No se pudo cerrar la sesión.')
