@@ -339,36 +339,41 @@ solo intento**:
 - Repetir el envío de una respuesta ya guardada no resta otra vida.
 - Un desafío con `vidas = null` (como los de prueba) no tiene límite de errores.
 
-## Minijuego "Ruta del robot" (suma puntos al ranking)
+## Minijuego "Cazabugs" (suma puntos al ranking)
 
-`0014_minijuego.sql` agrega un minijuego que se **desbloquea al terminar el Gran
-desafío** (sin intentos ni partida en curso). La persona programa a un robot con
-bloques para que llegue a la meta, recoja estrellas y esquive obstáculos.
+`0015_cazabugs.sql` agrega un minijuego que se **desbloquea al terminar el Gran
+desafío** (sin intentos ni partida en curso) y reemplaza al anterior "Ruta del
+robot". En un tablero de 3 x 4 agujeros aparecen bichos que hay que tocar antes
+de que se escondan; hay que evitar tocar a Usagi.
 
-- **Bloques:** avanzar, girar a la izquierda, girar a la derecha y **repetir**
-  (bucle de 1 a 9 veces, hasta dos bucles anidados). Un bucle cuenta como 1
-  bloque más lo que tiene adentro, por eso ahorra bloques.
-- **Niveles:** 6 niveles (tableros de 5x5 y 6x6) en `minijuego_niveles`, de menor
-  a mayor dificultad. Cada uno trae su **par**: el mínimo de bloques sin bucles
-  para llegar a la meta recogiendo todas las estrellas. También hay un nivel de
-  **práctica** que se juega solo en el navegador y no suma puntos.
-- **Puntos por nivel:** 5 por llegar + 3 por estrella + hasta 7 de bonificación
-  (7 menos 1 por cada bloque que supere el par). Máximo por nivel 15-21; el total
-  del minijuego es 114.
-- **El servidor decide:** `enviar_ruta(nivel, programa)` valida el programa
-  (1 a 40 bloques, máximo 200 pasos), **simula el recorrido** y calcula los
-  puntos. Guarda el mejor resultado de cada persona y nivel en
-  `minijuego_resultados` y se puede volver a jugar para mejorarlo.
-- **Ranking:** los puntos del minijuego se suman al ranking del Gran desafío
-  (`ranking_desafio`) y al ranking público de la expo (`ranking_evento`, que
-  ahora muestra el total por persona). Cada mejora publica una fila "Ruta del
-  robot" en `resultados_publicos`, así la pantalla de la expo se actualiza en
-  vivo.
-- **Cliente:** `src/lib/rutaRobot.js` tiene la misma simulación para animar el
-  recorrido (las pruebas comparan ambas), `src/pages/RutaRobotPage.vue` la
-  pantalla y `src/data/minigameRepository.js` el acceso a datos.
-- **Pruebas:** `ruta_robot_logica.mjs` (lógica, sin base), `minijuego_ui.mjs`
-  (pantalla; con `MOCK=1` no necesita la migración aplicada).
+- **Bichos:** bug (10 puntos), veloz (20, se esconde rápido), gordo (30, hay que
+  tocarlo 2 veces), dorado (60, dura muy poco) y Usagi (tocarlo resta 25 y corta
+  la racha). Cada bicho seguido sin fallar sube la **racha**: x2 desde el 5.º, x3
+  desde el 9.º y x4 desde el 13.º. Un toque en vacío corta la racha.
+- **Ronda:** dura 45 segundos y los bichos duran cada vez menos. Hay cuenta
+  regresiva, sonidos, vibración y efectos. También hay una **práctica** sin
+  puntos que se puede jugar siempre, sin servidor.
+- **Puntos de ranking:** cada 40 puntos de juego valen 1 punto de ranking
+  (máximo 100). Cuenta la mejor ronda de cada persona (`cazabugs_mejores`) y se
+  suma al ranking del Gran desafío (`ranking_desafio`) y al ranking público
+  (`ranking_evento`, que muestra el total por persona). Cada mejora publica una
+  fila "Cazabugs" en `resultados_publicos`, así la pantalla de la expo se
+  actualiza en vivo.
+- **El servidor decide el puntaje:** `cazabugs_iniciar()` crea una ronda y
+  entrega una **semilla**. Todo lo que aparece sale de esa semilla con un
+  generador congruencial (`cazabugs_cronograma`). Al terminar, el celular manda
+  solo los **toques** (momento y casilla) a `cazabugs_enviar()`, que repite la
+  partida (`cazabugs_reproducir`), rechaza toques imposibles (fuera de tiempo,
+  casillas inexistentes, menos de 60 ms entre toques, más de 500) y calcula el
+  puntaje. La ronda debe enviarse entre los 40 y los 120 segundos de iniciada y
+  solo una vez. Nunca se manda un puntaje desde el celular.
+- **Cliente:** `src/lib/cazabugs.js` tiene el mismo algoritmo (para dibujar los
+  bichos y mostrar el puntaje en vivo), `src/pages/CazabugsPage.vue` la pantalla
+  y `src/data/minigameRepository.js` el acceso a datos.
+- **Pruebas:** `cazabugs_logica.mjs` (lógica, sin base) y `cazabugs_ui.mjs`
+  (pantalla con un jugador automático; con `MOCK=1` no necesita la migración).
+  Además se comprobó que el cronograma y el puntaje del servidor coinciden con
+  los del cliente.
 
 ## Pruebas
 

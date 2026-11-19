@@ -1,8 +1,8 @@
-// Minijuego "Ruta del robot": niveles, resultados propios y envío de rutas.
+// Minijuego "Cazabugs": estado de desbloqueo, mejor resultado propio y rondas.
 //
-// El servidor es quien simula el recorrido y calcula los puntos (función
-// enviar_ruta). Acá solo se leen los niveles (públicos) y los resultados de la
-// propia persona, y se envía el programa armado.
+// El servidor entrega la semilla de cada ronda y, al terminar, repite la
+// partida con los toques para calcular el puntaje oficial (cazabugs_enviar).
+// Acá solo se piden esos datos; nunca se manda un puntaje.
 
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -10,8 +10,10 @@ const MENSAJES = {
   PR_AUTH_REQUIRED: 'Entrá como invitado o con tu cuenta para jugar.',
   PR_MINIJUEGO_BLOQUEADO:
     'El minijuego se desbloquea cuando terminás el Gran desafío.',
-  PR_NIVEL_NO_EXISTE: 'Ese nivel no existe.',
-  PR_PROGRAMA_INVALIDO: 'El programa no es válido. Revisá los bloques.'
+  PR_RONDA_NO_EXISTE: 'Esa ronda no existe.',
+  PR_RONDA_CERRADA: 'Esa ronda ya se envió.',
+  PR_RONDA_FUERA_DE_TIEMPO: 'La ronda se envió fuera de tiempo. Jugá otra.',
+  PR_TOQUES_INVALIDOS: 'No se pudo validar la ronda.'
 }
 
 function mensajeError(err, fallback) {
@@ -29,49 +31,6 @@ function client() {
   return getSupabaseClient()
 }
 
-function mapNivel(fila) {
-  return {
-    id: fila.id,
-    orden: fila.orden,
-    nombre: fila.nombre,
-    consejo: fila.consejo,
-    n: fila.n,
-    inicio: fila.inicio,
-    rumbo: fila.rumbo,
-    meta: fila.meta,
-    muros: fila.muros ?? [],
-    estrellas: fila.estrellas ?? [],
-    par: fila.par
-  }
-}
-
-export async function fetchNiveles() {
-  const { data, error } = await client()
-    .from('minijuego_niveles')
-    .select(
-      'id, orden, nombre, consejo, n, inicio, rumbo, meta, muros, estrellas, par'
-    )
-    .order('orden', { ascending: true })
-  if (error)
-    throw new Error(mensajeError(error, 'No se pudieron cargar los niveles.'))
-  return (data ?? []).map(mapNivel)
-}
-
-// Mejor resultado propio de cada nivel: { [nivelId]: { puntos, bloques, estrellas } }
-export async function fetchMisResultados() {
-  const { data, error } = await client()
-    .from('minijuego_resultados')
-    .select('nivel_id, puntos, bloques, estrellas')
-  if (error)
-    throw new Error(mensajeError(error, 'No se pudieron leer tus resultados.'))
-  return Object.fromEntries(
-    (data ?? []).map(fila => [
-      fila.nivel_id,
-      { puntos: fila.puntos, bloques: fila.bloques, estrellas: fila.estrellas }
-    ])
-  )
-}
-
 export async function fetchDesbloqueado() {
   const { data, error } = await client().rpc('minijuego_desbloqueado')
   if (error)
@@ -81,23 +40,54 @@ export async function fetchDesbloqueado() {
   return data === true
 }
 
-export async function enviarRuta(nivelId, programa) {
-  const { data, error } = await client().rpc('enviar_ruta', {
-    p_nivel: nivelId,
-    p_programa: programa
+// Mejor resultado propio: { puntaje, puntos, aciertos, mejorRacha, rondas }
+export async function fetchMiMejor() {
+  const { data, error } = await client()
+    .from('cazabugs_mejores')
+    .select('puntaje, puntos, aciertos, mejor_racha, rondas')
+    .maybeSingle()
+  if (error)
+    throw new Error(mensajeError(error, 'No se pudo leer tu mejor resultado.'))
+  if (!data) return null
+  return {
+    puntaje: data.puntaje,
+    puntos: data.puntos,
+    aciertos: data.aciertos,
+    mejorRacha: data.mejor_racha,
+    rondas: data.rondas
+  }
+}
+
+export async function iniciarRonda() {
+  const { data, error } = await client().rpc('cazabugs_iniciar')
+  if (error)
+    throw new Error(mensajeError(error, 'No se pudo empezar la ronda.'))
+  const fila = Array.isArray(data) ? data[0] : data
+  if (!fila) throw new Error('El servidor no devolvió la ronda.')
+  return {
+    id: fila.ronda,
+    semilla: fila.semilla,
+    duracionMs: fila.duracion_ms
+  }
+}
+
+export async function enviarRonda(rondaId, toques) {
+  const { data, error } = await client().rpc('cazabugs_enviar', {
+    p_ronda: rondaId,
+    p_toques: toques
   })
-  if (error) throw new Error(mensajeError(error, 'No se pudo enviar tu ruta.'))
+  if (error) throw new Error(mensajeError(error, 'No se pudo enviar la ronda.'))
   const fila = Array.isArray(data) ? data[0] : data
   if (!fila) throw new Error('El servidor no devolvió el resultado.')
   return {
-    llego: fila.llego === true,
-    choco: fila.choco === true,
-    bloques: fila.bloques,
-    pasos: fila.pasos,
-    estrellas: fila.estrellas,
+    puntaje: fila.puntaje,
     puntos: fila.puntos,
+    aciertos: fila.aciertos,
+    fallos: fila.fallos,
+    amigos: fila.amigos,
+    mejorRacha: fila.mejor_racha,
+    mejorPuntaje: fila.mejor_puntaje,
     mejorPuntos: fila.mejor_puntos,
-    mejoro: fila.mejoro === true,
-    total: fila.total_minijuego
+    mejoro: fila.mejoro === true
   }
 }

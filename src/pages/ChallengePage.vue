@@ -616,7 +616,7 @@
                     unelevated
                     size="lg"
                     class="dl-btn-main dl-btn-main--big"
-                    label="🤖 JUGAR EL MINIJUEGO Y SUMAR PUNTOS"
+                    label="🐛 JUGAR CAZABUGS Y SUMAR PUNTOS"
                     :to="{ name: 'minijuego' }"
                   />
                   <q-btn
@@ -647,7 +647,7 @@
                 mejor intento válido.
                 <template v-if="challenge.minijuego">
                   ¡Ahora podés sumar más puntos con el minijuego
-                  <strong>Ruta del robot</strong>!
+                  <strong>Cazabugs</strong>!
                 </template>
               </p>
             </div>

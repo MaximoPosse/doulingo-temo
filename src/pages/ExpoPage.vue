@@ -167,19 +167,21 @@
           class="dl-expo__mini"
           :class="{ 'is-bloqueado': !minijuego.desbloqueado }"
         >
-          <div class="dl-expo__mini-icono" aria-hidden="true">🤖</div>
+          <div class="dl-expo__mini-icono" aria-hidden="true">🐛</div>
           <div class="dl-expo__mini-texto">
             <span class="dl-expo__mini-etiqueta"
               >Minijuego · suma al ranking</span
             >
-            <h2 class="dl-expo__mini-titulo">Ruta del robot</h2>
+            <h2 class="dl-expo__mini-titulo">Cazabugs</h2>
             <p>
-              Programá al robot con bloques para que llegue a la meta y recoja
-              estrellas. Son 6 niveles y cada uno suma puntos a tu total.
+              ¡Cazá los bugs antes de que se escondan! Rachas que multiplican
+              los puntos, bichos dorados y Usagi, que NO hay que tocar. Rondas
+              de 45 segundos: tu mejor ronda suma al ranking.
             </p>
             <p v-if="minijuego.desbloqueado" class="dl-expo__mini-estado">
-              {{ nivelesSuperados }} niveles superados ·
-              <strong>{{ puntosMinijuego }} puntos</strong> extra
+              Tu mejor ronda:
+              <strong>{{ puntosMinijuego }} puntos</strong> extra para el
+              ranking
             </p>
             <p v-else class="dl-expo__mini-estado">
               <q-icon name="lock" size="16px" /> Se desbloquea cuando terminás
@@ -206,9 +208,9 @@
               participante en cada desafío.
             </li>
             <li v-if="hayMinijuego">
-              <q-icon name="smart_toy" size="18px" color="primary" />
-              Los puntos del minijuego <strong>Ruta del robot</strong> se suman
-              a tu puntaje total.
+              <q-icon name="bug_report" size="18px" color="primary" />
+              Los puntos del minijuego <strong>Cazabugs</strong> se suman a tu
+              puntaje total.
             </li>
             <li>
               <q-icon name="timer" size="18px" color="primary" />
@@ -238,10 +240,7 @@ import { computed } from 'vue'
 import usagiImg from '@/assets/amigos/chiikawa-fiesta.webp'
 import chiikawaImg from '@/assets/amigos/chiikawa-tumbado.webp'
 import { fetchExpo } from '@/data/challengeRepository'
-import {
-  fetchDesbloqueado,
-  fetchMisResultados
-} from '@/data/minigameRepository'
+import { fetchDesbloqueado, fetchMiMejor } from '@/data/minigameRepository'
 import { useRemoteData } from '@/composables/useRemoteData'
 
 const { data, loading, error, load } = useRemoteData(fetchExpo)
@@ -249,11 +248,11 @@ const { data, loading, error, load } = useRemoteData(fetchExpo)
 // Estado del minijuego (si la base todavía no lo tiene, simplemente no se muestra).
 const { data: minijuego } = useRemoteData(async () => {
   try {
-    const [desbloqueado, resultados] = await Promise.all([
+    const [desbloqueado, mejor] = await Promise.all([
       fetchDesbloqueado(),
-      fetchMisResultados()
+      fetchMiMejor()
     ])
-    return { desbloqueado, resultados }
+    return { desbloqueado, mejor }
   } catch {
     return null
   }
@@ -261,15 +260,7 @@ const { data: minijuego } = useRemoteData(async () => {
 const hayMinijuego = computed(() =>
   (data.value?.challenges ?? []).some(challenge => challenge.minijuego)
 )
-const nivelesSuperados = computed(
-  () => Object.keys(minijuego.value?.resultados ?? {}).length
-)
-const puntosMinijuego = computed(() =>
-  Object.values(minijuego.value?.resultados ?? {}).reduce(
-    (suma, resultado) => suma + resultado.puntos,
-    0
-  )
-)
+const puntosMinijuego = computed(() => minijuego.value?.mejor?.puntos ?? 0)
 
 const event = computed(() => data.value?.event ?? null)
 const challenges = computed(() => data.value?.challenges ?? [])

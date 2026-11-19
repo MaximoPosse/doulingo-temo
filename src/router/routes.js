@@ -36,7 +36,7 @@ const routes = [
       {
         path: 'expo/minijuego',
         name: 'minijuego',
-        component: () => import('@/pages/RutaRobotPage.vue')
+        component: () => import('@/pages/CazabugsPage.vue')
       },
       {
         path: 'expo/:challengeId',
